@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "../api/auth/[...nextauth]/route";
+import { auth } from "@/auth";
 import db from "@/lib/db";
 import { redirect } from "next/navigation";
 import styles from "./settings.module.css";
@@ -7,7 +6,7 @@ import SettingsForm from "./SettingsForm";
 import Image from "next/image";
 
 export default async function SettingsPage() {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session) {
     redirect("/");
   }

@@ -1,7 +1,6 @@
-import { withAuth } from "next-auth/middleware";
+import { auth } from "@/auth";
 
-export const proxy = withAuth(function proxy(req) {
-});
+export const proxy = auth;
 
 export default proxy;
 

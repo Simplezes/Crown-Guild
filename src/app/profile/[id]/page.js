@@ -5,8 +5,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { fetchDiscordUser } from "@/lib/discord";
 import { getMonsterCount } from "@/lib/monsters";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../api/auth/[...nextauth]/route";
+import { auth } from "@/auth";
 import ProfileCrowns from "@/components/ProfileCrowns";
 import StatusEditor from "@/components/StatusEditor";
 
@@ -50,7 +49,7 @@ export async function generateMetadata({ params }) {
 
 export default async function Profile({ params }) {
   const { id } = await params;
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   const isOwner = session?.user?.id === id;
   const data = await getProfileData(id);
 

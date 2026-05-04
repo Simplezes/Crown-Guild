@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 import db from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../../auth/[...nextauth]/route";
+import { auth } from "@/auth";
 import { pusherServer } from "@/lib/pusher";
 
 export async function POST(request, { params }) {
   try {
     const { id } = await params;
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session || !session.user || !session.user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -87,7 +86,7 @@ export async function POST(request, { params }) {
 export async function DELETE(request, { params }) {
   try {
     const { id } = await params;
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session || !session.user || !session.user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

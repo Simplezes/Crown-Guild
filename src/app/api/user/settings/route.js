@@ -1,9 +1,8 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../../api/auth/[...nextauth]/route";
+import { auth } from "@/auth";
 import db from "@/lib/db";
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
 
   try {
@@ -24,7 +23,7 @@ export async function GET() {
 }
 
 export async function PUT(req) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
 
   try {
@@ -50,7 +49,7 @@ export async function PUT(req) {
   }
 }
 export async function DELETE() {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
 
   const userId = session.user.id;

@@ -1,11 +1,10 @@
 import db from "@/lib/db";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../auth/[...nextauth]/route";
+import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import { pusherServer } from "@/lib/pusher";
 
 export async function PATCH(req, { params }) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -118,7 +117,7 @@ export async function PATCH(req, { params }) {
 }
 
 export async function DELETE(req, { params }) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

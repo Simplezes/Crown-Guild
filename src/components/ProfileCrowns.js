@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import MonsterIcon from "@/components/MonsterIcon";
@@ -219,9 +219,9 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
               >
                 {renderGroupActions(group)}
                 {group.map((crown, i) => (
-                  <>
+                  <React.Fragment key={crown.id}>
                     {i > 0 && (
-                      <div key={`connector-${crown.id}`} className={styles.chainConnector}>
+                      <div className={styles.chainConnector}>
                         <Image
                           src="/icons/MHWilds-Link_Party_Icon.png"
                           width={14} height={14}
@@ -230,10 +230,10 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
                         />
                       </div>
                     )}
-                    <div key={crown.id} className={styles.crownGroupItem}>
+                    <div className={styles.crownGroupItem}>
                       {renderCard(crown, true)}
                     </div>
-                  </>
+                  </React.Fragment>
                 ))}
               </div>
             );

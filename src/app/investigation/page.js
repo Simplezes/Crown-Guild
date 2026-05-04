@@ -2,12 +2,11 @@ import styles from "./investigation.module.css";
 import Link from "next/link";
 import Image from "next/image";
 import { getAllMonsters } from "@/lib/monsters";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { auth } from "@/auth";
 import db from "@/lib/db";
 
 export default async function Investigation() {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   let userCrowns = [];
 
   if (session?.user?.id) {
