@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { getProfileData, getHunterRank } from "@/lib/profile";
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 export async function GET(request, { params }) {
   const { id } = await params;
@@ -93,7 +93,6 @@ export async function GET(request, { params }) {
             border: `1px solid ${colors.border}`,
             position: 'relative',
             padding: '30px',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.8)',
           }}
         >
           <div
