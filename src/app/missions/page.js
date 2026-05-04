@@ -167,8 +167,7 @@ export default function MissionsPage() {
                       <span className={styles.badge}>{currentMission.type} Crown</span>
                       {currentMission.tempered === 1 && <span className={`${styles.badge} ${styles.temperedBadge}`}>Tempered</span>}
                       <span className={styles.badge}>
-                        {currentMission.strength_rating}
-                        <Image src="/icons/MHWilds-Notes_1_Star_Icon.png" width={10} height={10} alt="★" className="pixel-art" style={{ display: 'inline', margin: '0 2px' }} />
+                        {currentMission.strength_rating}★
                         Rating
                       </span>
                     </div>

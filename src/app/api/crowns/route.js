@@ -22,10 +22,9 @@ export async function POST(req) {
       strength_rating,
       quest,
       pair_id,
-      // Investigation fields (only relevant when quest === "Investigation Quests")
-      investigation_id,        // link to an existing investigation
-      investigation_monster_id, // create a new investigation for this monster
-      remaining_uses,          // uses for the new investigation (default 3)
+      investigation_id,
+      investigation_monster_id,
+      remaining_uses,
     } = await req.json();
 
     if (!monster_id || !type || !quest || !strength_rating) {
@@ -41,7 +40,6 @@ export async function POST(req) {
 
     if (quest === "Investigation Quests") {
       if (investigation_id) {
-        // Link to an existing investigation — verify ownership
         const check = await db.execute({
           sql: "SELECT id FROM investigations WHERE id = ? AND user_id = ?",
           args: [investigation_id, session.user.id],
@@ -51,7 +49,6 @@ export async function POST(req) {
         }
         resolvedInvestigationId = investigation_id;
       } else {
-        // Create a new investigation
         const invMonsterId = investigation_monster_id || monster_id;
         const uses = remaining_uses || 3;
 
@@ -62,7 +59,6 @@ export async function POST(req) {
         resolvedInvestigationId = Number(invRes.lastInsertRowid);
       }
     } else if (quest === "Field Survey Quests" && investigation_monster_id && investigation_monster_id !== monster_id) {
-      // Field Survey: track host monster only when it differs (no uses)
       const invRes = await db.execute({
         sql: "INSERT INTO investigations (user_id, monster_id, remaining_uses) VALUES (?, ?, NULL)",
         args: [session.user.id, investigation_monster_id],
@@ -82,7 +78,7 @@ export async function POST(req) {
         tempered ? 1 : 0,
         strength_rating,
         quest,
-        null, // remaining_uses lives on the investigation now
+        null,
         resolvedInvestigationId,
         pair_id || null,
       ],

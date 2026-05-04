@@ -10,6 +10,7 @@ import ProfileCrowns from "@/components/ProfileCrowns";
 import StatusEditor from "@/components/StatusEditor";
 
 import { getProfileData, getHunterRank } from "@/lib/profile";
+import CrownSummary from "@/components/CrownSummary";
 
 
 export async function generateMetadata({ params }) {
@@ -116,6 +117,9 @@ export default async function Profile({ params }) {
                 <div className={styles.totalLine}>
                   <label>Total</label>
                   <span className="gold-text">{stats.total || 0}</span>
+                </div>
+                <div className={styles.crownSummaryWrapper}>
+                  <CrownSummary crowns={crowns} />
                 </div>
               </div>
 

@@ -69,15 +69,18 @@
 
 .ledgerGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
 }
 
 .monsterCard {
   background: var(--mh-glass);
   border: 1px solid var(--mh-border);
-  padding: 32px;
+  padding: 16px;
   position: relative;
+  display: block;
+  text-decoration: none;
+  color: inherit;
   transition: var(--transition-mh);
   overflow: hidden;
 }
@@ -90,115 +93,97 @@
   bottom: 0;
   width: 3px;
   background: var(--mh-border);
+  transition: background 0.2s;
 }
 
 .monsterCard:hover {
   border-color: var(--mh-gold);
-  transform: translateY(-5px);
+  transform: translateY(-3px);
 }
 
 .monsterCard:hover::before {
   background: var(--mh-gold);
 }
 
-.monsterHeader {
+.cardTop {
   display: flex;
-  gap: 20px;
-  margin-bottom: 24px;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
 }
 
 .monsterIcon {
-  width: 64px;
-  height: 64px;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.monsterTitle h3 {
-  font-size: 1.6rem;
-  margin-bottom: 4px;
+.cardMeta {
+  flex: 1;
+  min-width: 0;
+}
+
+.cardMeta h3 {
+  font-size: 1.15rem;
   color: var(--mh-tan);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+  transition: color 0.2s;
 }
 
-.statusTags {
-  display: flex;
-  gap: 12px;
-}
-
-.statusTags span {
-  font-size: 0.6rem;
-  text-transform: uppercase;
-  padding: 2px 8px;
-  border: 1px solid var(--mh-border);
-}
-
-.found {
+.monsterCard:hover .cardMeta h3 {
   color: var(--mh-gold);
-  border-color: var(--mh-gold) !important;
-  background: rgba(181, 154, 93, 0.05);
 }
 
-.missing {
+.monsterType {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
   color: var(--mh-tan-dark);
-  opacity: 0.5;
+  opacity: 0.7;
 }
 
-.crownChecklist {
-  display: grid;
-  gap: 12px;
+.crownRows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-top: 1px solid var(--mh-border);
+  padding-top: 12px;
 }
 
-.checkItem {
+.crownRow {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 12px;
+  gap: 8px;
+  padding: 6px 8px;
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid transparent;
+  border-radius: 2px;
 }
 
-.isFound {
+.crownRowFound {
   background: var(--mh-umber);
   border-color: var(--mh-border);
 }
 
-.grayscale {
-  filter: grayscale(1) brightness(0.5);
-  opacity: 0.3;
-}
-
-.checkInfo label {
-  display: block;
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  color: var(--mh-tan-dark);
-  margin-bottom: 4px;
-}
-
-.pending {
-  font-size: 0.75rem;
-  color: var(--mh-border);
-  font-style: italic;
-}
-
-.hunterStack {
+.avatarStack {
   display: flex;
   align-items: center;
-  gap: 16px;
-}
-
-.avatars {
-  display: flex;
-  align-items: center;
+  flex: 1;
 }
 
 .stackAvatar {
-  width: 28px;
-  height: 28px;
-  border: 2px solid var(--mh-gold);
-  margin-left: -12px;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--mh-gold);
+  margin-left: -8px;
   background: var(--mh-black);
+  border-radius: 3px;
 }
 
 .stackAvatar:first-child {
@@ -206,25 +191,38 @@
 }
 
 .moreCount {
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
   background: var(--mh-gold);
   color: #000;
-  font-size: 0.7rem;
+  font-size: 0.58rem;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: -12px;
-  border: 2px solid var(--mh-gold);
+  margin-left: -8px;
+  border-radius: 3px;
 }
 
-.stackCount {
-  font-size: 0.75rem;
-  font-weight: 600;
+.hunterCount {
+  font-size: 0.68rem;
+  font-weight: 700;
   color: var(--mh-gold);
+  letter-spacing: 0.04em;
+  margin-left: auto;
 }
 
+.grayscale {
+  filter: grayscale(1) brightness(0.4);
+  opacity: 0.35;
+}
+
+.pending {
+  font-size: 0.65rem;
+  color: var(--mh-border);
+  font-style: italic;
+  flex: 1;
+}
 
 .noResults {
   grid-column: 1 / -1;

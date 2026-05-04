@@ -96,7 +96,6 @@ export default function MissionControl() {
       const res = await fetch('/api/missions/complete', { method: 'POST' });
       const data = await res.json();
       if (data.success) {
-        // API triggers pusher 'mission_update' which handles the rest
         setCompletedMission(currentMission);
         setMission(null);
         missionRef.current = null;

@@ -175,9 +175,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 20px;
-  background: rgba(26, 22, 20, 0.4);
+  padding: 10px 14px;
+  background: rgba(18, 13, 10, 0.5);
   border: 1px solid var(--mh-border);
+  gap: 10px;
   transition: var(--transition-mh);
 }
 
@@ -214,17 +215,19 @@
 .hunterMain {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 14px;
   flex: 1;
+  min-width: 0;
   text-decoration: none;
 }
 
 .avatar {
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border: 1px solid var(--mh-border);
   background: #000;
-  padding: 2px;
+  flex-shrink: 0;
+  border-radius: 6px;
   transition: var(--transition-mh);
 }
 
@@ -233,16 +236,28 @@
 }
 
 .hunterDetail {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
+}
+
+.hunterTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .name {
   font-family: 'Marcellus', serif;
-  font-size: 1.2rem;
+  font-size: 1rem;
   color: var(--mh-tan);
   letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   transition: var(--transition-mh);
 }
 
@@ -250,58 +265,103 @@
   color: var(--mh-gold);
 }
 
+.crownBadges {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.ratingChip {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--mh-gold);
+  background: rgba(181, 154, 93, 0.1);
+  border: 1px solid rgba(181, 154, 93, 0.3);
+  padding: 2px 7px;
+  letter-spacing: 0.04em;
+}
+
+.temperedChip {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--mh-red-bright, #e05555);
+  background: rgba(139, 46, 46, 0.15);
+  border: 1px solid rgba(139, 46, 46, 0.4);
+  padding: 1px 6px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
 .statusBubble {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(181, 154, 93, 0.08);
-  border-left: 2px solid var(--mh-gold);
-  padding: 4px 10px;
-  margin: 4px 0;
+  gap: 6px;
+  padding: 2px 8px;
+  background: rgba(181, 154, 93, 0.06);
+  border-left: 2px solid rgba(181, 154, 93, 0.35);
 }
 
 .statusBubble span {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-style: italic;
   color: var(--mh-tan);
-  opacity: 0.8;
+  opacity: 0.75;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.questMeta {
+.questRow {
   display: flex;
   align-items: center;
-  gap: 12px;
-  line-height: 1;
+  gap: 6px;
 }
 
-.questIcon {
-  flex-shrink: 0;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.4);
+.questLabel {
+  font-size: 0.7rem;
+  color: var(--mh-tan-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 600;
+}
+
+.usesChip {
+  font-size: 0.6rem;
+  color: var(--mh-tan-dark);
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--mh-border);
+  padding: 1px 5px;
+  letter-spacing: 0.04em;
 }
 
-.normal {
-  font-size: 0.75rem;
-  color: var(--mh-tan-dark);
-  text-transform: uppercase;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+.linkedRow {
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
-.tempered {
-  font-size: 0.75rem;
-  color: var(--mh-tan-dark);
-  text-transform: uppercase;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+.ratingText {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--mh-gold);
+  letter-spacing: 0.03em;
 }
 
-.hostMonsterLine {
+.temperedText {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--mh-red-bright, #e05555);
+  letter-spacing: 0.03em;
+}
+
+.linkedSep {
+  color: var(--mh-border);
+  font-size: 0.65rem;
+  margin: 0 1px;
+}
+
+.hostLine {
   display: flex;
   align-items: center;
   gap: 5px;
@@ -309,6 +369,7 @@
   color: var(--mh-tan-dark);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  opacity: 0.75;
 }
 
 .empty {

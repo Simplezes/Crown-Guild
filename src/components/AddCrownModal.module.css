@@ -52,16 +52,16 @@
 
 .drawerContent {
   flex: 1;
-  padding: 30px;
+  padding: 18px;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--mh-gold) transparent;
 }
 
 .header {
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   border-bottom: 1px solid rgba(181, 154, 93, 0.2);
-  padding-bottom: 15px;
+  padding-bottom: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -93,16 +93,16 @@
 .monsterPreview {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
   background: rgba(0, 0, 0, 0.5);
-  padding: 20px;
+  padding: 10px 14px;
   border: 1px solid #2a2522;
-  margin-bottom: 30px;
+  margin-bottom: 12px;
 }
 
 .previewMeta h3 {
   margin: 0;
-  font-size: 1.4rem;
+  font-size: 1.1rem;
   color: var(--mh-gold);
 }
 
@@ -117,13 +117,13 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 10px;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 5px;
 }
 
 .field label {
@@ -154,12 +154,12 @@
 
 .pickerGrid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 4px;
 }
 
 .pickerItem {
-  height: 36px;
+  height: 26px;
   background: #0c0a09;
   border: 1px solid #2a2522;
   display: flex;
@@ -227,68 +227,6 @@
   border-color: var(--mh-gold);
 }
 
-.toggleLabel {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  cursor: pointer;
-  padding: 5px 0;
-}
-
-.switch {
-  position: relative;
-  width: 60px;
-  height: 28px;
-  background: #000;
-  border: 1px solid #2a2522;
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.8);
-  transition: all 0.3s ease;
-}
-
-.switchHandle {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 26px;
-  height: 22px;
-  background: #333;
-  border: 1px solid #444;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.toggleInput {
-  display: none;
-}
-
-.toggleInput:checked+.switch {
-  border-color: var(--mh-purple);
-  background: rgba(163, 53, 238, 0.1);
-}
-
-.toggleInput:checked+.switch .switchHandle {
-  transform: translateX(28px);
-  background: var(--mh-purple);
-  border-color: #d195ff;
-  box-shadow: 0 0 10px rgba(163, 53, 238, 0.5);
-}
-
-.temperedLabel {
-  font-family: 'Marcellus', serif;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #666;
-  transition: all 0.3s ease;
-  width: 80px;
-  display: inline-block;
-}
-
-.temperedActive {
-  color: var(--mh-purple);
-  font-weight: 800;
-  text-shadow: 0 0 4px rgba(163, 53, 238, 0.4);
-}
-
 .submitBtn {
   background: var(--mh-gold);
   color: #000;
@@ -313,26 +251,10 @@
   padding: 100px 0;
 }
 
-.temperedRow {
+.typeHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 4px 0;
-}
-
-.temperedRowType {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: 'Marcellus', serif;
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--mh-tan-dark);
-}
-
-.temperedRow .toggleLabel {
-  flex-shrink: 0;
 }
 
 .successMessage h2 {
@@ -519,8 +441,6 @@
 .animateIn {
   animation: slideDownFade 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-
-/* ── Investigation Section ─────────────────────────────────────────────── */
 
 .investigationSection {
   background: rgba(181, 154, 93, 0.04);

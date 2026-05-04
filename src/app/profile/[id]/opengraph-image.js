@@ -46,7 +46,6 @@ export default async function Image({ params }) {
     avatarUrl = avatarUrl.replace('.webp', '.png');
   }
 
-  // Design tokens from globals.css
   const colors = {
     black: '#0c0a09',
     umber: '#1a1614',

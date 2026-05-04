@@ -36,13 +36,8 @@
 }
 
 .optionsList {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
   background: #0c0a09;
   border: 1px solid var(--mh-gold);
-  z-index: 100;
   max-height: 250px;
   overflow-y: clip;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);

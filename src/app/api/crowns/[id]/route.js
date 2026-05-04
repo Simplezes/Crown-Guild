@@ -18,14 +18,14 @@ export async function PATCH(req, { params }) {
       tempered,
       strength_rating,
       quest,
-      // Investigation fields
+      pair_id,
       investigation_id,
       investigation_monster_id,
       remaining_uses,
     } = await req.json();
 
     const checkRes = await db.execute({
-      sql: "SELECT user_id, investigation_id as old_investigation_id FROM crowns WHERE id = ?",
+      sql: "SELECT user_id, investigation_id as old_investigation_id, pair_id as old_pair_id FROM crowns WHERE id = ?",
       args: [id],
     });
 
@@ -41,7 +41,6 @@ export async function PATCH(req, { params }) {
 
     if (quest === "Investigation Quests") {
       if (investigation_id) {
-        // Link to an existing investigation — verify ownership
         const check = await db.execute({
           sql: "SELECT id FROM investigations WHERE id = ? AND user_id = ?",
           args: [investigation_id, session.user.id],
@@ -51,7 +50,6 @@ export async function PATCH(req, { params }) {
         }
         resolvedInvestigationId = investigation_id;
       } else if (investigation_monster_id) {
-        // Create a new investigation
         const uses = remaining_uses || 3;
         const invRes = await db.execute({
           sql: "INSERT INTO investigations (user_id, monster_id, remaining_uses) VALUES (?, ?, ?)",
@@ -59,27 +57,34 @@ export async function PATCH(req, { params }) {
         });
         resolvedInvestigationId = Number(invRes.lastInsertRowid);
       } else {
-        // Keep current investigation unchanged
         resolvedInvestigationId = oldInvestigationId;
       }
     } else if (quest === "Field Survey Quests") {
       if (investigation_monster_id && investigation_monster_id !== monster_id) {
-        // Different host monster: create a field survey investigation (no uses)
         const invRes = await db.execute({
           sql: "INSERT INTO investigations (user_id, monster_id, remaining_uses) VALUES (?, ?, NULL)",
           args: [session.user.id, investigation_monster_id],
         });
         resolvedInvestigationId = Number(invRes.lastInsertRowid);
       }
-      // else: resolvedInvestigationId stays null → clears any old investigation
     }
-    // If quest changed to other types: resolvedInvestigationId stays null
+
+    const resolvedPairId = pair_id !== undefined ? (pair_id || null) : checkRes.rows[0].old_pair_id ?? null;
+
+    if (monster_id === undefined) {
+      await db.execute({
+        sql: "UPDATE crowns SET pair_id = ? WHERE id = ?",
+        args: [resolvedPairId, id],
+      });
+      await pusherServer.trigger("public-channel", "crown_update", {});
+      return NextResponse.json({ success: true });
+    }
 
     await db.execute({
       sql: `
         UPDATE crowns
         SET monster_id = ?, type = ?, tempered = ?, strength_rating = ?, quest = ?,
-            remaining_uses = NULL, investigation_id = ?
+            remaining_uses = NULL, investigation_id = ?, pair_id = ?
         WHERE id = ?
       `,
       args: [
@@ -89,11 +94,11 @@ export async function PATCH(req, { params }) {
         strength_rating,
         quest,
         resolvedInvestigationId,
+        resolvedPairId,
         id,
       ],
     });
 
-    // Clean up the old investigation if it's now orphaned
     if (oldInvestigationId && oldInvestigationId !== resolvedInvestigationId) {
       const stillLinked = await db.execute({
         sql: "SELECT COUNT(*) as c FROM crowns WHERE investigation_id = ?",
@@ -149,7 +154,6 @@ export async function DELETE(req, { params }) {
       args: [id],
     });
 
-    // Clean up the investigation if it's now orphaned
     if (investigationId) {
       const stillLinked = await db.execute({
         sql: "SELECT COUNT(*) as c FROM crowns WHERE investigation_id = ?",

@@ -45,84 +45,74 @@ export default function RegistrySearch({ initialRegistry }) {
               key={monster.id}
               href={`/monster/${monster.name}`}
               className={styles.monsterCard}
-              style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}
             >
-              <div className={styles.monsterHeader}>
+              <div className={styles.cardTop}>
                 <div className={styles.monsterIcon}>
                   {monster.image_name ? (
                     <Image
                       src={`/monsters/${monster.image_name}`}
                       alt={monster.name}
-                      width={64}
-                      height={64}
+                      width={52}
+                      height={52}
                       className="pixel-art"
                     />
                   ) : (
-                    <div className={styles.fallbackIcon}>
-                      <Image src="/icons/MHWilds-Hunt_Icon.png" width={40} height={40} alt="" className="pixel-art" />
-                    </div>
+                    <Image src="/icons/MHWilds-Hunt_Icon.png" width={32} height={32} alt="" className="pixel-art" />
                   )}
                 </div>
-                <div className={styles.monsterTitle}>
+                <div className={styles.cardMeta}>
                   <h3>{monster.name}</h3>
-                  <div className={styles.statusTags}>
-                    <span className={monster.smallFinders.length > 0 ? styles.found : styles.missing}>Small</span>
-                    <span className={monster.largeFinders.length > 0 ? styles.found : styles.missing}>Large</span>
-                  </div>
+                  {monster.extraInfo?.type && (
+                    <span className={styles.monsterType}>{monster.extraInfo.type}</span>
+                  )}
                 </div>
               </div>
 
-              <div className={styles.crownChecklist}>
-                <div className={styles.checkItem + (monster.smallFinders.length > 0 ? ` ${styles.isFound}` : '')}>
+              <div className={styles.crownRows}>
+                <div className={`${styles.crownRow} ${monster.smallFinders.length > 0 ? styles.crownRowFound : ''}`}>
                   <Image
                     src="/icons/smallcrown.png"
-                    width={16} height={16} alt=""
-                    className={"pixel-art " + (monster.smallFinders.length > 0 ? '' : styles.grayscale)}
+                    width={13} height={13} alt="S"
+                    className={`pixel-art ${monster.smallFinders.length === 0 ? styles.grayscale : ''}`}
                   />
-                  <div className={styles.checkInfo}>
-                    <label>Small Crown</label>
-                    {monster.smallFinders.length > 0 ? (
-                      <div className={styles.hunterStack}>
-                        <div className={styles.avatars}>
-                          {monster.smallFinders.slice(0, 3).map((f, i) => (
-                            <img key={i} src={f.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"} alt={f.username} className={styles.stackAvatar} />
-                          ))}
-                          {monster.smallFinders.length > 3 && (
-                            <div className={styles.moreCount}>+{monster.smallFinders.length - 3}</div>
-                          )}
-                        </div>
-                        <span className={styles.stackCount}>{monster.smallFinders.length} Hunters</span>
+                  {monster.smallFinders.length > 0 ? (
+                    <>
+                      <div className={styles.avatarStack}>
+                        {monster.smallFinders.slice(0, 4).map((f, i) => (
+                          <img key={i} src={f.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"} alt={f.username} className={styles.stackAvatar} />
+                        ))}
+                        {monster.smallFinders.length > 4 && (
+                          <div className={styles.moreCount}>+{monster.smallFinders.length - 4}</div>
+                        )}
                       </div>
-                    ) : (
-                      <span className={styles.pending}>Not Recorded</span>
-                    )}
-                  </div>
+                      <span className={styles.hunterCount}>{monster.smallFinders.length}</span>
+                    </>
+                  ) : (
+                    <span className={styles.pending}>Not Recorded</span>
+                  )}
                 </div>
 
-                <div className={styles.checkItem + (monster.largeFinders.length > 0 ? ` ${styles.isFound}` : '')}>
+                <div className={`${styles.crownRow} ${monster.largeFinders.length > 0 ? styles.crownRowFound : ''}`}>
                   <Image
                     src="/icons/largecrown.png"
-                    width={16} height={16} alt=""
-                    className={"pixel-art " + (monster.largeFinders.length > 0 ? '' : styles.grayscale)}
+                    width={15} height={15} alt="L"
+                    className={`pixel-art ${monster.largeFinders.length === 0 ? styles.grayscale : ''}`}
                   />
-                  <div className={styles.checkInfo}>
-                    <label>Large Crown</label>
-                    {monster.largeFinders.length > 0 ? (
-                      <div className={styles.hunterStack}>
-                        <div className={styles.avatars}>
-                          {monster.largeFinders.slice(0, 3).map((f, i) => (
-                            <img key={i} src={f.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"} alt={f.username} className={styles.stackAvatar} />
-                          ))}
-                          {monster.largeFinders.length > 3 && (
-                            <div className={styles.moreCount}>+{monster.largeFinders.length - 3}</div>
-                          )}
-                        </div>
-                        <span className={styles.stackCount}>{monster.largeFinders.length} Hunters</span>
+                  {monster.largeFinders.length > 0 ? (
+                    <>
+                      <div className={styles.avatarStack}>
+                        {monster.largeFinders.slice(0, 4).map((f, i) => (
+                          <img key={i} src={f.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"} alt={f.username} className={styles.stackAvatar} />
+                        ))}
+                        {monster.largeFinders.length > 4 && (
+                          <div className={styles.moreCount}>+{monster.largeFinders.length - 4}</div>
+                        )}
                       </div>
-                    ) : (
-                      <span className={styles.pending}>Not Recorded</span>
-                    )}
-                  </div>
+                      <span className={styles.hunterCount}>{monster.largeFinders.length}</span>
+                    </>
+                  ) : (
+                    <span className={styles.pending}>Not Recorded</span>
+                  )}
                 </div>
               </div>
             </Link>

@@ -14,6 +14,7 @@
   visibility: hidden;
   transition: all 0.3s ease;
   padding: 10px;
+  overflow-y: auto;
 }
 
 .overlayOpen {
@@ -80,7 +81,7 @@
 }
 
 .editorHeader {
-  padding: 16px 24px;
+  padding: 12px 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
   justify-content: space-between;
@@ -111,7 +112,7 @@
 
 .editorContent {
   flex: 1;
-  padding: 24px;
+  padding: 16px;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--mh-gold) transparent;
@@ -120,13 +121,13 @@
 .formGrid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 24px;
+  gap: 14px;
 }
 
 .editRow {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .editRow label {
@@ -178,19 +179,19 @@
 
 .starGrid {
   display: grid;
-  grid-template-columns: repeat(10, 1fr);
-  gap: 4px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
 }
 
 .starItem {
-  height: 32px;
+  height: 38px;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid #333;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 0.7rem;
+  font-size: 0.85rem;
   color: #777;
 }
 
@@ -209,25 +210,37 @@
 
 .groupTemperedRow {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
+  gap: 8px;
+  padding: 6px 10px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.groupCrownControls {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.groupCrownControls .starGrid {
+  flex: 1;
+  min-width: 0;
 }
 
 .groupTemperedType {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 0.7rem;
+  gap: 8px;
+  font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--mh-tan-dark);
-}
-
-.groupTemperedRow .toggleLabel {
-  gap: 10px;
+  min-width: 76px;
   flex-shrink: 0;
 }
 
@@ -254,7 +267,7 @@
 }
 
 .editorFooter {
-  padding: 16px 24px;
+  padding: 10px 20px;
   background: rgba(0, 0, 0, 0.2);
   border-top: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
@@ -285,9 +298,14 @@
 }
 
 @media (max-width: 600px) {
+  .overlay {
+    align-items: flex-start;
+    padding: 12px 8px;
+  }
+
   .modal {
     flex-direction: column;
-    max-height: 95vh;
+    max-height: none;
     width: 100%;
   }
 
@@ -336,6 +354,17 @@
     grid-template-columns: repeat(5, 1fr);
   }
 
+  .groupTemperedRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .groupCrownControls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .questSelect {
     grid-template-columns: 1fr;
   }
@@ -374,60 +403,6 @@
   background: var(--mh-gold);
   color: #000;
   border-color: var(--mh-gold);
-}
-
-.toggleLabel {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-}
-
-.switch {
-  position: relative;
-  width: 44px;
-  height: 22px;
-  background: #000;
-  border: 1px solid #333;
-  transition: all 0.3s ease;
-}
-
-.switchHandle {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 18px;
-  height: 16px;
-  background: #333;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.toggleInput {
-  display: none;
-}
-
-.toggleInput:checked+.switch {
-  border-color: var(--mh-purple);
-  background: rgba(163, 53, 238, 0.1);
-}
-
-.toggleInput:checked+.switch .switchHandle {
-  transform: translateX(22px);
-  background: var(--mh-purple);
-}
-
-.temperedLabel {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #666;
-  width: 72px;
-  display: inline-block;
-}
-
-.temperedActive {
-  color: var(--mh-purple);
-  font-weight: bold;
 }
 
 .successOverlay {
@@ -478,8 +453,6 @@
 .animateIn {
   animation: slideDownFade 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-
-/* ── Investigation block inside Edit modal ───────────────────────────── */
 
 .investigationBlock {
   background: rgba(181, 154, 93, 0.04);

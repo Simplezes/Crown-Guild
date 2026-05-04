@@ -4,7 +4,7 @@ import ContactButton from "./ContactButton";
 import { getQuestIcon } from "@/lib/monsters";
 import styles from "@/app/monster/[name]/monster.module.css";
 
-export default function HunterItem({ crown, monsterName, isHighlighted }) {
+export default function HunterItem({ crown, linkedCrown = null, monsterName, isHighlighted }) {
   const {
     user_id,
     avatar_url,
@@ -21,71 +21,63 @@ export default function HunterItem({ crown, monsterName, isHighlighted }) {
     inv_monster_name,
   } = crown;
 
-  // Resolve effective remaining uses (new model: on investigation; legacy: on crown)
   const effectiveUses = inv_remaining_uses !== undefined ? inv_remaining_uses : remaining_uses;
-
-  // Whether the crown's investigation/survey is for a different host monster
   const hasHost = inv_monster_id && String(inv_monster_id) !== String(monster_id);
   const hostName = hasHost
     ? inv_monster_name?.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
     : null;
 
+  // For linked S&L pairs
+  const smallC = linkedCrown ? (crown.type === 'small' ? crown : linkedCrown) : null;
+  const largeC = linkedCrown ? (crown.type === 'large' ? crown : linkedCrown) : null;
+  const anyTempered = linkedCrown ? (crown.tempered || linkedCrown.tempered) : null;
+
   return (
     <div className={`${styles.hunterItem} mh-card ${isHighlighted ? styles.highlighted : ''}`} id={`crown-${crownId}`}>
       <Link href={`/profile/${user_id}`} className={styles.hunterMain}>
-        <div className={styles.iconPair}>
-          <img
-            src={avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"}
-            alt=""
-            className={styles.avatar}
-            style={{ borderRadius: 10 }}
-          />
-        </div>
+        <img
+          src={avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"}
+          alt=""
+          className={styles.avatar}
+        />
         <div className={styles.hunterDetail}>
-          <span className={styles.name}>{username}</span>
+          <div className={styles.hunterTop}>
+            <span className={styles.name}>{username}</span>
+            {!linkedCrown && (
+              <div className={styles.crownBadges}>
+                <span className={styles.ratingChip}>{strength_rating}★</span>
+                {!!tempered && <span className={styles.temperedChip}>Tempered</span>}
+              </div>
+            )}
+          </div>
           {status_message && (
             <div className={styles.statusBubble}>
-              <Image
-                src="/icons/MHWilds-Notes_Checkmark_Icon.png"
-                width={12}
-                height={12}
-                alt=""
-                className="pixel-art"
-              />
+              <Image src="/icons/MHWilds-Notes_Checkmark_Icon.png" width={10} height={10} alt="" className="pixel-art" />
               <span>{status_message}</span>
             </div>
           )}
-          <div className={styles.questMeta}>
-            <div className={styles.questIcon}>
-              <Image
-                src={`/icons/${getQuestIcon(quest)}`}
-                width={24}
-                height={24}
-                alt=""
-                className="pixel-art"
-              />
-            </div>
-            <span className={tempered ? styles.tempered : styles.normal}>
-              {quest || "Hunt"} • {strength_rating}
-              <Image src="/icons/MHWilds-Notes_1_Star_Icon.png" width={12} height={12} alt="★" className="pixel-art" style={{ display: 'inline', verticalAlign: 'middle', margin: '0 2px' }} />
-              • {tempered ? (
-                <span style={{ color: 'var(--mh-red)' }}>
-                  <Image src="/icons/MHWilds-Hunt_Icon.png" width={12} height={12} alt="" className="pixel-art" style={{ display: 'inline', verticalAlign: 'middle', margin: '0 2px' }} />
-                  Tempered In Stock
-                </span>
-              ) : "In Stock"}
-              {quest === "Investigation Quests" && effectiveUses !== null && ` (${effectiveUses} left)`}
-            </span>
+          <div className={styles.questRow}>
+            <Image src={`/icons/${getQuestIcon(quest)}`} width={14} height={14} alt="" className="pixel-art" />
+            <span className={styles.questLabel}>{quest || "Hunt"}</span>
+            {quest === "Investigation Quests" && effectiveUses != null && (
+              <span className={styles.usesChip}>{effectiveUses} left</span>
+            )}
           </div>
-          {/* Host monster context */}
+          {linkedCrown && (
+            <div className={styles.linkedRow}>
+              <Image src="/icons/smallcrown.png" width={10} height={10} alt="S" className="pixel-art" />
+              <span className={smallC.tempered ? styles.temperedText : styles.ratingText}>{smallC.strength_rating}★</span>
+              {!!smallC.tempered && <span className={styles.temperedChip}>T</span>}
+              <span className={styles.linkedSep}>·</span>
+              <Image src="/icons/largecrown.png" width={12} height={12} alt="L" className="pixel-art" />
+              <span className={largeC.tempered ? styles.temperedText : styles.ratingText}>{largeC.strength_rating}★</span>
+              {!!largeC.tempered && <span className={styles.temperedChip}>T</span>}
+            </div>
+          )}
           {hasHost && (
-            <div className={styles.hostMonsterLine}>
+            <div className={styles.hostLine}>
               <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={10} height={10} alt="" className="pixel-art" />
-              <span>
-                {quest === "Field Survey Quests"
-                  ? `${hostName} Field Survey`
-                  : `${hostName} Investigation`}
-              </span>
+              <span>{quest === "Field Survey Quests" ? `${hostName} Field Survey` : `${hostName} Investigation`}</span>
             </div>
           )}
         </div>
@@ -102,4 +94,3 @@ export default function HunterItem({ crown, monsterName, isHighlighted }) {
     </div>
   );
 }
-

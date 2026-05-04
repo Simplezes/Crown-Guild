@@ -1,0 +1,54 @@
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.groupLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Marcellus', serif;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--mh-tan-dark);
+}
+
+.multiIcon {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.count {
+  margin-left: auto;
+  font-family: 'Marcellus', serif;
+  font-size: 0.65rem;
+  color: var(--mh-gold);
+  opacity: 0.8;
+}
+
+.iconGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.iconLink {
+  display: block;
+  border: 1px solid var(--mh-border);
+  transition: border-color 0.15s ease, transform 0.15s ease;
+  line-height: 0;
+}
+
+.iconLink:hover {
+  border-color: var(--mh-gold);
+  transform: scale(1.12);
+}

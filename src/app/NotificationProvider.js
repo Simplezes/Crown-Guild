@@ -48,7 +48,6 @@ export function NotificationProvider({ children }) {
     setPusherChannel(channel);
 
     channel.bind('notification', (notif) => {
-      // Only process notifications meant for the current user
       if (notif.recipient_id === session.user.id) {
         setNotifications(prev => [notif, ...prev]);
         setUnreadCount(prev => prev + 1);
@@ -68,7 +67,6 @@ export function NotificationProvider({ children }) {
         if (filter.user_id && n.user_id === filter.user_id && filter.monster_id && n.monster_id === filter.monster_id) return false;
         return true;
       }));
-      // Recalculate unread count based on actual state might be better, but this works for now
       setUnreadCount(prev => Math.max(0, prev - 1));
     });
 
@@ -128,7 +126,6 @@ export function NotificationProvider({ children }) {
         const data = await res.json();
         throw new Error(data.error || 'Action failed');
       }
-      // The API should handle triggering pusher events now.
     } catch (err) {
       console.error(`Failed to ${action} notification:`, err);
       throw err;

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import MonsterIcon from "@/components/MonsterIcon";
@@ -10,28 +10,18 @@ import { useRouter } from "next/navigation";
 import { useToast, useConfirm } from "@/app/UIProvider";
 
 export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
+  const CROWNS_PER_PAGE = 24;
   const [crowns, setCrowns] = useState(initialCrowns);
+  const [page, setPage] = useState(1);
   const [editingCrown, setEditingCrown] = useState(null);
   const [editingGroup, setEditingGroup] = useState(null);
-  const [activeGroupKey, setActiveGroupKey] = useState(null);
-  const groupRefs = useRef({});
   const router = useRouter();
   const toast = useToast();
   const confirm = useConfirm();
 
   useEffect(() => {
-    const onPointerDown = (e) => {
-      const key = activeGroupKey;
-      if (!key) return;
-      const el = groupRefs.current[key];
-      if (el && !el.contains(e.target)) setActiveGroupKey(null);
-    };
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, [activeGroupKey]);
-
-  useEffect(() => {
     setCrowns(initialCrowns);
+    setPage(1);
   }, [initialCrowns]);
 
   const handleDelete = async (id) => {
@@ -52,7 +42,6 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
     }
   };
 
-  // Group crowns by pair_id first, then investigation_id
   const groupedCrowns = [];
   const usedPairIds = new Set();
   const usedInvIds = new Set();
@@ -83,40 +72,6 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
       console.error("Delete error:", err);
       toast.error("An error occurred.");
     }
-  };
-
-  const renderGroupActions = (group) => {
-    if (!isOwner) return null;
-    const first = group[0];
-    return (
-      <div className={styles.groupActions}>
-        <button
-          onClick={() => {
-            const url = `${window.location.origin}/monster/${encodeURIComponent(first.name)}?crownId=${first.id}&user=${userId}`;
-            navigator.clipboard.writeText(url);
-            toast.info("Link copied to clipboard!");
-          }}
-          className={styles.actionBtn}
-          title="Share Crown"
-        >
-          <Image src="/icons/MHWilds-Link_Party_Icon.png" width={14} height={14} alt="Share" className="pixel-art" />
-        </button>
-        <button
-          onClick={() => setEditingGroup(group)}
-          className={styles.actionBtn}
-          title="Edit Crown"
-        >
-          <Image src="/icons/MHWilds-Settings_Icon.png" width={14} height={14} alt="Edit" className="pixel-art" />
-        </button>
-        <button
-          onClick={() => handleDeleteGroup(group)}
-          className={`${styles.actionBtn} ${styles.deleteBtn}`}
-          title="Delete All Linked Crowns"
-        >
-          <Image src="/icons/MHWilds-Notes_X_Icon.png" width={14} height={14} alt="Delete" className="pixel-art" />
-        </button>
-      </div>
-    );
   };
 
   const renderCard = (crown, hideActions = false) => {
@@ -202,39 +157,111 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
     );
   };
 
+  const renderGroupCard = (group) => {
+    const first = group[0];
+    const titleCase = (str) => str ? str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : "??";
+    const hasInvestigation = first.quest === "Investigation Quests";
+    const hasFieldSurvey = first.quest === "Field Survey Quests" && first.inv_monster_id && first.inv_monster_id !== first.monster_id;
+    const hostDiffers = first.inv_monster_id && first.inv_monster_id !== first.monster_id;
+    const anyTempered = group.some(c => c.tempered);
+
+    let investigationLabel = null;
+    if (hasInvestigation) {
+      investigationLabel = hostDiffers
+        ? `${titleCase(first.inv_monster_name)} Inv.${first.remaining_uses != null ? ` · ${first.remaining_uses}` : ""}`
+        : `Investigation${first.remaining_uses != null ? ` · ${first.remaining_uses} left` : ""}`;
+    } else if (hasFieldSurvey) {
+      investigationLabel = `${titleCase(first.inv_monster_name)} Field Survey`;
+    }
+
+    return (
+      <div className={styles.crownCard}>
+        <div className={styles.crownCornerLeft}>
+          <Image src="/icons/MHWilds-Link_Party_Icon.png" width={12} height={12} alt="linked" className="pixel-art" />
+        </div>
+        <div className={`${styles.crownCornerRight} ${styles.linkedCrownTypes}`}>
+          {group.map(c => (
+            <Image
+              key={c.id}
+              src={c.type === 'small' ? "/icons/smallcrown.png" : "/icons/largecrown.png"}
+              width={14} height={14}
+              alt={c.type}
+              className="pixel-art"
+            />
+          ))}
+        </div>
+        <Link href={`/monster/${first.name}`} className={styles.monsterLink}>
+          <MonsterIcon imageName={first.image_name} name={first.name} tempered={anyTempered} size={64} />
+        </Link>
+        <div className={styles.crownOverlay}>
+          <Link href={`/monster/${first.name}`} className={styles.nameLink}>
+            <h3>{first.name}</h3>
+          </Link>
+          <div className={styles.linkedCrownRows}>
+            {group.map(c => (
+              <div key={c.id} className={styles.linkedCrownRow}>
+                <Image
+                  src={c.type === 'small' ? "/icons/smallcrown.png" : "/icons/largecrown.png"}
+                  width={10} height={10}
+                  alt={c.type}
+                  className="pixel-art"
+                />
+                <span className={styles.ratingBadge}>{c.strength_rating}★</span>
+                {!!c.tempered && <span className={styles.temperedBadge}>T</span>}
+              </div>
+            ))}
+          </div>
+          {investigationLabel && (
+            <div className={styles.crownInvestigation}>{investigationLabel}</div>
+          )}
+        </div>
+        {isOwner && (
+          <div className={styles.cardActions}>
+            <button
+              onClick={() => {
+                const url = `${window.location.origin}/monster/${encodeURIComponent(first.name)}?crownId=${first.id}&user=${userId}`;
+                navigator.clipboard.writeText(url);
+                toast.info("Link copied to clipboard!");
+              }}
+              className={styles.actionBtn}
+              title="Share Crown"
+            >
+              <Image src="/icons/MHWilds-Link_Party_Icon.png" width={14} height={14} alt="Share" className="pixel-art" />
+            </button>
+            <button
+              onClick={() => setEditingGroup(group)}
+              className={styles.actionBtn}
+              title="Edit Linked Crowns"
+            >
+              <Image src="/icons/MHWilds-Settings_Icon.png" width={14} height={14} alt="Edit" className="pixel-art" />
+            </button>
+            <button
+              onClick={() => handleDeleteGroup(group)}
+              className={`${styles.actionBtn} ${styles.deleteBtn}`}
+              title="Delete Linked Crowns"
+            >
+              <Image src="/icons/MHWilds-Notes_X_Icon.png" width={14} height={14} alt="Delete" className="pixel-art" />
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const totalPages = Math.max(1, Math.ceil(groupedCrowns.length / CROWNS_PER_PAGE));
+  const pagedGroups = groupedCrowns.slice((page - 1) * CROWNS_PER_PAGE, page * CROWNS_PER_PAGE);
+
   return (
     <>
       <div className={styles.scrollArea}>
         <div className={styles.crownGrid}>
-          {crowns.length > 0 ? groupedCrowns.map((group) => {
+          {crowns.length > 0 ? pagedGroups.map((group) => {
             if (group.length === 1) {
               return <div key={group[0].id}>{renderCard(group[0])}</div>;
             }
             return (
-              <div
-                key={group[0].pair_id ? `pair-${group[0].pair_id}` : `inv-${group[0].investigation_id}`}
-                className={`${styles.crownGroup}${activeGroupKey === (group[0].pair_id ?? `inv-${group[0].investigation_id}`) ? ` ${styles.crownGroupActive}` : ""}`}
-                ref={el => { groupRefs.current[group[0].pair_id ?? `inv-${group[0].investigation_id}`] = el; }}
-                onClick={() => setActiveGroupKey(group[0].pair_id ?? `inv-${group[0].investigation_id}`)}
-              >
-                {renderGroupActions(group)}
-                {group.map((crown, i) => (
-                  <React.Fragment key={crown.id}>
-                    {i > 0 && (
-                      <div className={styles.chainConnector}>
-                        <Image
-                          src="/icons/MHWilds-Link_Party_Icon.png"
-                          width={14} height={14}
-                          alt="linked"
-                          className="pixel-art"
-                        />
-                      </div>
-                    )}
-                    <div className={styles.crownGroupItem}>
-                      {renderCard(crown, true)}
-                    </div>
-                  </React.Fragment>
-                ))}
+              <div key={group[0].pair_id ? `pair-${group[0].pair_id}` : `inv-${group[0].investigation_id}`}>
+                {renderGroupCard(group)}
               </div>
             );
           }) : (
@@ -244,6 +271,21 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
             </div>
           )}
         </div>
+        {totalPages > 1 && (
+          <div className={styles.pagination}>
+            <button
+              className={styles.pageBtn}
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+            >←</button>
+            <span className={styles.pageInfo}>{page} / {totalPages}</span>
+            <button
+              className={styles.pageBtn}
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+            >→</button>
+          </div>
+        )}
       </div>
 
       <EditCrownModal

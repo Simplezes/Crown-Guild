@@ -60,7 +60,6 @@ export async function generateMetadata({ params, searchParams }) {
   if (crownId) {
     featuredCrown = await getCrownById(crownId);
   } else if (userId) {
-    // If no crownId, try to find the latest crown for this user and monster
     const userCrowns = await db.execute({
       sql: `SELECT id FROM crowns WHERE user_id = ? AND monster_id = ? ORDER BY id DESC LIMIT 1`,
       args: [userId, data.id]
@@ -113,8 +112,20 @@ export default async function MonsterDetail({ params, searchParams }) {
   }
 
   const { monster, extraInfo, crowns } = data;
-  const smallCrowns = crowns.filter(c => c.type === 'small');
-  const largeCrowns = crowns.filter(c => c.type === 'large');
+
+  // Group complete S&L pairs by pair_id
+  const pairMap = new Map();
+  for (const c of crowns) {
+    if (c.pair_id) {
+      if (!pairMap.has(c.pair_id)) pairMap.set(c.pair_id, []);
+      pairMap.get(c.pair_id).push(c);
+    }
+  }
+  const pairedGroups = [...pairMap.values()].filter(g => g.length >= 2);
+  const pairedCrownIds = new Set(pairedGroups.flatMap(g => g.map(c => c.id)));
+
+  const smallCrowns = crowns.filter(c => c.type === 'small' && !pairedCrownIds.has(c.id));
+  const largeCrowns = crowns.filter(c => c.type === 'large' && !pairedCrownIds.has(c.id));
   const gameInfo = extraInfo?.games?.find(g => g.game === "Monster Hunter Wilds");
 
   return (
@@ -170,6 +181,32 @@ export default async function MonsterDetail({ params, searchParams }) {
           </div>
 
           <div className={styles.records}>
+            {pairedGroups.length > 0 && (
+              <section className={styles.crownSection} style={{ marginBottom: '40px' }}>
+                <div className={styles.sectionTitle}>
+                  <Image src="/icons/largecrown.png" width={20} height={20} alt="" className="pixel-art" />
+                  <Image src="/icons/smallcrown.png" width={16} height={16} alt="" className="pixel-art" style={{ marginLeft: -8 }} />
+                  <h2 className="mh-title">S&amp;L Pair Records</h2>
+                </div>
+                <div className={styles.hunterList}>
+                  {pairedGroups.map((group) => {
+                    const smallC = group.find(c => c.type === 'small');
+                    const largeC = group.find(c => c.type === 'large');
+                    const isHl = group.some(c => String(c.id) === String(highlightCrownId));
+                    return (
+                      <HunterItem
+                        key={smallC.id}
+                        crown={smallC}
+                        linkedCrown={largeC}
+                        monsterName={monster.name}
+                        isHighlighted={isHl}
+                      />
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
             <section className={styles.crownSection} style={{ marginBottom: '40px' }}>
               <div className={styles.sectionTitle}>
                 <Image src="/icons/largecrown.png" width={24} height={24} alt="" className="pixel-art" />

@@ -4,11 +4,9 @@ import { createContext, useContext, useState, useCallback } from 'react';
 import Image from 'next/image';
 import styles from './UIProvider.module.css';
 
-// ── Toast ──────────────────────────────────────────────────────────────────
 const ToastContext = createContext(null);
 export const useToast = () => useContext(ToastContext);
 
-// ── Confirm ────────────────────────────────────────────────────────────────
 const ConfirmContext = createContext(null);
 export const useConfirm = () => useContext(ConfirmContext);
 
@@ -18,7 +16,6 @@ export function UIProvider({ children }) {
   const [toasts, setToasts] = useState([]);
   const [confirmState, setConfirmState] = useState(null);
 
-  // ── toast helpers ────────────────────────────────────────────────────────
   const addToast = useCallback((message, type) => {
     const id = ++_toastId;
     setToasts(prev => [...prev, { id, message, type }]);
@@ -33,7 +30,6 @@ export function UIProvider({ children }) {
 
   const dismissToast = (id) => setToasts(prev => prev.filter(t => t.id !== id));
 
-  // ── confirm helper ───────────────────────────────────────────────────────
   const confirm = useCallback((message, opts = {}) =>
     new Promise((resolve) => setConfirmState({ message, ...opts, resolve }))
   , []);
@@ -48,7 +44,6 @@ export function UIProvider({ children }) {
       <ConfirmContext.Provider value={confirm}>
         {children}
 
-        {/* ── Toasts ────────────────────────────────────────────────── */}
         {toasts.length > 0 && (
           <div className={styles.toastContainer}>
             {toasts.map(t => (
@@ -63,7 +58,6 @@ export function UIProvider({ children }) {
           </div>
         )}
 
-        {/* ── Confirm modal ─────────────────────────────────────────── */}
         {confirmState && (
           <div className={styles.backdrop} onClick={() => handleConfirm(false)}>
             <div className={styles.modal} onClick={e => e.stopPropagation()}>

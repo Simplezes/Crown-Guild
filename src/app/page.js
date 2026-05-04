@@ -71,8 +71,7 @@ export default async function Home() {
                             width={14} height={14} alt="" className="pixel-art"
                           />
                           <span className={mission.tempered ? styles.temperedCrown : ""}>
-                            {mission.type} • {mission.strength_rating}
-                            <Image src="/icons/MHWilds-Notes_1_Star_Icon.png" width={10} height={10} alt="★" className="pixel-art" style={{ display: 'inline', margin: '0 2px' }} />
+                            {mission.type} • {mission.strength_rating}★
                             {mission.tempered ? " • Tempered" : ""}
                           </span>
                         </div>

@@ -176,8 +176,7 @@ export async function GET(request, { params }) {
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <span style={{ fontSize: 14, color: colors.tanDark, display: 'flex' }}>STRENGTH RATING</span>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <span style={{ fontSize: 24, fontWeight: 'bold', display: 'flex' }}>{crown.strength_rating}</span>
-                          <img src={`${baseUrl}/icons/MHWilds-Notes_1_Star_Icon.png`} width={16} height={16} style={{ marginLeft: '5px' }} />
+                          <span style={{ fontSize: 24, fontWeight: 'bold', display: 'flex' }}>{crown.strength_rating}★</span>
                         </div>
                       </div>
                       {crown.remaining_uses !== null && (

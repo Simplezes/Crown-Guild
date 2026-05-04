@@ -17,10 +17,6 @@ function getRedis() {
   return redis;
 }
 
-/**
- * @param {"crown" | "beacon" | "mission" | "status"} key
- * @returns {Ratelimit | null}
- */
 function getLimiter(key) {
   const r = getRedis();
   if (!r) return null;
@@ -43,13 +39,6 @@ function getLimiter(key) {
   return ratelimiters[key];
 }
 
-/**
- * Check rate limit for a user. Returns a 429 Response if exceeded, null if allowed.
- * Silently passes through if Upstash env vars are not configured.
- * @param {"crown" | "beacon" | "mission" | "status"} key
- * @param {string} userId
- * @returns {Promise<Response | null>}
- */
 export async function checkRateLimit(key, userId) {
   const limiter = getLimiter(key);
   if (!limiter) return null;

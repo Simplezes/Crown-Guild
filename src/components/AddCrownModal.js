@@ -6,6 +6,7 @@ import CustomSelect from "./CustomSelect";
 import MonsterIcon from "./MonsterIcon";
 import Image from "next/image";
 import { useToast } from "@/app/UIProvider";
+import Toggle from "./Toggle";
 
 const QUEST_TYPES = [
   "Event Quests",
@@ -23,14 +24,13 @@ export default function AddCrownModal({ isOpen, onClose }) {
 
   const [formData, setFormData] = useState({
     monster_id: "",
-    types: [{ value: "small", tempered: false }],
+    types: [{ value: "small", tempered: false, strength_rating: 1 }],
     quest: "Optional Quests",
-    strength_rating: 1,
-    // Investigation fields
     inv_mode: "new",
     inv_monster_id: "",
     remaining_uses: 3,
     investigation_id: "",
+    show_host: false,
   });
 
   useEffect(() => {
@@ -56,7 +56,6 @@ export default function AddCrownModal({ isOpen, onClose }) {
     }
   }, [isOpen]);
 
-  // Sync inv_monster_id when the crown monster changes (sane default)
   const handleMonsterChange = (val) => {
     setFormData(prev => ({
       ...prev,
@@ -77,7 +76,7 @@ export default function AddCrownModal({ isOpen, onClose }) {
         ...prev,
         types: existing
           ? prev.types.filter(t => t.value !== val)
-          : [...prev.types, { value: val, tempered: false }],
+          : [...prev.types, { value: val, tempered: false, strength_rating: 1 }],
       };
     });
   };
@@ -91,9 +90,9 @@ export default function AddCrownModal({ isOpen, onClose }) {
     }));
   };
 
-  // Investigations matching the selected inv_monster
+  const effectiveHostId = formData.show_host ? (formData.inv_monster_id || formData.monster_id) : formData.monster_id;
   const matchingInvestigations = investigations.filter(
-    inv => String(inv.monster_id) === String(formData.inv_monster_id)
+    inv => String(inv.monster_id) === String(effectiveHostId)
   );
 
   const handleSubmit = async (e) => {
@@ -104,29 +103,23 @@ export default function AddCrownModal({ isOpen, onClose }) {
       const basePayload = {
         monster_id: parseInt(formData.monster_id),
         quest: formData.quest,
-        strength_rating: parseInt(formData.strength_rating),
       };
 
       if (formData.quest === "Investigation Quests") {
         if (formData.inv_mode === "existing" && formData.investigation_id) {
           basePayload.investigation_id = parseInt(formData.investigation_id);
         } else {
-          basePayload.investigation_monster_id = parseInt(formData.inv_monster_id || formData.monster_id);
+          basePayload.investigation_monster_id = parseInt(formData.show_host ? (formData.inv_monster_id || formData.monster_id) : formData.monster_id);
           basePayload.remaining_uses = parseInt(formData.remaining_uses);
         }
-      }
-
-      if (formData.quest === "Field Survey Quests") {
+      } else if (formData.show_host) {
         const hostId = parseInt(formData.inv_monster_id || formData.monster_id);
         if (hostId !== parseInt(formData.monster_id)) {
           basePayload.investigation_monster_id = hostId;
         }
       }
 
-      // Generate a pair_id to link crowns created together
       const pairId = formData.types.length > 1 ? crypto.randomUUID() : undefined;
-
-      // POST one request per selected crown type
       const results = await Promise.all(
         formData.types.map(t =>
           fetch("/api/crowns", {
@@ -136,6 +129,7 @@ export default function AddCrownModal({ isOpen, onClose }) {
               ...basePayload,
               type: t.value,
               tempered: t.tempered,
+              strength_rating: t.strength_rating,
               ...(pairId ? { pair_id: pairId } : {}),
             }),
           })
@@ -186,7 +180,7 @@ export default function AddCrownModal({ isOpen, onClose }) {
               imageName={monsters.find(m => m.id === parseInt(formData.monster_id))?.image_name}
               name={monsters.find(m => m.id === parseInt(formData.monster_id))?.name}
               tempered={formData.types.some(t => t.tempered)}
-              size={100}
+              size={56}
             />
             <div className={styles.previewMeta}>
               <h3>{monsters.find(m => m.id === parseInt(formData.monster_id))?.name || "Select Specimen"}</h3>
@@ -230,6 +224,37 @@ export default function AddCrownModal({ isOpen, onClose }) {
                 </div>
               </div>
 
+              {formData.types.map(t => (
+                <div key={t.value} className={styles.field}>
+                  <div className={styles.typeHeader}>
+                    <label>
+                      <Image src={t.value === 'small' ? "/icons/smallcrown.png" : "/icons/largecrown.png"} width={13} height={13} alt="" className="pixel-art" style={{ marginRight: 5 }} />
+                      {t.value === 'small' ? 'Small' : 'Large'} Crown
+                    </label>
+                    <Toggle
+                        checked={t.tempered}
+                        onChange={() => toggleTempered(t.value)}
+                        labelOn="Tempered"
+                        labelOff="Normal"
+                      />
+                  </div>
+                  <div className={styles.pickerGrid}>
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                      <div
+                        key={num}
+                        className={`${styles.pickerItem} ${t.strength_rating === num ? styles.pickerItemActive : ""}`}
+                        onClick={() => setFormData(prev => ({
+                          ...prev,
+                          types: prev.types.map(tp => tp.value === t.value ? { ...tp, strength_rating: num } : tp),
+                        }))}
+                      >
+                        {num}★
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+
               <div className={styles.field}>
                 <label>Quest Type</label>
                 <CustomSelect
@@ -239,26 +264,36 @@ export default function AddCrownModal({ isOpen, onClose }) {
                 />
               </div>
 
-              {/* ── Investigation Section ───────────────────────────── */}
-              {formData.quest === "Investigation Quests" && (
-                <div className={`${styles.investigationSection} ${styles.animateIn}`}>
-                  <div className={styles.field}>
-                    <label>Investigation Target</label>
-                    <p className={styles.fieldHint}>
-                      Which monster&rsquo;s investigation scroll is this?
-                      Set to a different monster if the crown comes from another monster&rsquo;s quest.
-                    </p>
+              <div className={styles.field}>
+                <label>Quest Host Monster</label>
+                <Toggle
+                  checked={formData.show_host}
+                  onChange={e => setFormData(prev => ({
+                    ...prev,
+                    show_host: e.target.checked,
+                    inv_monster_id: e.target.checked ? (prev.inv_monster_id || prev.monster_id) : prev.monster_id,
+                    inv_mode: "new",
+                    investigation_id: "",
+                  }))}
+                  labelOn="Different host monster"
+                  labelOff="Same as crown monster"
+                />
+                {formData.show_host && (
+                  <div className={styles.animateIn} style={{ marginTop: '10px' }}>
                     <CustomSelect
                       options={monsterOptions}
                       value={formData.inv_monster_id || formData.monster_id}
                       onChange={(val) =>
                         setFormData(prev => ({ ...prev, inv_monster_id: val, inv_mode: "new", investigation_id: "" }))
                       }
-                      placeholder="Select Investigation Monster"
+                      placeholder="Select host monster"
                     />
                   </div>
+                )}
+              </div>
 
-                  {/* If there are existing investigations for the chosen target, let the user pick */}
+              {formData.quest === "Investigation Quests" && (
+                <div className={`${styles.investigationSection} ${styles.animateIn}`}>
                   {matchingInvestigations.length > 0 && (
                     <div className={styles.field}>
                       <label>Link to Investigation</label>
@@ -323,68 +358,6 @@ export default function AddCrownModal({ isOpen, onClose }) {
                   )}
                 </div>
               )}
-
-              {/* ── Field Survey Host Monster ─────────────────────── */}
-              {formData.quest === "Field Survey Quests" && (
-                <div className={`${styles.investigationSection} ${styles.animateIn}`}>
-                  <div className={styles.field}>
-                    <label>Quest Host Monster</label>
-                    <p className={styles.fieldHint}>
-                      Only set this if the crown came from a different monster&rsquo;s field survey.
-                    </p>
-                    <CustomSelect
-                      options={monsterOptions}
-                      value={formData.inv_monster_id || formData.monster_id}
-                      onChange={(val) =>
-                        setFormData(prev => ({ ...prev, inv_monster_id: val }))
-                      }
-                      placeholder="Select host monster"
-                    />
-                  </div>
-                </div>
-              )}
-
-              <div className={styles.field}>
-                <label>Strength</label>
-                <div className={styles.pickerGrid}>
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
-                    <div
-                      key={num}
-                      className={`${styles.pickerItem} ${formData.strength_rating === num ? styles.pickerItemActive : ""}`}
-                      onClick={() => setFormData({ ...formData, strength_rating: num })}
-                    >
-                      {num}
-                      <Image src="/icons/MHWilds-Notes_1_Star_Icon.png" width={20} height={20} alt="★" className="pixel-art" style={{ display: 'inline', margin: '0 2px' }} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className={styles.field}>
-                <label>Tempered</label>
-                {formData.types.map(t => (
-                  <div key={t.value} className={styles.temperedRow}>
-                    <div className={styles.temperedRowType}>
-                      <Image src={t.value === 'small' ? "/icons/smallcrown.png" : "/icons/largecrown.png"} width={12} height={12} alt="" className="pixel-art" />
-                      {t.value === 'small' ? 'Small' : 'Large'}
-                    </div>
-                    <label className={styles.toggleLabel}>
-                      <input
-                        type="checkbox"
-                        className={styles.toggleInput}
-                        checked={t.tempered}
-                        onChange={() => toggleTempered(t.value)}
-                      />
-                      <div className={styles.switch}>
-                        <div className={styles.switchHandle} />
-                      </div>
-                      <span className={`${styles.temperedLabel} ${t.tempered ? styles.temperedActive : ""}`}>
-                        {t.tempered ? "Tempered" : "Normal"}
-                      </span>
-                    </label>
-                  </div>
-                ))}
-              </div>
 
               <button
                 type="submit"

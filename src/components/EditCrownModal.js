@@ -7,6 +7,7 @@ import MonsterIcon from "./MonsterIcon";
 import Image from "next/image";
 import CustomSelect from "./CustomSelect";
 import { useToast } from "@/app/UIProvider";
+import Toggle from "./Toggle";
 
 const QUEST_TYPES = [
   { label: "Event Quests", value: "Event Quests" },
@@ -23,21 +24,19 @@ export default function EditCrownModal({ isOpen, onClose, crown, group, onUpdate
   const [success, setSuccess] = useState(false);
   const [isBeingHosted, setIsBeingHosted] = useState(false);
   const [monsters, setMonsters] = useState([]);
-  const [investigations, setInvestigations] = useState([]);
 
-  const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState({
     monster_id: "",
-    types: ["small"],          // array of selected types (single-crown only)
-    tempered: false,           // single-crown tempered
+    types: ["small"],
+    tempered: false,
     quest: "Optional Quests",
     strength_rating: 1,
-    // Investigation fields
-    inv_mode: "existing",
     inv_monster_id: "",
     remaining_uses: 3,
-    investigation_id: "",
-    // Per-crown overrides for group editing
-    perCrown: [],              // [{id, type, tempered}]
+    show_host: false,
+    unlink: false,
+    linkedStrength_rating: 1,
+    perCrown: [],
   });
 
   useEffect(() => {
@@ -49,12 +48,13 @@ export default function EditCrownModal({ isOpen, onClose, crown, group, onUpdate
         tempered: isGroup ? false : !!ref.tempered,
         quest: ref.quest || "Optional Quests",
         strength_rating: ref.strength_rating || 1,
-        inv_mode: ref.investigation_id ? "existing" : "new",
         inv_monster_id: ref.inv_monster_id || ref.monster_id,
         remaining_uses: ref.remaining_uses || 3,
-        investigation_id: ref.investigation_id || "",
+        show_host: !!(ref.inv_monster_id && String(ref.inv_monster_id) !== String(ref.monster_id)),
+        unlink: false,
+        linkedStrength_rating: 1,
         perCrown: isGroup
-          ? crowns.map(c => ({ id: c.id, type: c.type, tempered: !!c.tempered }))
+          ? crowns.map(c => ({ id: c.id, type: c.type, tempered: !!c.tempered, strength_rating: c.strength_rating || 1 }))
           : [],
       });
       setSuccess(false);
@@ -69,29 +69,21 @@ export default function EditCrownModal({ isOpen, onClose, crown, group, onUpdate
         .then(data => { if (Array.isArray(data)) setMonsters(data); })
         .catch(console.error);
 
-      fetch("/api/investigations")
-        .then(res => res.json())
-        .then(data => { if (Array.isArray(data)) setInvestigations(data); })
-        .catch(console.error);
     }
   }, [isOpen, crown, group]);
 
-  // Investigations matching the currently chosen inv_monster
-  const matchingInvestigations = investigations.filter(
-    inv => String(inv.monster_id) === String(formData.inv_monster_id || formData.monster_id)
-  );
+  const effectiveHostId = formData.show_host ? (formData.inv_monster_id || formData.monster_id) : formData.monster_id;
 
   const isChanged = crowns.length > 0 && (() => {
     const ref = crowns[0];
     if (isGroup) {
-      const origPerCrown = crowns.map(c => ({ id: c.id, tempered: !!c.tempered }));
-      const perCrownChanged = formData.perCrown.some((pc, i) => pc.tempered !== origPerCrown[i]?.tempered);
+      const origPerCrown = crowns.map(c => ({ id: c.id, tempered: !!c.tempered, strength_rating: c.strength_rating || 1 }));
+      const perCrownChanged = formData.perCrown.some((pc, i) => pc.tempered !== origPerCrown[i]?.tempered || pc.strength_rating !== origPerCrown[i]?.strength_rating);
       return perCrownChanged ||
         formData.quest !== (ref.quest || "Optional Quests") ||
-        formData.strength_rating !== (ref.strength_rating || 1) ||
-        String(formData.investigation_id) !== String(ref.investigation_id || "") ||
-        (formData.quest === "Investigation Quests" && formData.inv_mode === "new" && formData.remaining_uses !== (ref.remaining_uses || 3)) ||
-        (formData.quest === "Field Survey Quests" && String(formData.inv_monster_id) !== String(ref.inv_monster_id || ref.monster_id));
+        (formData.quest === "Investigation Quests" && formData.remaining_uses !== (ref.remaining_uses || 3)) ||
+        String(formData.show_host ? (formData.inv_monster_id || formData.monster_id) : formData.monster_id) !== String(ref.inv_monster_id || ref.monster_id) ||
+        formData.unlink;
     }
     return (
       !formData.types.includes(ref.type) ||
@@ -99,9 +91,9 @@ export default function EditCrownModal({ isOpen, onClose, crown, group, onUpdate
       formData.tempered !== !!ref.tempered ||
       formData.quest !== (ref.quest || "Optional Quests") ||
       formData.strength_rating !== (ref.strength_rating || 1) ||
-      String(formData.investigation_id) !== String(ref.investigation_id || "") ||
-      (formData.quest === "Investigation Quests" && formData.inv_mode === "new" && formData.remaining_uses !== (ref.remaining_uses || 3)) ||
-      (formData.quest === "Field Survey Quests" && String(formData.inv_monster_id) !== String(ref.inv_monster_id || ref.monster_id))
+      (formData.quest === "Investigation Quests" && formData.remaining_uses !== (ref.remaining_uses || 3)) ||
+      String(formData.show_host ? (formData.inv_monster_id || formData.monster_id) : formData.monster_id) !== String(ref.inv_monster_id || ref.monster_id) ||
+      formData.unlink
     );
   })();
 
@@ -124,19 +116,12 @@ export default function EditCrownModal({ isOpen, onClose, crown, group, onUpdate
       const basePayload = {
         monster_id: parseInt(formData.monster_id),
         quest: formData.quest,
-        strength_rating: parseInt(formData.strength_rating),
       };
 
       if (formData.quest === "Investigation Quests") {
-        if (formData.inv_mode === "existing" && formData.investigation_id) {
-          basePayload.investigation_id = parseInt(formData.investigation_id);
-        } else if (formData.inv_mode === "new") {
-          basePayload.investigation_monster_id = parseInt(formData.inv_monster_id || formData.monster_id);
-          basePayload.remaining_uses = parseInt(formData.remaining_uses);
-        }
-      }
-
-      if (formData.quest === "Field Survey Quests") {
+        basePayload.investigation_monster_id = parseInt(formData.show_host ? (formData.inv_monster_id || formData.monster_id) : formData.monster_id);
+        basePayload.remaining_uses = parseInt(formData.remaining_uses);
+      } else if (formData.show_host) {
         const hostId = parseInt(formData.inv_monster_id || formData.monster_id);
         if (hostId !== parseInt(formData.monster_id)) {
           basePayload.investigation_monster_id = hostId;
@@ -146,34 +131,34 @@ export default function EditCrownModal({ isOpen, onClose, crown, group, onUpdate
       let requests;
 
       if (isGroup) {
-        // PATCH each crown with shared settings + its own type/tempered
         requests = formData.perCrown.map(pc =>
           fetch(`/api/crowns/${pc.id}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...basePayload, type: pc.type, tempered: pc.tempered }),
+            body: JSON.stringify({ ...basePayload, type: pc.type, tempered: pc.tempered, strength_rating: pc.strength_rating, ...(formData.unlink ? { pair_id: null } : {}) }),
           })
         );
       } else {
         const ref = crowns[0];
         const patchType = formData.types.includes(ref.type) ? ref.type : formData.types[0];
+        const extraTypes = formData.types.filter(t => t !== patchType);
+        const pairId = extraTypes.length > 0 ? crypto.randomUUID() : undefined;
+        const pairIdOverride = formData.unlink ? { pair_id: null } : (pairId ? { pair_id: pairId } : {});
         requests = [
           fetch(`/api/crowns/${ref.id}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...basePayload, type: patchType, tempered: formData.tempered }),
+            body: JSON.stringify({ ...basePayload, type: patchType, tempered: formData.tempered, strength_rating: parseInt(formData.strength_rating), ...pairIdOverride }),
           }),
         ];
-        for (const type of formData.types) {
-          if (type !== patchType) {
-            requests.push(
-              fetch("/api/crowns", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ...basePayload, type, tempered: formData.tempered }),
-              })
-            );
-          }
+        for (const type of extraTypes) {
+          requests.push(
+            fetch("/api/crowns", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ ...basePayload, type, tempered: formData.tempered, strength_rating: parseInt(formData.linkedStrength_rating || formData.strength_rating), pair_id: pairId }),
+            })
+          );
         }
       }
 
@@ -237,7 +222,6 @@ export default function EditCrownModal({ isOpen, onClose, crown, group, onUpdate
               <div className={styles.editRow}>
                 <label>Classification</label>
                 {isGroup ? (
-                  // Group: fixed types, independent tempered per crown
                   <div className={styles.groupTemperedList}>
                     {formData.perCrown.map((pc, i) => (
                       <div key={pc.id} className={styles.groupTemperedRow}>
@@ -248,30 +232,39 @@ export default function EditCrownModal({ isOpen, onClose, crown, group, onUpdate
                           />
                           <span>{pc.type === 'small' ? 'Small Gold' : 'Large Gold'}</span>
                         </div>
-                        <label className={styles.toggleLabel}>
-                          <input
-                            type="checkbox"
-                            className={styles.toggleInput}
-                            checked={pc.tempered}
-                            onChange={() => setFormData(prev => ({
-                              ...prev,
-                              perCrown: prev.perCrown.map((p, j) =>
-                                j === i ? { ...p, tempered: !p.tempered } : p
-                              ),
-                            }))}
-                          />
-                          <div className={styles.switch}>
-                            <div className={styles.switchHandle} />
+                        <div className={styles.groupCrownControls}>
+                          <div className={styles.starGrid}>
+                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                              <div
+                                key={num}
+                                className={`${styles.starItem} ${pc.strength_rating === num ? styles.starItemActive : ""}`}
+                                onClick={() => setFormData(prev => ({
+                                  ...prev,
+                                  perCrown: prev.perCrown.map((p, j) =>
+                                    j === i ? { ...p, strength_rating: num } : p
+                                  ),
+                                }))}
+                              >
+                                {num}
+                              </div>
+                            ))}
                           </div>
-                          <span className={`${styles.temperedLabel} ${pc.tempered ? styles.temperedActive : ""}`}>
-                            {pc.tempered ? "Tempered" : "Normal"}
-                          </span>
-                        </label>
+                          <Toggle
+                              checked={pc.tempered}
+                              onChange={() => setFormData(prev => ({
+                                ...prev,
+                                perCrown: prev.perCrown.map((p, j) =>
+                                  j === i ? { ...p, tempered: !p.tempered } : p
+                                ),
+                              }))}
+                              labelOn="Tempered"
+                              labelOff="Normal"
+                            />
+                        </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  // Single: type toggle chips
                   <div className={styles.typeToggle}>
                     {[
                       { value: 'small', label: 'Small Gold', icon: '/icons/smallcrown.png' },
@@ -291,23 +284,73 @@ export default function EditCrownModal({ isOpen, onClose, crown, group, onUpdate
               </div>
 
               <div className={styles.editRow}>
-                <label>
-                  Rating ({formData.strength_rating}
-                  <Image src="/icons/MHWilds-Notes_1_Star_Icon.png" width={10} height={10} alt="★" className="pixel-art" style={{ display: 'inline', margin: '0 2px' }} />
-                  )
-                </label>
-                <div className={styles.starGrid}>
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
-                    <div
-                      key={num}
-                      className={`${styles.starItem} ${formData.strength_rating === num ? styles.starItemActive : ""}`}
-                      onClick={() => setFormData({ ...formData, strength_rating: num })}
-                    >
-                      {num}
-                    </div>
-                  ))}
-                </div>
+                <label>S&amp;L Pair</label>
+                <Toggle
+                  checked={isGroup ? !formData.unlink : formData.types.length > 1}
+                  onChange={() => {
+                    if (isGroup || !!ref.pair_id) {
+                      setFormData(prev => ({ ...prev, unlink: !prev.unlink }));
+                    } else {
+                      const oppositeType = ref.type === 'small' ? 'large' : 'small';
+                      toggleType(oppositeType);
+                    }
+                  }}
+                  labelOn="Linked"
+                  labelOff="Unlinked"
+                />
               </div>
+
+              {!isGroup && (
+                <div className={styles.editRow}>
+                  <label>
+                    Rating ({formData.strength_rating}★)
+                  </label>
+                  <div className={styles.starGrid}>
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                      <div
+                        key={num}
+                        className={`${styles.starItem} ${formData.strength_rating === num ? styles.starItemActive : ""}`}
+                        onClick={() => setFormData({ ...formData, strength_rating: num })}
+                      >
+                        {num}
+                      </div>
+                    ))}
+                  </div>
+                  {formData.types.length > 1 && (() => {
+                    const linkedType = formData.types.find(t => t !== ref.type);
+                    return linkedType ? (
+                      <div style={{ marginTop: 10 }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                          <Image src={linkedType === 'small' ? '/icons/smallcrown.png' : '/icons/largecrown.png'} width={14} height={14} alt="" className="pixel-art" />
+                          {linkedType === 'small' ? 'Small' : 'Large'} Rating ({formData.linkedStrength_rating}★)
+                        </label>
+                        <div className={styles.starGrid}>
+                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                            <div
+                              key={num}
+                              className={`${styles.starItem} ${formData.linkedStrength_rating === num ? styles.starItemActive : ""}`}
+                              onClick={() => setFormData(prev => ({ ...prev, linkedStrength_rating: num }))}
+                            >
+                              {num}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null;
+                  })()}
+                </div>
+              )}
+
+              {!isGroup && (
+                <div className={styles.editRow}>
+                  <Toggle
+                    checked={formData.tempered}
+                    onChange={e => setFormData({ ...formData, tempered: e.target.checked })}
+                    labelOn="Tempered Specimen"
+                    labelOff="Normal Specimen"
+                  />
+                </div>
+              )}
 
               <div className={styles.editRow}>
                 <label>Mission Source</label>
@@ -316,144 +359,58 @@ export default function EditCrownModal({ isOpen, onClose, crown, group, onUpdate
                     <div
                       key={q.value}
                       className={`${styles.questBtn} ${formData.quest === q.value ? styles.questBtnActive : ""}`}
-                      onClick={() => setFormData({ ...formData, quest: q.value, inv_mode: "new" })}
+                      onClick={() => setFormData({ ...formData, quest: q.value })}
                     >
                       {q.label}
                     </div>
                   ))}
                 </div>
 
-                {/* ── Investigation controls ─────────────────────────── */}
                 {formData.quest === "Investigation Quests" && (
                   <div className={`${styles.investigationBlock} ${styles.animateIn}`}>
-                    <div className={styles.editRow} style={{ marginTop: '12px' }}>
-                      <label>Investigation Target</label>
-                      <p className={styles.invHint}>
-                        Which monster&rsquo;s investigation scroll gives access to this crown?
-                      </p>
-                      {monsters.length > 0 && (
-                        <CustomSelect
-                          options={monsterOptions}
-                          value={formData.inv_monster_id || formData.monster_id}
-                          onChange={(val) =>
-                            setFormData(prev => ({
-                              ...prev,
-                              inv_monster_id: val,
-                              inv_mode: "new",
-                              investigation_id: "",
-                            }))
-                          }
-                          placeholder="Select investigation monster"
-                        />
-                      )}
-                    </div>
-
-                    {matchingInvestigations.length > 0 && (
-                      <div className={styles.editRow} style={{ marginTop: '10px' }}>
-                        <label>Link to Investigation</label>
-                        <div className={styles.invModeToggle}>
+                    <div className={`${styles.editRow} ${styles.animateIn}`} style={{ marginTop: '8px' }}>
+                      <label>Remaining Uses</label>
+                      <div className={styles.permitChips}>
+                        {[1, 2, 3].map(num => (
                           <div
-                            className={`${styles.invModeBtn} ${formData.inv_mode === "existing" ? styles.invModeBtnActive : ""}`}
-                            onClick={() => setFormData(prev => ({
-                              ...prev,
-                              inv_mode: "existing",
-                              investigation_id: prev.investigation_id || matchingInvestigations[0].id,
-                            }))}
+                            key={num}
+                            className={`${styles.permitChip} ${formData.remaining_uses === num ? styles.permitChipActive : ""}`}
+                            onClick={() => setFormData({ ...formData, remaining_uses: num })}
                           >
-                            Use Existing
+                            {num}
                           </div>
-                          <div
-                            className={`${styles.invModeBtn} ${formData.inv_mode === "new" ? styles.invModeBtnActive : ""}`}
-                            onClick={() => setFormData(prev => ({ ...prev, inv_mode: "new", investigation_id: "" }))}
-                          >
-                            New Investigation
-                          </div>
-                        </div>
+                        ))}
                       </div>
-                    )}
-
-                    {formData.inv_mode === "existing" && matchingInvestigations.length > 0 ? (
-                      <div className={`${styles.editRow} ${styles.animateIn}`} style={{ marginTop: '8px' }}>
-                        <label>Select Investigation</label>
-                        <div className={styles.invList}>
-                          {matchingInvestigations.map(inv => (
-                            <div
-                              key={inv.id}
-                              className={`${styles.invItem} ${String(formData.investigation_id) === String(inv.id) ? styles.invItemActive : ""}`}
-                              onClick={() => setFormData(prev => ({ ...prev, investigation_id: inv.id }))}
-                            >
-                              <MonsterIcon imageName={inv.monster_image} name={inv.monster_name} size={24} />
-                              <div className={styles.invItemInfo}>
-                                <span className={styles.invItemName}>{capitalize(inv.monster_name)} Investigation</span>
-                                <span className={styles.invItemMeta}>
-                                  {inv.remaining_uses} use{inv.remaining_uses !== 1 ? "s" : ""} left
-                                  {inv.crown_count > 0 ? ` · ${inv.crown_count} crown${inv.crown_count !== 1 ? "s" : ""} linked` : ""}
-                                </span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ) : formData.inv_mode === "new" && (
-                      <div className={`${styles.editRow} ${styles.animateIn}`} style={{ marginTop: '8px' }}>
-                        <label>Remaining Uses</label>
-                        <div className={styles.permitChips}>
-                          {[1, 2, 3].map(num => (
-                            <div
-                              key={num}
-                              className={`${styles.permitChip} ${formData.remaining_uses === num ? styles.permitChipActive : ""}`}
-                              onClick={() => setFormData({ ...formData, remaining_uses: num })}
-                            >
-                              {num}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* ── Field Survey controls ────────────────────── */}
-                {formData.quest === "Field Survey Quests" && (
-                  <div className={`${styles.investigationBlock} ${styles.animateIn}`}>
-                    <div className={styles.editRow} style={{ marginTop: '12px' }}>
-                      <label>Quest Host Monster</label>
-                      <p className={styles.invHint}>
-                        Which monster&rsquo;s field survey did this crown come from?
-                      </p>
-                      {monsters.length > 0 && (
-                        <CustomSelect
-                          options={monsterOptions}
-                          value={formData.inv_monster_id || formData.monster_id}
-                          onChange={(val) =>
-                            setFormData(prev => ({ ...prev, inv_monster_id: val }))
-                          }
-                          placeholder="Select host monster"
-                        />
-                      )}
                     </div>
                   </div>
                 )}
 
-                {/* Single-crown tempered toggle — hidden for groups (handled per-crown above) */}
-                {!isGroup && (
                 <div className={styles.editRow} style={{ marginTop: '12px' }}>
-                  <label className={styles.toggleLabel}>
-                    <input
-                      type="checkbox"
-                      className={styles.toggleInput}
-                      checked={formData.tempered}
-                      onChange={e => setFormData({ ...formData, tempered: e.target.checked })}
-                    />
-                    <div className={styles.switch}>
-                      <div className={styles.switchHandle} />
+                  <label>Quest Host Monster</label>
+                  <Toggle
+                    checked={formData.show_host}
+                    onChange={e => setFormData(prev => ({
+                      ...prev,
+                      show_host: e.target.checked,
+                      inv_monster_id: e.target.checked ? (prev.inv_monster_id || prev.monster_id) : prev.monster_id,
+
+                    }))}
+                    labelOn="Different host monster"
+                    labelOff="Same as crown monster"
+                  />
+                  {formData.show_host && monsters.length > 0 && (
+                    <div className={styles.animateIn} style={{ marginTop: '10px' }}>
+                      <CustomSelect
+                        options={monsterOptions}
+                        value={formData.inv_monster_id || formData.monster_id}
+                        onChange={(val) =>
+                          setFormData(prev => ({ ...prev, inv_monster_id: val }))
+                        }
+                        placeholder="Select host monster"
+                      />
                     </div>
-                    <span className={`${styles.temperedLabel} ${formData.tempered ? styles.temperedActive : ""}`}>
-                      {formData.tempered ? "Tempered Specimen" : "Normal Specimen"}
-                    </span>
-                  </label>
+                  )}
                 </div>
-                )}
               </div>
             </div>
 

@@ -2,11 +2,6 @@ import db from "@/lib/db";
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 
-/**
- * GET /api/investigations
- * Returns all investigations for the authenticated user, with monster details
- * and a count of how many crowns are linked to each.
- */
 export async function GET() {
   const session = await auth();
   if (!session) {
