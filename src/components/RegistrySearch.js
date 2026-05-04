@@ -126,7 +126,8 @@ export default function RegistrySearch({ initialRegistry }) {
                 </div>
               </div>
 
-              {(monster.smallFinders.some(f => f.remaining_uses > 0) || monster.largeFinders.some(f => f.remaining_uses > 0)) && (
+              {(monster.smallFinders.some(f => f.remaining_uses > 0 || f.remaining_uses === null) || 
+                monster.largeFinders.some(f => f.remaining_uses > 0 || f.remaining_uses === null)) && (
                 <div className={styles.hostingBadge}>
                   <span className={styles.pulse}></span>
                   HOSTS AVAILABLE
