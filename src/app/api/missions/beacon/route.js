@@ -3,6 +3,7 @@ import db from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import { pusherServer } from "@/lib/pusher";
+import { checkRateLimit } from "@/lib/ratelimit";
 
 export async function POST(request) {
   try {
@@ -10,6 +11,9 @@ export async function POST(request) {
     if (!session || !session.user || !session.user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const rateLimitRes = await checkRateLimit("beacon", session.user.id);
+    if (rateLimitRes) return rateLimitRes;
 
     const { host_id, monster_id, crown_id } = await request.json();
 
@@ -37,6 +41,15 @@ export async function POST(request) {
       return NextResponse.json({ error: "You already have an active mission. Finish or cancel it first." }, { status: 400 });
     }
 
+    const crownOwnerCheck = await db.execute({
+      sql: "SELECT id FROM crowns WHERE id = ? AND user_id = ? AND monster_id = ?",
+      args: [cId, host_id, mId]
+    });
+
+    if (crownOwnerCheck.rows.length === 0) {
+      return NextResponse.json({ error: "Invalid crown" }, { status: 400 });
+    }
+
     const existing = await db.execute({
       sql: "SELECT id FROM web_notifications WHERE user_id = ? AND host_id = ? AND monster_id = ? AND crown_id = ? AND status = 'pending'",
       args: [session.user.id, host_id, mId, cId]
@@ -52,12 +65,8 @@ export async function POST(request) {
       args: [session.user.id, host_id, host_id, mId, cId]
     });
 
-    // In the future, cron jobs will pick this up for discord, but we also want to trigger pusher immediately for the UI
     await pusherServer.trigger("public-channel", "notification_created", {});
     
-    // We can also fetch the actual notification data to broadcast it instantly if we wanted, 
-    // but the original architecture relied on the bot polling. Let's just trigger notification_created.
-
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error creating beacon:", error);

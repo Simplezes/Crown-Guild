@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import db from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
+import { checkRateLimit } from "@/lib/ratelimit";
 
 export async function POST(request) {
   try {
@@ -10,7 +11,14 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const rateLimitRes = await checkRateLimit("status", session.user.id);
+    if (rateLimitRes) return rateLimitRes;
+
     const { status_message } = await request.json();
+
+    if (status_message && status_message.length > 200) {
+      return NextResponse.json({ error: "Status message too long (max 200 characters)" }, { status: 400 });
+    }
 
     await db.execute({
       sql: "UPDATE users SET status_message = ? WHERE id = ?",

@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "../auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
 import { pusherServer } from "@/lib/pusher";
+import { checkRateLimit } from "@/lib/ratelimit";
 
 export async function POST(req) {
   const session = await getServerSession(authOptions);
@@ -10,6 +11,9 @@ export async function POST(req) {
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const rateLimitRes = await checkRateLimit("crown", session.user.id);
+  if (rateLimitRes) return rateLimitRes;
 
   try {
     const { monster_id, type, tempered, strength_rating, quest, remaining_uses } = await req.json();

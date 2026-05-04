@@ -31,6 +31,13 @@ export async function PUT(req) {
     const body = await req.json();
     const { lobby_id, quest_password, receive_dms } = body;
 
+    if (lobby_id && lobby_id.length > 20) {
+      return new Response(JSON.stringify({ error: "Lobby ID too long" }), { status: 400 });
+    }
+    if (quest_password && quest_password.length > 64) {
+      return new Response(JSON.stringify({ error: "Quest password too long" }), { status: 400 });
+    }
+
     await db.execute({
       sql: "UPDATE users SET lobby_id = ?, quest_password = ?, receive_dms = ? WHERE id = ?",
       args: [lobby_id || null, quest_password || null, receive_dms ? 1 : 0, session.user.id]

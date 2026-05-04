@@ -3,6 +3,7 @@ import db from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import { pusherServer } from "@/lib/pusher";
+import { checkRateLimit } from "@/lib/ratelimit";
 
 export async function POST(request) {
   try {
@@ -10,6 +11,9 @@ export async function POST(request) {
     if (!session || !session.user || !session.user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const rateLimitRes = await checkRateLimit("mission", session.user.id);
+    if (rateLimitRes) return rateLimitRes;
 
     const userId = session.user.id;
 

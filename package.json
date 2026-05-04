@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@libsql/client": "^0.17.3",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.37.0",
     "discord-interactions": "^4.4.0",
     "dotenv": "^17.4.2",
     "next": "16.2.4",
