@@ -8,7 +8,6 @@ export async function GET(request) {
     return new NextResponse('Missing url parameter', { status: 400 });
   }
 
-  // Provide the oEmbed "photo" payload
   return NextResponse.json({
     type: "photo",
     version: "1.0",

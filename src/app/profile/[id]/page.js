@@ -24,16 +24,12 @@ export async function generateMetadata({ params }) {
   }
 
   const imageUrl = `/profile/${encodeURIComponent(id)}/og?v=${data.stats.total || 0}`;
+  const userRank = getHunterRank(data.activity.hosted || 0, data.activity.joined || 0);
 
   return {
-    alternates: {
-      types: {
-        'application/json+oembed': `/api/oembed?url=${encodeURIComponent(imageUrl)}`,
-      },
-    },
     openGraph: {
-      title: '',
-      description: '',
+      title: `${data.user.username}'s Guild Card`,
+      description: `${userRank} • ${data.stats.total || 0} Total Crowns (S: ${data.stats.small || 0} | L: ${data.stats.large || 0} | T: ${data.stats.tempered || 0}) • Field Guide: ${data.completion}%`,
       images: [
         {
           url: imageUrl,

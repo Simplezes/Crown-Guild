@@ -88,14 +88,14 @@ export async function GET(request, { params }) {
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <img src={`${baseUrl}/icons/MHWilds-Hunt_Icon.png`} width={44} height={44} style={{ marginRight: '15px' }} />
+              <img src={`${baseUrl}/icons/MHWilds-Hunt_Icon.png`} width={44} height={44} style={{ marginRight: '15px', imageRendering: 'pixelated' }} />
               <span style={{ fontSize: 28, letterSpacing: '4px', color: colors.gold, display: 'flex' }}>
                 {crown ? 'CROWN RECORD' : 'MONSTER LEDGER'}
               </span>
             </div>
             {crown && (
               <div style={{ display: 'flex', alignItems: 'center', background: colors.umber, padding: '5px 15px', border: `1px solid ${colors.border}` }}>
-                <img src={`${baseUrl}/icons/${crown.type}crown.png`} width={24} height={24} style={{ marginRight: '10px' }} />
+                <img src={`${baseUrl}/icons/${crown.type}crown.png`} width={24} height={24} style={{ marginRight: '10px', imageRendering: 'pixelated' }} />
                 <span style={{ fontSize: 16, color: colors.gold, fontWeight: 'bold', display: 'flex' }}>
                   {crown.type.toUpperCase()} CROWN
                 </span>
@@ -125,7 +125,7 @@ export async function GET(request, { params }) {
                 src={`${baseUrl}/monsters/${monster.image_name}`}
                 width={300}
                 height={300}
-                style={{ objectFit: 'contain' }}
+                style={{ objectFit: 'contain', imageRendering: 'pixelated' }}
               />
               <span style={{ fontSize: 42, color: colors.goldBright, marginTop: '20px', textAlign: 'center', display: 'flex' }}>
                 {monster.name}
@@ -158,7 +158,7 @@ export async function GET(request, { params }) {
 
                   <div style={{ display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.03)', padding: '25px', border: `1px solid ${colors.border}` }}>
                     <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
-                      <img src={`${baseUrl}/icons/${getQuestIcon(crown.quest)}`} width={32} height={32} style={{ marginRight: '15px' }} />
+                      <img src={`${baseUrl}/icons/${getQuestIcon(crown.quest)}`} width={32} height={32} style={{ marginRight: '15px', imageRendering: 'pixelated' }} />
                       <span style={{ fontSize: 24, color: crown.tempered ? colors.red : colors.gold, fontWeight: 'bold', display: 'flex' }}>
                         {crown.quest || 'Hunt'}
                         {crown.tempered && ' (Tempered)'}
@@ -210,7 +210,7 @@ export async function GET(request, { params }) {
                     <div style={{ display: 'flex', flexDirection: 'column', minWidth: '120px' }}>
                       <span style={{ fontSize: 14, color: colors.tanDark, display: 'flex' }}>LARGE CROWNS</span>
                       <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
-                        <img src={`${baseUrl}/icons/largecrown.png`} width={20} height={20} style={{ marginRight: '8px' }} />
+                        <img src={`${baseUrl}/icons/largecrown.png`} width={20} height={20} style={{ marginRight: '8px', imageRendering: 'pixelated' }} />
                         <span style={{ fontSize: 24, fontWeight: 'bold', color: stats.large > 0 ? colors.gold : colors.tanDark, display: 'flex' }}>
                           {stats.large || 0} HOSTS
                         </span>
@@ -220,7 +220,7 @@ export async function GET(request, { params }) {
                     <div style={{ display: 'flex', flexDirection: 'column', minWidth: '120px' }}>
                       <span style={{ fontSize: 14, color: colors.tanDark, display: 'flex' }}>SMALL CROWNS</span>
                       <div style={{ display: 'flex', alignItems: 'center', marginTop: '5px' }}>
-                        <img src={`${baseUrl}/icons/smallcrown.png`} width={20} height={20} style={{ marginRight: '8px' }} />
+                        <img src={`${baseUrl}/icons/smallcrown.png`} width={20} height={20} style={{ marginRight: '8px', imageRendering: 'pixelated' }} />
                         <span style={{ fontSize: 24, fontWeight: 'bold', color: stats.small > 0 ? colors.gold : colors.tanDark, display: 'flex' }}>
                           {stats.small || 0} HOSTS
                         </span>

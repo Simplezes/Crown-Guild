@@ -124,7 +124,7 @@ export async function GET(request, { params }) {
         <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: `${iconGap}px` }}>
           {visible.map(m => (
             <div key={m.name} style={{ width: iconSize, height: iconSize, border: `1px solid ${colors.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.03)' }}>
-              <img src={`${baseUrl}/monsters/${m.image_name}`} width={iconSize - 6} height={iconSize - 6} style={{ objectFit: 'contain' }} />
+              <img src={`${baseUrl}/monsters/${m.image_name}`} width={iconSize - 6} height={iconSize - 6} style={{ objectFit: 'contain', imageRendering: 'pixelated' }} />
             </div>
           ))}
           {overflow > 0 && (
@@ -172,7 +172,7 @@ export async function GET(request, { params }) {
           <div style={{ display: 'flex', flexDirection: 'column', flex: 1, gap: '16px' }}>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
-              <img src={`${baseUrl}/icons/MHWilds-Expedition_Record_Board_Icon.png`} width={30} height={30} />
+              <img src={`${baseUrl}/icons/MHWilds-Expedition_Record_Board_Icon.png`} width={30} height={30} style={{ imageRendering: 'pixelated' }} />
               <span style={{ fontSize: 22, letterSpacing: '4px', color: colors.gold, display: 'flex' }}>CROWN IN STOCK</span>
               <span style={{ fontSize: 14, color: colors.tanDark, marginLeft: '8px', display: 'flex' }}>— {allMonsters.length} monsters</span>
             </div>

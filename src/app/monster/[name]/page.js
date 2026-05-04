@@ -67,23 +67,25 @@ export async function generateMetadata({ params, searchParams }) {
     }
   }
 
+  let title = `${data.name} | Crown Registry`;
+  let description = `${data.is_large ? 'Large Monster' : 'Small Monster'} • View S&L crown records and tactical field intelligence.`;
+
   if (featuredCrown) {
     // If sharing a specific record, ensure the og image targets that record
     imageUrl += `?crownId=${featuredCrown.id}`;
+    const crownSize = featuredCrown.type === 'small' ? 'Small' : 'Large';
+    const tempStr = featuredCrown.tempered ? 'Tempered ' : '';
+    title = `${tempStr}${crownSize} Crown ${data.name}`;
+    description = `Secured by ${featuredCrown.username} • View the full S&L ledger on Crown Guild.`;
   } else {
     // Basic cache buster for the general monster page
     imageUrl += `?v=${Date.now()}`;
   }
 
   return {
-    alternates: {
-      types: {
-        'application/json+oembed': `/api/oembed?url=${encodeURIComponent(imageUrl)}`,
-      },
-    },
     openGraph: {
-      title: '',
-      description: '',
+      title,
+      description,
       images: [
         {
           url: imageUrl,
