@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { getProfileData, getHunterRank } from "@/lib/profile";
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 export async function GET(request, { params }) {
   const { id } = await params;

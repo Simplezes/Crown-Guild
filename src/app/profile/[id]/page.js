@@ -45,6 +45,7 @@ export async function generateMetadata({ params }) {
       card: "summary_large_image",
       title: `${user.username} | Crown Guild`,
       description: `Hunter Rank: ${userRank} • ${data.stats.total || 0} Crowns Collected`,
+      images: [`/profile/${id}/og`],
     },
   };
 }
