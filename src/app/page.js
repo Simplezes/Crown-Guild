@@ -7,7 +7,7 @@ import MonsterIcon from "@/components/MonsterIcon";
 export const metadata = {
   openGraph: {
     title: "Crown Guild | Monster Hunter Wilds Registry",
-    description: "The premium crown tracking and matchmaking hub for Monster Hunter Wilds.",
+    description: "Track Monster Hunter Wilds collections, find hosts, and hunt together.",
     images: ["/hero.png"],
   },
 };

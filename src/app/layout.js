@@ -11,8 +11,8 @@ const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 export const metadata = {
   metadataBase: new URL(process.env.NEXTAUTH_URL || "http://localhost:3000"),
   title: "Crown Guild | Monster Hunter Wilds Registry",
-  description: "The premium crown tracking and matchmaking hub for Monster Hunter Wilds. Track collections, find hosts, and hunt together.",
-  keywords: ["Monster Hunter", "MHWilds", "Crown Tracking", "Matchmaking", "LFG", "Crown Guild"],
+  description: "Track Monster Hunter Wilds collections, find hosts, and hunt together.",
+  keywords: ["Monster Hunter", "MHWilds", "Crown", "Guild", "LFG", "Crown Guild"],
 };
 
 export default function RootLayout({ children }) {
