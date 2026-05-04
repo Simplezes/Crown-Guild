@@ -34,7 +34,7 @@ export async function generateMetadata({ params }) {
       description: `Hunter Rank: ${userRank} • ${data.stats.total || 0} Crowns Collected`,
       images: [
         {
-          url: `/profile/${id}/opengraph-image`,
+          url: `/profile/${id}/og`,
           width: 1200,
           height: 630,
           alt: `${user.username}'s Hunter Card`,
