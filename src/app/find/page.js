@@ -1,0 +1,62 @@
+import db from "@/lib/db";
+import styles from "./find.module.css";
+import Image from "next/image";
+import { getAllMonsters, getQuestIcon } from "@/lib/monsters";
+import FindSearch from "./FindSearch";
+
+async function getHostsData() {
+  try {
+    const monsters = await getAllMonsters();
+    const crownsRes = await db.execute(`
+      SELECT c.*, u.username, u.avatar_url, u.lobby_id
+      FROM crowns c
+      JOIN users u ON c.user_id = u.id
+      WHERE c.remaining_uses > 0 OR c.remaining_uses IS NULL
+      ORDER BY c.monster_id, c.type DESC
+    `);
+    
+    const plainRows = JSON.parse(JSON.stringify(crownsRes.rows));
+    
+    const hosts = plainRows.map(crown => {
+      const monster = monsters.find(m => m.id === crown.monster_id);
+      return {
+        ...crown,
+        monster_name: monster?.name || "Unknown Monster",
+        monster_image: monster?.image_name || null,
+        monster_emoji: monster?.emoji || "🐉"
+      };
+    });
+
+    return { hosts };
+  } catch (e) {
+    console.error("Find fetch error", e);
+    return { hosts: [] };
+  }
+}
+
+export default async function FindPage() {
+  const { hosts } = await getHostsData();
+
+  return (
+    <main className={styles.main}>
+      <div className="premium-container">
+        <header className={styles.pageHeader + " animate-mh"}>
+          <div className={styles.titleGroup}>
+            <div className={styles.indicator}>
+              <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={18} height={18} alt="" className="pixel-art" />
+              <span>Quest Registry</span>
+            </div>
+            <h1 className="gold-text">Find a Host</h1>
+          </div>
+          <p className={styles.subtitle}>
+            Browse available investigations and connect with hunters hosting specific crown specimens.
+          </p>
+        </header>
+
+        <div className={styles.content + " animate-mh"}>
+          <FindSearch initialHosts={hosts} />
+        </div>
+      </div>
+    </main>
+  );
+}

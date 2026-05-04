@@ -1,0 +1,131 @@
+.container {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  width: 90%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.beaconBar {
+  pointer-events: auto;
+  background: rgba(26, 22, 20, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--mh-gold);
+  border-left: 4px solid #E67E22;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(230, 126, 34, 0.1);
+  padding: 12px 24px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.icon {
+  width: 40px;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--mh-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.text {
+  flex: 1;
+  color: var(--mh-tan);
+  font-size: 0.95rem;
+  font-family: 'Marcellus', serif;
+}
+
+.highlight {
+  color: var(--mh-gold);
+  font-weight: 700;
+  margin-right: 6px;
+}
+
+.target {
+  color: #E67E22;
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+.viewBtn {
+  background: var(--mh-gold);
+  color: #000;
+  padding: 6px 16px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  transition: var(--transition-mh);
+}
+
+.viewBtn:hover {
+  background: #fff;
+  transform: translateY(-1px);
+}
+
+.closeBtn {
+  background: transparent;
+  border: 1px solid var(--mh-border);
+  color: var(--mh-tan-dark);
+  padding: 6px 16px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: var(--transition-mh);
+}
+
+.closeBtn:hover {
+  color: var(--mh-tan);
+  border-color: var(--mh-tan);
+}
+
+.timer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: #E67E22;
+  width: 100%;
+  animation: shrink 10s linear forwards;
+}
+
+@keyframes shrink {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+@media (max-width: 600px) {
+  .content {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+  
+  .actions {
+    width: 100%;
+    justify-content: center;
+  }
+}

@@ -1,0 +1,448 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  padding: 10px;
+}
+
+.overlayOpen {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal {
+  width: 100%;
+  max-width: 800px;
+  background: rgba(13, 11, 10, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(181, 154, 93, 0.3);
+  display: flex;
+  height: auto;
+  max-height: 90vh;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+  position: relative;
+  overflow: hidden;
+  transform: translateY(10px);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.overlayOpen .modal {
+  transform: translateY(0);
+}
+
+.monsterSidebar {
+  width: 220px;
+  background: rgba(0, 0, 0, 0.5);
+  border-right: 1px solid #2a2522;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.monsterImage {
+  margin-bottom: 16px;
+  filter: drop-shadow(0 0 15px rgba(181, 154, 93, 0.2));
+}
+
+.monsterSidebar h1 {
+  font-size: 1.4rem;
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.recordId {
+  font-family: 'Marcellus', serif;
+  font-size: 0.6rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+.editorMain {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.editorHeader {
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.editorHeader h2 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--mh-tan-dark);
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: transform 0.2s ease;
+}
+
+.closeBtn:hover {
+  transform: scale(1.1);
+}
+
+.editorContent {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--mh-gold) transparent;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+.editRow {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.editRow label {
+  font-family: 'Marcellus', serif;
+  font-size: 0.65rem;
+  color: var(--mh-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.typeToggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.toggleOption {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toggleOption:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(181, 154, 93, 0.3);
+}
+
+.toggleOptionActive {
+  background: rgba(181, 154, 93, 0.1);
+  border-color: var(--mh-gold);
+}
+
+.toggleOption span {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888;
+}
+
+.toggleOptionActive span {
+  color: var(--mh-gold-bright);
+  font-weight: bold;
+}
+
+.starGrid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 4px;
+}
+
+.starItem {
+  height: 32px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.7rem;
+  color: #777;
+}
+
+.starItemActive {
+  background: var(--mh-gold);
+  color: #000;
+  border-color: var(--mh-gold);
+  font-weight: bold;
+}
+
+.questSelect {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.questBtn {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 10px 14px;
+  font-size: 0.7rem;
+  color: #888;
+  cursor: pointer;
+  text-align: center;
+}
+
+.questBtnActive {
+  border-color: rgba(181, 154, 93, 0.5);
+  color: var(--mh-gold);
+  background: rgba(181, 154, 93, 0.05);
+}
+
+.editorFooter {
+  padding: 16px 24px;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.discardBtn {
+  background: none;
+  border: none;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.65rem;
+  cursor: pointer;
+}
+
+.commitBtn {
+  background: var(--mh-gold);
+  border: none;
+  color: #000;
+  padding: 10px 24px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 600px) {
+  .modal {
+    flex-direction: column;
+    max-height: 95vh;
+    width: 100%;
+  }
+
+  .monsterSidebar {
+    width: 100%;
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 12px 20px;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid rgba(181, 154, 93, 0.2);
+  }
+
+  .monsterImage {
+    margin-bottom: 0;
+    margin-right: 12px;
+    width: 32px !important;
+    height: 32px !important;
+    display: flex;
+    align-items: center;
+  }
+
+  .monsterImage img {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .monsterSidebar h1 {
+    font-size: 1.1rem;
+    text-align: left;
+  }
+
+  .recordId {
+    display: none;
+  }
+
+  .editorContent {
+    padding: 16px;
+  }
+
+  .formGrid {
+    gap: 16px;
+  }
+
+  .starGrid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .questSelect {
+    grid-template-columns: 1fr;
+  }
+
+  .toggleOption {
+    padding: 8px;
+  }
+
+  .editorFooter {
+    padding: 12px 16px;
+  }
+
+  .commitBtn {
+    flex: 1;
+  }
+}
+
+.permitChips {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.permitChip {
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #333;
+  text-align: center;
+  cursor: pointer;
+  font-size: 0.7rem;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.permitChipActive {
+  background: var(--mh-gold);
+  color: #000;
+  border-color: var(--mh-gold);
+}
+
+.toggleLabel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.switch {
+  position: relative;
+  width: 44px;
+  height: 22px;
+  background: #000;
+  border: 1px solid #333;
+  transition: all 0.3s ease;
+}
+
+.switchHandle {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 16px;
+  background: #333;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.toggleInput {
+  display: none;
+}
+
+.toggleInput:checked+.switch {
+  border-color: var(--mh-purple);
+  background: rgba(163, 53, 238, 0.1);
+}
+
+.toggleInput:checked+.switch .switchHandle {
+  transform: translateX(22px);
+  background: var(--mh-purple);
+}
+
+.temperedLabel {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #666;
+}
+
+.temperedActive {
+  color: var(--mh-purple);
+  font-weight: bold;
+}
+
+.successOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(13, 11, 10, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+}
+
+.successIcon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  color: var(--mh-gold);
+}
+
+.warningBanner {
+  background: rgba(196, 152, 42, 0.1);
+  border-top: 1px solid rgba(196, 152, 42, 0.2);
+  padding: 12px 24px;
+  color: var(--mh-gold);
+  font-size: 0.7rem;
+  text-align: center;
+  font-family: 'Marcellus', serif;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+@keyframes slideDownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animateIn {
+  animation: slideDownFade 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

@@ -1,0 +1,484 @@
+.monsterLink {
+  text-decoration: none;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.monsterLink:hover {
+  transform: scale(1.1);
+}
+
+.nameLink {
+  text-decoration: none;
+  color: inherit;
+}
+
+.nameLink:hover h3 {
+  color: var(--mh-gold);
+}
+
+.main {
+  min-height: 100vh;
+  padding-top: 140px;
+  padding-bottom: 40px;
+  display: flex;
+  flex-direction: column;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 60px;
+  height: calc(100vh - 180px);
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+}
+
+.hunterCard {
+  background: var(--mh-glass);
+  border: 1px solid var(--mh-border);
+  padding: 32px;
+  position: relative;
+  overflow-y: auto;
+}
+
+.hunterCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--mh-red);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.avatarWrapper {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin-bottom: 24px;
+}
+
+.profileAvatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 1px solid var(--mh-border);
+}
+
+.hunterRank {
+  font-family: 'Marcellus', serif;
+  font-size: 0.8rem;
+  color: var(--mh-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 2px;
+  font-weight: bold;
+}
+
+.identity h1 {
+  font-size: 1.8rem;
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+
+.guildId {
+  font-size: 0.7rem;
+  color: var(--mh-tan-dark);
+  letter-spacing: 0.05em;
+  margin-bottom: 24px;
+}
+
+.section {
+  margin-bottom: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--mh-border);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.sectionHeader span {
+  font-size: 0.75rem;
+  color: var(--mh-tan-dark);
+}
+
+.statLine {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.8rem;
+}
+
+.statLine label {
+  color: var(--mh-tan-dark);
+}
+
+.statLine span {
+  font-weight: 600;
+  color: var(--mh-tan);
+}
+
+.totalLine {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--mh-border);
+}
+
+.totalLine label {
+  font-family: 'Marcellus', serif;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.iconLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lobbyBlock {
+  padding: 12px;
+  background: rgba(139, 46, 46, 0.05);
+  border: 1px solid var(--mh-border);
+  margin-bottom: 24px;
+}
+
+.lobbyHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.lobbyHeader label {
+  font-family: 'Marcellus', serif;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+}
+
+.lobbyBlock code {
+  font-size: 1rem;
+  color: var(--mh-gold);
+}
+
+.backLink {
+  margin-top: auto;
+  font-family: 'Marcellus', serif;
+  font-size: 0.75rem;
+  color: var(--mh-tan-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  padding-top: 20px;
+}
+
+.backLink:hover {
+  color: var(--mh-gold);
+}
+
+.gallery {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.topDashboard {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.dashboardCard {
+  background: var(--mh-glass);
+  border: 1px solid var(--mh-border);
+  padding: 24px;
+  position: relative;
+  transition: var(--transition-mh);
+}
+
+.dashboardCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--mh-red);
+}
+
+.dashboardCard:hover {
+  border-color: var(--mh-gold);
+  background: rgba(45, 38, 34, 0.9);
+}
+
+.dbHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 16px;
+}
+
+.dbHeader>span {
+  font-family: 'Marcellus', serif;
+  font-weight: bold;
+}
+
+.dbTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dbTitle h3 {
+  font-size: 0.85rem;
+  margin: 0;
+  color: var(--mh-tan);
+}
+
+.progressBar {
+  height: 12px;
+  background: var(--mh-umber);
+  border: 1px solid var(--mh-border);
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--mh-gold);
+  box-shadow: 0 0 10px rgba(181, 154, 93, 0.5);
+  position: relative;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.progressFill::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(-45deg,
+      transparent,
+      transparent 4px,
+      rgba(255, 255, 255, 0.15) 4px,
+      rgba(255, 255, 255, 0.15) 8px);
+}
+
+.assistBox {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.assistDetails {
+  display: flex;
+  flex-direction: column;
+}
+
+.assistMonster {
+  font-family: 'Marcellus', serif;
+  font-size: 1rem;
+  color: var(--mh-tan);
+}
+
+.assistNote {
+  font-size: 0.7rem;
+  color: var(--mh-gold);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.galleryHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--mh-border);
+  padding-bottom: 12px;
+}
+
+.recordCount {
+  font-size: 0.75rem;
+  color: var(--mh-tan-dark);
+  text-transform: uppercase;
+}
+
+.scrollArea {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 12px;
+}
+
+.crownGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.crownCard {
+  background: var(--mh-glass);
+  border: 1px solid var(--mh-border);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: var(--transition-mh);
+  position: relative;
+  overflow: hidden;
+}
+
+.crownCard:hover {
+  border-color: var(--mh-gold);
+  background: rgba(45, 38, 34, 0.9);
+}
+
+.monsterIconWrapper {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.crownInfoHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.crownInfo h3 {
+  font-size: 0.9rem;
+  margin-bottom: 2px;
+  color: var(--mh-tan);
+}
+
+.cardActions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: all 0.2s ease;
+}
+
+.crownCard:hover .cardActions {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.actionBtn {
+  background: none;
+  border: none;
+  color: var(--mh-tan-dark);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-mh);
+  opacity: 0.6;
+}
+
+.actionBtn:hover {
+  color: var(--mh-gold);
+  background: rgba(255, 255, 255, 0.05);
+  opacity: 1;
+}
+
+.deleteBtn:hover {
+  color: var(--mh-red);
+}
+
+.crownDetail {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.65rem;
+  color: var(--mh-gold);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.noRecords {
+  grid-column: 1 / -1;
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--mh-tan-dark);
+}
+
+@media (max-width: 1100px) {
+  .layout {
+    grid-template-columns: 1fr;
+    height: auto;
+    overflow: visible;
+  }
+
+  .main {
+    height: auto;
+    overflow: visible;
+    padding-top: 120px;
+  }
+
+  .topDashboard {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .layout {
+    gap: 30px;
+  }
+
+  .hunterCard {
+    padding: 24px;
+  }
+
+  .avatarWrapper {
+    width: 80px;
+    height: 80px;
+  }
+
+  .identity h1 {
+    font-size: 1.5rem;
+  }
+
+  .galleryHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .crownGrid {
+    grid-template-columns: 1fr;
+  }
+}

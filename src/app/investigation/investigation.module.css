@@ -1,0 +1,150 @@
+.main {
+  min-height: 100vh;
+  padding-top: 140px;
+  padding-bottom: 60px;
+}
+
+.pageHeader {
+  margin-bottom: 40px;
+  border-bottom: 1px solid var(--mh-border);
+  padding-bottom: 24px;
+}
+
+.indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--mh-tan-dark);
+  font-family: 'Marcellus', serif;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 0.75rem;
+  margin-bottom: 8px;
+}
+
+.titleGroup h1 {
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+
+.description {
+  color: var(--mh-tan);
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.monsterGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.monsterCard {
+  background: var(--mh-glass);
+  border: 1px solid var(--mh-border);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: var(--transition-mh);
+  position: relative;
+}
+
+.monsterCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--mh-red);
+  opacity: 0;
+  transition: var(--transition-mh);
+}
+
+.monsterCard:hover {
+  border-color: var(--mh-gold);
+  transform: translateY(-2px);
+}
+
+.monsterCard:hover::before {
+  opacity: 1;
+}
+
+.iconWrapper {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fallback {
+  font-size: 2.5rem;
+}
+
+.monsterName {
+  font-family: 'Marcellus', serif;
+  font-size: 1rem;
+  text-align: center;
+  color: var(--mh-tan);
+  transition: var(--transition-mh);
+}
+
+.monsterCard:hover .monsterName {
+  color: var(--mh-gold);
+}
+
+.completedBadge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--mh-glass);
+  border: 1px solid var(--mh-gold);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 8px rgba(181, 154, 93, 0.4);
+  z-index: 5;
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding-top: 100px;
+  }
+
+  .titleGroup h1 {
+    font-size: 2.2rem;
+  }
+
+  .monsterGrid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+  }
+
+  .monsterCard {
+    padding: 12px;
+  }
+
+  .iconWrapper {
+    width: 60px;
+    height: 60px;
+  }
+
+  .monsterName {
+    font-size: 0.85rem;
+  }
+}

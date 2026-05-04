@@ -1,0 +1,295 @@
+.main {
+  min-height: 100vh;
+  padding-top: 120px;
+  padding-bottom: 80px;
+}
+
+.pageHeader {
+  margin-bottom: 48px;
+  border-bottom: 1px solid var(--mh-border);
+  padding-bottom: 32px;
+}
+
+.titleGroup {
+  margin-bottom: 12px;
+}
+
+.indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Marcellus', serif;
+  font-size: 0.8rem;
+  color: var(--mh-tan-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: var(--mh-tan-dark);
+  font-size: 1.1rem;
+  max-width: 600px;
+}
+
+.searchContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.searchBarWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+.searchInner {
+  flex: 1;
+  max-width: 700px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--mh-glass);
+  border: 1px solid var(--mh-border);
+  padding: 16px 24px;
+  transition: var(--transition-mh);
+}
+
+.searchInner:focus-within {
+  border-color: var(--mh-gold);
+  box-shadow: 0 0 20px rgba(181, 154, 93, 0.15);
+}
+
+.searchIcon {
+  width: 20px;
+  height: 20px;
+  color: var(--mh-tan-dark);
+}
+
+.searchInput {
+  background: none;
+  border: none;
+  width: 100%;
+  color: var(--mh-tan);
+  font-family: 'Marcellus', serif;
+  font-size: 1.2rem;
+  outline: none;
+}
+
+.searchInput::placeholder {
+  color: var(--mh-tan-dark);
+  opacity: 0.4;
+}
+
+.clearBtn {
+  background: none;
+  border: none;
+  color: var(--mh-tan-dark);
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.searchStats {
+  font-family: 'Marcellus', serif;
+  font-size: 0.8rem;
+  color: var(--mh-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.resultsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.monsterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.groupHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(181, 154, 93, 0.2);
+}
+
+.groupHeader h2 {
+  font-size: 1.8rem;
+  color: var(--mh-tan);
+  margin: 0;
+}
+
+.hostsList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+  gap: 20px;
+}
+
+.hostCard {
+  background: var(--mh-glass);
+  border: 1px solid var(--mh-border);
+  display: flex;
+  justify-content: space-between;
+  padding: 24px;
+  position: relative;
+  transition: var(--transition-mh);
+}
+
+.hostCard:hover {
+  border-color: var(--mh-gold);
+}
+
+.hostMain {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.hunterInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--mh-gold);
+  background: #000;
+}
+
+.hunterText {
+  display: flex;
+  flex-direction: column;
+}
+
+.hunterName {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--mh-tan);
+  text-decoration: none;
+}
+
+.hunterName:hover {
+  color: var(--mh-gold);
+}
+
+.status {
+  font-size: 0.75rem;
+}
+
+.online {
+  color: #4CAF50;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  background: currentColor;
+  border-radius: 50%;
+  box-shadow: 0 0 5px currentColor;
+}
+
+.offline {
+  color: var(--mh-tan-dark);
+}
+
+.questDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.crownType {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.temperedText {
+  color: var(--mh-red);
+}
+
+.normalText {
+  color: var(--mh-gold);
+}
+
+.questMeta {
+  font-size: 0.85rem;
+  color: var(--mh-tan-dark);
+}
+
+.hostActions {
+  display: flex;
+  align-items: flex-start;
+}
+
+.actionBtn {
+  background: var(--mh-umber);
+  border: 1px solid var(--mh-border);
+  color: var(--mh-tan);
+  padding: 8px 16px;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: var(--transition-mh);
+  white-space: nowrap;
+}
+
+.actionBtn:hover {
+  background: var(--mh-gold);
+  color: #000;
+  border-color: var(--mh-gold);
+}
+
+.noResults {
+  padding: 100px 0;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.noResults h3 {
+  font-size: 1.5rem;
+  color: var(--mh-tan);
+}
+
+.noResults p {
+  color: var(--mh-tan-dark);
+}
+
+@media (max-width: 768px) {
+  .searchBarWrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hostsList {
+    grid-template-columns: 1fr;
+  }
+
+  .hostCard {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .actionBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}

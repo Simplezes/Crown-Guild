@@ -1,0 +1,237 @@
+.main {
+  min-height: 100vh;
+  padding-top: 120px;
+  padding-bottom: 80px;
+}
+
+.header {
+  margin-bottom: 40px;
+  border-bottom: 1px solid var(--mh-border);
+  padding-bottom: 24px;
+}
+
+.titleGroup h1 {
+  font-size: 3.2rem;
+  line-height: 0.95;
+  font-weight: 400;
+}
+
+.indicator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Marcellus', serif;
+  font-size: 0.75rem;
+  color: var(--mh-tan-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  margin-bottom: 12px;
+  opacity: 0.7;
+}
+
+.formContainer {
+  max-width: 600px;
+}
+
+.formCard {
+  background: var(--mh-glass);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--mh-border);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-shadow: var(--premium-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.formCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, var(--mh-gold), transparent);
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+  border-bottom: 1px dashed var(--mh-border);
+  padding-bottom: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.field label {
+  font-family: 'Marcellus', serif;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--mh-gold);
+  opacity: 0.9;
+}
+
+.input {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--mh-border);
+  padding: 12px 16px;
+  color: #fff;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.95rem;
+  transition: var(--transition-mh);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--mh-gold);
+  background: rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 20px rgba(181, 154, 93, 0.12), inset 0 0 8px rgba(0,0,0,0.5);
+}
+
+.hint {
+  font-size: 0.75rem;
+  color: var(--mh-tan-dark);
+  opacity: 0.8;
+  line-height: 1.4;
+}
+
+.toggleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 16px 20px;
+  border: 1px solid var(--mh-border);
+  cursor: pointer;
+  transition: var(--transition-mh);
+}
+
+.toggleRow:hover {
+  border-color: var(--mh-gold);
+  background: rgba(181, 154, 93, 0.05);
+}
+
+.toggleInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.toggleInfo label {
+  cursor: pointer;
+  font-family: 'Marcellus', serif;
+  font-size: 0.95rem;
+  color: var(--mh-tan);
+  letter-spacing: 0.04em;
+}
+
+.switchWrapper {
+  position: relative;
+}
+
+.switch {
+  position: relative;
+  width: 56px;
+  height: 28px;
+  background: #000;
+  border: 1px solid var(--mh-border);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.9);
+  transition: var(--transition-mh);
+}
+
+.switchHandle {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  background: #333;
+  border: 1px solid #444;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.toggleInput {
+  display: none;
+}
+
+.toggleInput:checked + .switch {
+  border-color: var(--mh-purple);
+  background: rgba(163, 53, 238, 0.15);
+}
+
+.toggleInput:checked + .switch .switchHandle {
+  transform: translateX(28px);
+  background: var(--mh-purple);
+  border-color: #d195ff;
+  box-shadow: 0 0 12px rgba(163, 53, 238, 0.5);
+}
+
+.actions {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.errorText {
+  color: var(--mh-red-bright);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.dangerZone {
+  margin-top: 60px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255, 68, 68, 0.2);
+}
+
+.deleteBtn {
+  margin-top: 20px;
+  background: rgba(255, 68, 68, 0.05);
+  border: 1px solid rgba(255, 68, 68, 0.3);
+  color: #ff6b6b;
+  padding: 12px 24px;
+  font-family: 'Marcellus', serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: var(--transition-mh);
+  width: 100%;
+}
+
+.deleteBtn:hover {
+  background: rgba(255, 68, 68, 0.15);
+  border-color: #ff4444;
+  color: #fff;
+  box-shadow: 0 0 15px rgba(255, 68, 68, 0.2);
+}
+
+.deleteBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .titleGroup h1 {
+    font-size: 2.5rem;
+  }
+  
+  .formCard {
+    padding: 24px 20px;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
