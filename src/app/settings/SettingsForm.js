@@ -4,8 +4,11 @@ import { useState } from "react";
 import styles from "./settings.module.css";
 import Image from "next/image";
 import { signOut } from "next-auth/react";
+import { useToast, useConfirm } from "@/app/UIProvider";
 
 export default function SettingsForm({ initialData }) {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [formData, setFormData] = useState(initialData);
   const [status, setStatus] = useState("idle");
 
@@ -45,9 +48,11 @@ export default function SettingsForm({ initialData }) {
   };
  
   const handleDeleteAccount = async () => {
-    if (!confirm("⚠️ WARNING: This will permanently delete your account, all your crowns, and your mission history. This action cannot be undone. Are you sure?")) {
-      return;
-    }
+    const ok = await confirm(
+      "This will permanently delete your account, all your crowns, and your mission history. This action cannot be undone.",
+      { title: "Delete Account", danger: true, confirmLabel: "Delete My Account" }
+    );
+    if (!ok) return;
 
     setStatus("loading");
     try {
@@ -55,12 +60,12 @@ export default function SettingsForm({ initialData }) {
       if (res.ok) {
         signOut({ callbackUrl: "/" });
       } else {
-        alert("Failed to delete account. Please try again.");
+        toast.error("Failed to delete account. Please try again.");
         setStatus("idle");
       }
     } catch (err) {
       console.error(err);
-      alert("An error occurred while deleting your account.");
+      toast.error("An error occurred while deleting your account.");
       setStatus("idle");
     }
   };

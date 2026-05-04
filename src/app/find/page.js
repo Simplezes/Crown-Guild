@@ -8,10 +8,15 @@ async function getHostsData() {
   try {
     const monsters = await getAllMonsters();
     const crownsRes = await db.execute(`
-      SELECT c.*, u.username, u.avatar_url, u.lobby_id
+      SELECT c.*, u.username, u.avatar_url, u.lobby_id,
+             inv.remaining_uses  AS inv_remaining_uses,
+             inv.monster_id      AS inv_monster_id,
+             inv_m.name          AS inv_monster_name
       FROM crowns c
       JOIN users u ON c.user_id = u.id
-      WHERE c.remaining_uses > 0 OR c.remaining_uses IS NULL
+      LEFT JOIN investigations inv   ON c.investigation_id = inv.id
+      LEFT JOIN monsters       inv_m ON inv.monster_id     = inv_m.id
+      WHERE inv.remaining_uses IS NULL OR inv.remaining_uses > 0
       ORDER BY c.monster_id, c.type DESC
     `);
     

@@ -15,9 +15,14 @@ async function getMonsterData(name) {
 
     const crownsRes = await db.execute({
       sql: `
-        SELECT c.*, u.username, u.avatar_url, u.id as user_id, u.status_message
+        SELECT c.*, u.username, u.avatar_url, u.id as user_id, u.status_message,
+               inv.remaining_uses  AS inv_remaining_uses,
+               inv.monster_id      AS inv_monster_id,
+               inv_m.name          AS inv_monster_name
         FROM crowns c
         JOIN users u ON c.user_id = u.id
+        LEFT JOIN investigations inv   ON c.investigation_id = inv.id
+        LEFT JOIN monsters       inv_m ON inv.monster_id     = inv_m.id
         WHERE c.monster_id = ?
         ORDER BY c.type DESC, c.tempered DESC
       `,

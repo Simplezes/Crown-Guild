@@ -5,10 +5,12 @@ import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import styles from './Missions.module.css';
 import { useNotifications } from '@/app/NotificationProvider';
+import { useToast } from '@/app/UIProvider';
 
 export default function MissionsPage() {
   const { data: session } = useSession();
   const { pusherChannel } = useNotifications();
+  const toast = useToast();
   const [currentMission, setCurrentMission] = useState(null);
   const currentMissionRef = useRef(null);
   const [completedMission, setCompletedMission] = useState(null);
@@ -42,7 +44,7 @@ export default function MissionsPage() {
         setCurrentMission(null);
         fetchHistory(1);
       } else {
-        alert(data.error || 'Failed to complete mission');
+        toast.error(data.error || 'Failed to complete mission');
       }
     } catch (err) {
       console.error('Failed to complete mission:', err);

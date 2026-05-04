@@ -184,6 +184,32 @@
   gap: 10px;
 }
 
+.crownTypeToggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.crownTypeChip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  background: #0c0a09;
+  border: 1px solid #2a2522;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.crownTypeChipActive {
+  background: rgba(181, 154, 93, 0.15);
+  color: var(--mh-gold);
+  border-color: var(--mh-gold);
+}
+
 .permitChip {
   padding: 10px;
   background: #0c0a09;
@@ -253,6 +279,8 @@
   letter-spacing: 0.1em;
   color: #666;
   transition: all 0.3s ease;
+  width: 80px;
+  display: inline-block;
 }
 
 .temperedActive {
@@ -283,6 +311,28 @@
 .successMessage {
   text-align: center;
   padding: 100px 0;
+}
+
+.temperedRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.temperedRowType {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Marcellus', serif;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--mh-tan-dark);
+}
+
+.temperedRow .toggleLabel {
+  flex-shrink: 0;
 }
 
 .successMessage h2 {
@@ -468,4 +518,96 @@
 
 .animateIn {
   animation: slideDownFade 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── Investigation Section ─────────────────────────────────────────────── */
+
+.investigationSection {
+  background: rgba(181, 154, 93, 0.04);
+  border: 1px solid rgba(181, 154, 93, 0.18);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fieldHint {
+  font-family: 'Marcellus', serif;
+  font-size: 0.72rem;
+  color: var(--mh-tan-dark);
+  margin: -4px 0 4px;
+  line-height: 1.5;
+}
+
+.invModeToggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.invModeBtn {
+  padding: 8px;
+  background: #0c0a09;
+  border: 1px solid #2a2522;
+  text-align: center;
+  cursor: pointer;
+  font-family: 'Marcellus', serif;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.invModeBtnActive {
+  background: rgba(181, 154, 93, 0.12);
+  border-color: var(--mh-gold);
+  color: var(--mh-gold);
+}
+
+.invList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.invItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #0c0a09;
+  border: 1px solid #2a2522;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.invItem:hover {
+  border-color: rgba(181, 154, 93, 0.4);
+  background: rgba(181, 154, 93, 0.04);
+}
+
+.invItemActive {
+  border-color: var(--mh-gold) !important;
+  background: rgba(181, 154, 93, 0.1) !important;
+}
+
+.invItemInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.invItemName {
+  font-family: 'Marcellus', serif;
+  font-size: 0.82rem;
+  color: #ccc;
+}
+
+.invItemMeta {
+  font-family: 'Marcellus', serif;
+  font-size: 0.68rem;
+  color: var(--mh-tan-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }

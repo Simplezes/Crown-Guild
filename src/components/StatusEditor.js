@@ -3,8 +3,10 @@
 import { useState } from 'react';
 import styles from './StatusEditor.module.css';
 import Image from 'next/image';
+import { useToast } from '@/app/UIProvider';
 
 export default function StatusEditor({ initialStatus, isOwner }) {
+  const toast = useToast();
   const [status, setStatus] = useState(initialStatus || '');
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -21,11 +23,11 @@ export default function StatusEditor({ initialStatus, isOwner }) {
       if (res.ok) {
         setIsEditing(false);
       } else {
-        alert('Failed to save status');
+        toast.error('Failed to save status');
       }
     } catch (err) {
       console.error(err);
-      alert('Error saving status');
+      toast.error('Error saving status');
     } finally {
       setLoading(false);
     }

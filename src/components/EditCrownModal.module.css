@@ -201,6 +201,36 @@
   font-weight: bold;
 }
 
+.groupTemperedList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.groupTemperedRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.groupTemperedType {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--mh-tan-dark);
+}
+
+.groupTemperedRow .toggleLabel {
+  gap: 10px;
+  flex-shrink: 0;
+}
+
 .questSelect {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -391,6 +421,8 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: #666;
+  width: 72px;
+  display: inline-block;
 }
 
 .temperedActive {
@@ -445,4 +477,96 @@
 
 .animateIn {
   animation: slideDownFade 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── Investigation block inside Edit modal ───────────────────────────── */
+
+.investigationBlock {
+  background: rgba(181, 154, 93, 0.04);
+  border: 1px solid rgba(181, 154, 93, 0.18);
+  padding: 12px;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.invHint {
+  font-family: 'Marcellus', serif;
+  font-size: 0.7rem;
+  color: var(--mh-tan-dark);
+  margin: 2px 0 8px;
+  line-height: 1.5;
+}
+
+.invModeToggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.invModeBtn {
+  padding: 7px;
+  background: #0c0a09;
+  border: 1px solid #2a2522;
+  text-align: center;
+  cursor: pointer;
+  font-family: 'Marcellus', serif;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.invModeBtnActive {
+  background: rgba(181, 154, 93, 0.12);
+  border-color: var(--mh-gold);
+  color: var(--mh-gold);
+}
+
+.invList {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.invItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: #0c0a09;
+  border: 1px solid #2a2522;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.invItem:hover {
+  border-color: rgba(181, 154, 93, 0.4);
+}
+
+.invItemActive {
+  border-color: var(--mh-gold) !important;
+  background: rgba(181, 154, 93, 0.1) !important;
+}
+
+.invItemInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.invItemName {
+  font-family: 'Marcellus', serif;
+  font-size: 0.78rem;
+  color: #ccc;
+}
+
+.invItemMeta {
+  font-family: 'Marcellus', serif;
+  font-size: 0.65rem;
+  color: var(--mh-tan-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }

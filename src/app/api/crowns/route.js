@@ -16,7 +16,18 @@ export async function POST(req) {
   if (rateLimitRes) return rateLimitRes;
 
   try {
-    const { monster_id, type, tempered, strength_rating, quest, remaining_uses } = await req.json();
+    const {
+      monster_id,
+      type,
+      tempered,
+      strength_rating,
+      quest,
+      pair_id,
+      // Investigation fields (only relevant when quest === "Investigation Quests")
+      investigation_id,        // link to an existing investigation
+      investigation_monster_id, // create a new investigation for this monster
+      remaining_uses,          // uses for the new investigation (default 3)
+    } = await req.json();
 
     if (!monster_id || !type || !quest || !strength_rating) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -27,10 +38,43 @@ export async function POST(req) {
       args: [session.user.id, session.user.name, session.user.image],
     });
 
+    let resolvedInvestigationId = null;
+
+    if (quest === "Investigation Quests") {
+      if (investigation_id) {
+        // Link to an existing investigation — verify ownership
+        const check = await db.execute({
+          sql: "SELECT id FROM investigations WHERE id = ? AND user_id = ?",
+          args: [investigation_id, session.user.id],
+        });
+        if (check.rows.length === 0) {
+          return NextResponse.json({ error: "Investigation not found" }, { status: 404 });
+        }
+        resolvedInvestigationId = investigation_id;
+      } else {
+        // Create a new investigation
+        const invMonsterId = investigation_monster_id || monster_id;
+        const uses = remaining_uses || 3;
+
+        const invRes = await db.execute({
+          sql: "INSERT INTO investigations (user_id, monster_id, remaining_uses) VALUES (?, ?, ?)",
+          args: [session.user.id, invMonsterId, uses],
+        });
+        resolvedInvestigationId = Number(invRes.lastInsertRowid);
+      }
+    } else if (quest === "Field Survey Quests" && investigation_monster_id && investigation_monster_id !== monster_id) {
+      // Field Survey: track host monster only when it differs (no uses)
+      const invRes = await db.execute({
+        sql: "INSERT INTO investigations (user_id, monster_id, remaining_uses) VALUES (?, ?, NULL)",
+        args: [session.user.id, investigation_monster_id],
+      });
+      resolvedInvestigationId = Number(invRes.lastInsertRowid);
+    }
+
     await db.execute({
       sql: `
-        INSERT INTO crowns(user_id, monster_id, type, tempered, strength_rating, quest, remaining_uses) 
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO crowns(user_id, monster_id, type, tempered, strength_rating, quest, remaining_uses, investigation_id, pair_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
       args: [
         session.user.id,
@@ -39,11 +83,12 @@ export async function POST(req) {
         tempered ? 1 : 0,
         strength_rating,
         quest,
-        quest === "Investigation Quests" ? (remaining_uses || 3) : null
+        null, // remaining_uses lives on the investigation now
+        resolvedInvestigationId,
+        pair_id || null,
       ],
     });
 
-    // Broadcast the update to all clients
     await pusherServer.trigger("public-channel", "crown_update", {});
 
     return NextResponse.json({ success: true });

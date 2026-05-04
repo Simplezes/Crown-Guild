@@ -175,7 +175,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 24px;
+  padding: 10px 20px;
   background: rgba(26, 22, 20, 0.4);
   border: 1px solid var(--mh-border);
   transition: var(--transition-mh);
@@ -235,7 +235,7 @@
 .hunterDetail {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .name {
@@ -295,11 +295,20 @@
 
 .tempered {
   font-size: 0.75rem;
-  color: var(--mh-purple);
+  color: var(--mh-tan-dark);
   text-transform: uppercase;
-  font-weight: 800;
-  text-shadow: 0 0 6px var(--mh-purple-glow);
+  font-weight: 600;
   letter-spacing: 0.08em;
+}
+
+.hostMonsterLine {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.6rem;
+  color: var(--mh-tan-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .empty {

@@ -6,10 +6,12 @@ import { usePathname } from 'next/navigation';
 import styles from './MissionControl.module.css';
 import Image from 'next/image';
 import { useNotifications } from '@/app/NotificationProvider';
+import { useToast } from '@/app/UIProvider';
 
 export default function MissionControl() {
   const { data: session } = useSession();
   const { pusherChannel } = useNotifications();
+  const toast = useToast();
   const pathname = usePathname();
   const [mission, setMission] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -99,7 +101,7 @@ export default function MissionControl() {
         setMission(null);
         missionRef.current = null;
       } else {
-        alert(data.error || 'Failed to complete mission');
+        toast.error(data.error || 'Failed to complete mission');
       }
     } catch (err) {
       console.error('Failed to complete mission:', err);

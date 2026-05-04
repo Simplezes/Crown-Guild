@@ -333,20 +333,20 @@
 
 .crownGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 16px;
 }
 
 .crownCard {
   background: var(--mh-glass);
   border: 1px solid var(--mh-border);
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  transition: var(--transition-mh);
+  height: 160px;
   position: relative;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-mh);
 }
 
 .crownCard:hover {
@@ -354,28 +354,133 @@
   background: rgba(45, 38, 34, 0.9);
 }
 
-.monsterIconWrapper {
-  width: 44px;
-  height: 44px;
+.crownCornerLeft {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  opacity: 0.7;
+  z-index: 1;
+}
+
+.crownCornerRight {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  opacity: 0.85;
+  z-index: 0;
+}
+
+.crownOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 28px 10px 10px;
+  background: linear-gradient(to bottom, transparent, rgba(18, 13, 10, 0.95));
+  z-index: 1;
+}
+
+.crownOverlay h3 {
+  font-size: 0.8rem;
+  color: var(--mh-tan);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.crownDetail {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 5px;
 }
 
-.crownInfoHeader {
+.ratingBadge {
+  font-size: 0.6rem;
+  color: var(--mh-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 8px;
+  align-items: center;
+  gap: 2px;
 }
 
-.crownInfo h3 {
-  font-size: 0.9rem;
-  margin-bottom: 2px;
-  color: var(--mh-tan);
+.temperedBadge {
+  font-size: 0.55rem;
+  color: var(--mh-red);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: 1px solid rgba(139, 46, 46, 0.5);
+  padding: 1px 4px;
+  font-weight: 600;
+}
+
+.crownInvestigation {
+  font-size: 0.58rem;
+  color: var(--mh-tan-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .cardActions {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 13, 10, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 2;
+}
+
+.crownCard:hover .cardActions {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.actionBtn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--mh-border);
+  color: var(--mh-tan);
+  cursor: pointer;
+  padding: 7px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-mh);
+}
+
+.actionBtn:hover {
+  color: var(--mh-gold);
+  border-color: var(--mh-gold);
+  background: rgba(181, 154, 93, 0.12);
+}
+
+.deleteBtn:hover {
+  color: var(--mh-red);
+  border-color: var(--mh-red);
+  background: rgba(139, 46, 46, 0.12);
+}
+
+.crownGroup {
+  background: var(--mh-glass);
+  grid-column: span 2;
+  display: flex;
+  align-items: stretch;
+  position: relative;
+}
+
+.groupActions {
   position: absolute;
   top: 8px;
   right: 8px;
@@ -385,45 +490,48 @@
   opacity: 0;
   transform: translateY(-5px);
   transition: all 0.2s ease;
+  z-index: 2;
 }
 
-.crownCard:hover .cardActions {
+.crownGroup:hover .groupActions,
+.crownGroupActive .groupActions {
   opacity: 1;
   transform: translateY(0);
 }
 
-.actionBtn {
-  background: none;
-  border: none;
-  color: var(--mh-tan-dark);
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
+.crownGroupItem {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  height: 160px;
+}
+
+.crownGroupItem .crownCard {
+  flex: 1;
+  min-width: 0;
+  height: 160px;
+  box-sizing: border-box;
+}
+
+/* Suppress individual card hover inside a group — group acts as one unit */
+.crownGroupItem .crownCard:hover {
+  border-color: var(--mh-border);
+  background: var(--mh-glass);
+}
+
+.crownGroup:hover .crownGroupItem .crownCard,
+.crownGroupActive .crownGroupItem .crownCard {
+  border-color: var(--mh-gold);
+  background: rgba(45, 38, 34, 0.9);
+}
+
+.chainConnector {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: var(--transition-mh);
-  opacity: 0.6;
-}
-
-.actionBtn:hover {
-  color: var(--mh-gold);
-  background: rgba(255, 255, 255, 0.05);
-  opacity: 1;
-}
-
-.deleteBtn:hover {
-  color: var(--mh-red);
-}
-
-.crownDetail {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.65rem;
-  color: var(--mh-gold);
-  text-transform: uppercase;
-  font-weight: 600;
+  align-self: center;
+  padding: 0 6px;
+  flex-shrink: 0;
 }
 
 .noRecords {
@@ -480,5 +588,9 @@
 
   .crownGrid {
     grid-template-columns: 1fr;
+  }
+
+  .crownGroup {
+    grid-column: span 1;
   }
 }

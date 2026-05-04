@@ -28,8 +28,17 @@ export async function getProfileData(userId) {
     user.username = user.username || `Hunter ${user.id.substring(0, 4)}`;
 
     const crownsRes = await db.execute({
-      sql: `SELECT c.id, m.id as monster_id, m.name, m.emoji, m.image_name, c.type, c.tempered, c.strength_rating, c.quest, c.remaining_uses
-            FROM crowns c JOIN monsters m ON c.monster_id = m.id 
+      sql: `SELECT c.id, m.id as monster_id, m.name, m.emoji, m.image_name,
+                   c.type, c.tempered, c.strength_rating, c.quest, c.investigation_id, c.pair_id,
+                   inv.remaining_uses,
+                   inv.monster_id     AS inv_monster_id,
+                   inv_m.name         AS inv_monster_name,
+                   inv_m.image_name   AS inv_monster_image,
+                   inv_m.emoji        AS inv_monster_emoji
+            FROM crowns c
+            JOIN  monsters m     ON c.monster_id      = m.id
+            LEFT JOIN investigations inv   ON c.investigation_id = inv.id
+            LEFT JOIN monsters       inv_m ON inv.monster_id     = inv_m.id
             WHERE c.user_id = ?
             ORDER BY c.id DESC`,
       args: [userId]
@@ -97,10 +106,19 @@ export async function getCrownById(crownId) {
   try {
     const res = await db.execute({
       sql: `
-        SELECT c.*, m.name as monster_name, m.image_name as monster_image, u.username, u.avatar_url, u.id as user_id, u.status_message
+        SELECT c.*,
+               m.name as monster_name, m.image_name as monster_image,
+               u.username, u.avatar_url, u.id as user_id, u.status_message,
+               inv.remaining_uses,
+               inv.monster_id   AS inv_monster_id,
+               inv_m.name       AS inv_monster_name,
+               inv_m.image_name AS inv_monster_image,
+               inv_m.emoji      AS inv_monster_emoji
         FROM crowns c
-        JOIN monsters m ON c.monster_id = m.id
-        JOIN users u ON c.user_id = u.id
+        JOIN  monsters m     ON c.monster_id      = m.id
+        JOIN  users    u     ON c.user_id          = u.id
+        LEFT JOIN investigations inv   ON c.investigation_id = inv.id
+        LEFT JOIN monsters       inv_m ON inv.monster_id     = inv_m.id
         WHERE c.id = ?
       `,
       args: [crownId]

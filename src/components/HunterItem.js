@@ -15,8 +15,20 @@ export default function HunterItem({ crown, monsterName, isHighlighted }) {
     strength_rating,
     remaining_uses,
     id: crownId,
-    monster_id
+    monster_id,
+    inv_remaining_uses,
+    inv_monster_id,
+    inv_monster_name,
   } = crown;
+
+  // Resolve effective remaining uses (new model: on investigation; legacy: on crown)
+  const effectiveUses = inv_remaining_uses !== undefined ? inv_remaining_uses : remaining_uses;
+
+  // Whether the crown's investigation/survey is for a different host monster
+  const hasHost = inv_monster_id && String(inv_monster_id) !== String(monster_id);
+  const hostName = hasHost
+    ? inv_monster_name?.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+    : null;
 
   return (
     <div className={`${styles.hunterItem} mh-card ${isHighlighted ? styles.highlighted : ''}`} id={`crown-${crownId}`}>
@@ -62,12 +74,23 @@ export default function HunterItem({ crown, monsterName, isHighlighted }) {
                   Tempered In Stock
                 </span>
               ) : "In Stock"}
-              {quest === "Investigation Quests" && remaining_uses !== null && ` (${remaining_uses} left)`}
+              {quest === "Investigation Quests" && effectiveUses !== null && ` (${effectiveUses} left)`}
             </span>
           </div>
+          {/* Host monster context */}
+          {hasHost && (
+            <div className={styles.hostMonsterLine}>
+              <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={10} height={10} alt="" className="pixel-art" />
+              <span>
+                {quest === "Field Survey Quests"
+                  ? `${hostName} Field Survey`
+                  : `${hostName} Investigation`}
+              </span>
+            </div>
+          )}
         </div>
       </Link>
-      {(remaining_uses > 0 || remaining_uses === null) && (
+      {(effectiveUses > 0 || effectiveUses === null) && (
         <ContactButton
           hostId={user_id}
           monsterId={monster_id}

@@ -104,8 +104,21 @@ export default function FindSearch({ initialHosts }) {
                         </div>
                         <div className={styles.questMeta}>
                           {host.quest || "Hunt"} • {host.strength_rating}★
-                          {host.remaining_uses !== null && ` • ${host.remaining_uses} Left`}
+                          {host.inv_remaining_uses !== null && host.inv_remaining_uses !== undefined
+                            ? ` • ${host.inv_remaining_uses} Left`
+                            : ""}
                         </div>
+                        {host.inv_monster_id && String(host.inv_monster_id) !== String(host.monster_id) && (
+                          <div className={styles.hostMonsterLine}>
+                            <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={10} height={10} alt="" className="pixel-art" />
+                            <span>
+                              {host.inv_monster_name
+                                ? host.inv_monster_name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+                                : "??"}
+                              {host.quest === "Field Survey Quests" ? " Field Survey" : " Investigation"}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
 
