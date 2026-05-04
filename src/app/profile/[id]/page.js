@@ -23,18 +23,28 @@ export async function generateMetadata({ params }) {
     };
   }
 
+  const imageUrl = `/profile/${encodeURIComponent(id)}/og?v=${data.stats.total || 0}`;
+
   return {
+    alternates: {
+      types: {
+        'application/json+oembed': `/api/oembed?url=${encodeURIComponent(imageUrl)}`,
+      },
+    },
     openGraph: {
       title: '',
       description: '',
       images: [
         {
-          url: `/profile/${encodeURIComponent(id)}/og?v=${data.stats.total || 0}`,
+          url: imageUrl,
           width: 1200,
           height: 630,
         },
       ],
     },
+    twitter: {
+      card: 'summary_large_image',
+    }
   };
 }
 

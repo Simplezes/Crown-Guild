@@ -67,7 +67,20 @@ export async function generateMetadata({ params, searchParams }) {
     }
   }
 
+  if (featuredCrown) {
+    // If sharing a specific record, ensure the og image targets that record
+    imageUrl += `?crownId=${featuredCrown.id}`;
+  } else {
+    // Basic cache buster for the general monster page
+    imageUrl += `?v=${Date.now()}`;
+  }
+
   return {
+    alternates: {
+      types: {
+        'application/json+oembed': `/api/oembed?url=${encodeURIComponent(imageUrl)}`,
+      },
+    },
     openGraph: {
       title: '',
       description: '',
@@ -79,6 +92,9 @@ export async function generateMetadata({ params, searchParams }) {
         },
       ],
     },
+    twitter: {
+      card: 'summary_large_image',
+    }
   };
 }
 
