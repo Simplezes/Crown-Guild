@@ -23,13 +23,10 @@ export async function generateMetadata({ params }) {
     };
   }
 
-  const { user } = data;
-  const userRank = getHunterRank(data.activity.hosted || 0, data.activity.joined || 0);
-
   return {
-    title: `${user.username} | Crown Guild`,
-    description: `[${userRank}] Check out ${user.username}'s hunting records and crown collection on Crown Guild.`,
     openGraph: {
+      title: '',
+      description: '',
       images: [
         {
           url: `/profile/${encodeURIComponent(id)}/og?v=${data.stats.total || 0}`,
@@ -37,11 +34,6 @@ export async function generateMetadata({ params }) {
           height: 630,
         },
       ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${user.username} | Crown Guild`,
-      description: `Hunter Rank: ${userRank} • ${data.stats.total || 0} Crowns Collected`,
     },
   };
 }

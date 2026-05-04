@@ -52,8 +52,6 @@ export async function generateMetadata({ params, searchParams }) {
     return { title: "Monster Not Found | Crown Guild" };
   }
 
-  let title = `${data.name} | Crown Guild`;
-  let description = `View hunting records and crown information for ${data.name} in Monster Hunter Wilds.`;
   let imageUrl = `/monster/${encodeURIComponent(name)}/og`;
 
   let featuredCrown = null;
@@ -69,16 +67,10 @@ export async function generateMetadata({ params, searchParams }) {
     }
   }
 
-  if (featuredCrown) {
-    title = `${featuredCrown.username}'s ${data.name} Crown | Crown Guild`;
-    description = `${featuredCrown.username} is sharing a ${featuredCrown.type} ${data.name} crown via "${featuredCrown.quest || 'Hunt'}" with strength ${featuredCrown.strength_rating}.`;
-    imageUrl += `?crownId=${featuredCrown.id}`;
-  }
-
   return {
-    title,
-    description,
     openGraph: {
+      title: '',
+      description: '',
       images: [
         {
           url: imageUrl,
@@ -86,11 +78,6 @@ export async function generateMetadata({ params, searchParams }) {
           height: 630,
         },
       ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
     },
   };
 }
