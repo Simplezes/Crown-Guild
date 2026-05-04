@@ -225,47 +225,6 @@
   color: var(--mh-gold);
 }
 
-.hostingBadge {
-  position: absolute;
-  top: 16px;
-  right: -32px;
-  background: var(--mh-gold);
-  color: #000;
-  font-size: 0.55rem;
-  font-weight: 900;
-  padding: 4px 40px;
-  transform: rotate(45deg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  z-index: 5;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.pulse {
-  width: 6px;
-  height: 6px;
-  background: #000;
-  border-radius: 50%;
-  animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.3;
-  }
-
-  100% {
-    opacity: 1;
-  }
-}
 
 .noResults {
   grid-column: 1 / -1;
@@ -303,9 +262,4 @@
     padding: 20px;
   }
 
-  .hostingBadge {
-    top: 14px;
-    right: -34px;
-    padding: 3px 40px;
-  }
 }
