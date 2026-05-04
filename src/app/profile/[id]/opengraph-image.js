@@ -46,6 +46,17 @@ export default async function Image({ params }) {
     avatarUrl = avatarUrl.replace('.webp', '.png');
   }
 
+  let topAssistImageOk = false;
+  if (topAssist?.image_name) {
+    try {
+      const res = await fetch(`${baseUrl}/monsters/${topAssist.image_name}`, { method: 'HEAD' });
+      const ct = res.headers.get('content-type') || '';
+      topAssistImageOk = !ct.includes('webp');
+    } catch {
+      topAssistImageOk = false;
+    }
+  }
+
   const colors = {
     black: '#0c0a09',
     umber: '#1a1614',
@@ -255,12 +266,14 @@ export default async function Image({ params }) {
                     border: `1px solid ${colors.border}`,
                   }}
                 >
-                  <img
-                    src={`${baseUrl}/monsters/${topAssist.image_name}`}
-                    width={80}
-                    height={80}
-                    style={{ marginRight: '20px' }}
-                  />
+                  {topAssistImageOk && (
+                    <img
+                      src={`${baseUrl}/monsters/${topAssist.image_name}`}
+                      width={80}
+                      height={80}
+                      style={{ marginRight: '20px' }}
+                    />
+                  )}
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <span style={{ fontSize: 14, color: colors.gold, fontWeight: 'bold', display: 'flex' }}>TOP ASSIST</span>
                     <span style={{ fontSize: 24, color: colors.tan, display: 'flex' }}>{topAssist.name}</span>

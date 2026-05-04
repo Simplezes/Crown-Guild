@@ -245,7 +245,7 @@ export default function EditCrownModal({ isOpen, onClose, crown, group, onUpdate
                                   ),
                                 }))}
                               >
-                                {num}
+                                {num}★
                               </div>
                             ))}
                           </div>
@@ -312,7 +312,7 @@ export default function EditCrownModal({ isOpen, onClose, crown, group, onUpdate
                         className={`${styles.starItem} ${formData.strength_rating === num ? styles.starItemActive : ""}`}
                         onClick={() => setFormData({ ...formData, strength_rating: num })}
                       >
-                        {num}
+                        {num}★
                       </div>
                     ))}
                   </div>
@@ -331,7 +331,7 @@ export default function EditCrownModal({ isOpen, onClose, crown, group, onUpdate
                               className={`${styles.starItem} ${formData.linkedStrength_rating === num ? styles.starItemActive : ""}`}
                               onClick={() => setFormData(prev => ({ ...prev, linkedStrength_rating: num }))}
                             >
-                              {num}
+                              {num}★
                             </div>
                           ))}
                         </div>

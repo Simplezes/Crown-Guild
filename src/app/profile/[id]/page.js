@@ -70,19 +70,20 @@ export default async function Profile({ params }) {
                 <h2 className="mh-title">Hunter Card</h2>
               </div>
 
-              <div className={styles.avatarWrapper}>
-                <img
-                  src={user.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"}
-                  alt=""
-                  className={styles.profileAvatar}
-                  style={{ borderRadius: 10 }}
-                />
-              </div>
-
-              <div className={styles.identity}>
-                <h1 className="gold-text">{user.username}</h1>
-                <p className={styles.hunterRank}>{userRank}</p>
-                <p className={styles.guildId}>Member ID: {user.id}</p>
+              <div className={styles.profileTop}>
+                <div className={styles.avatarWrapper}>
+                  <img
+                    src={user.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"}
+                    alt=""
+                    className={styles.profileAvatar}
+                    style={{ borderRadius: 10 }}
+                  />
+                </div>
+                <div className={styles.identity}>
+                  <h1 className="gold-text">{user.username}</h1>
+                  <p className={styles.hunterRank}>{userRank}</p>
+                  <p className={styles.guildId}>Member ID: {user.id}</p>
+                </div>
               </div>
 
               <StatusEditor initialStatus={user.status_message} isOwner={isOwner} />

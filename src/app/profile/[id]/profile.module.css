@@ -40,7 +40,7 @@
 .hunterCard {
   background: var(--mh-glass);
   border: 1px solid var(--mh-border);
-  padding: 32px;
+  padding: 20px;
   position: relative;
   overflow-y: auto;
 }
@@ -59,14 +59,21 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 24px;
+  margin-bottom: 14px;
+}
+
+.profileTop {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
 }
 
 .avatarWrapper {
   position: relative;
-  width: 100px;
-  height: 100px;
-  margin-bottom: 24px;
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
 }
 
 .profileAvatar {
@@ -87,21 +94,20 @@
 }
 
 .identity h1 {
-  font-size: 1.8rem;
+  font-size: 1.4rem;
   line-height: 1.1;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 
 .guildId {
   font-size: 0.7rem;
   color: var(--mh-tan-dark);
   letter-spacing: 0.05em;
-  margin-bottom: 24px;
 }
 
 .section {
-  margin-bottom: 24px;
-  padding-top: 16px;
+  margin-bottom: 14px;
+  padding-top: 12px;
   border-top: 1px solid var(--mh-border);
 }
 
@@ -121,7 +127,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 5px;
   font-size: 0.8rem;
 }
 

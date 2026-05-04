@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { useToast, useConfirm } from "@/app/UIProvider";
 
 export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
-  const CROWNS_PER_PAGE = 24;
+  const CROWNS_PER_PAGE = 12;
   const [crowns, setCrowns] = useState(initialCrowns);
   const [page, setPage] = useState(1);
   const [editingCrown, setEditingCrown] = useState(null);
