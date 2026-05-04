@@ -30,8 +30,6 @@ export async function generateMetadata({ params }) {
     title: `${user.username} | Crown Guild`,
     description: `[${userRank}] Check out ${user.username}'s hunting records and crown collection on Crown Guild.`,
     openGraph: {
-      title: `${user.username} | Crown Guild Profile`,
-      description: `Hunter Rank: ${userRank} • ${data.stats.total || 0} Crowns Collected`,
       images: [
         {
           url: `/profile/${encodeURIComponent(id)}/og`,
