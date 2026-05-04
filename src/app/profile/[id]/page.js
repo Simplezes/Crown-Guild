@@ -32,7 +32,7 @@ export async function generateMetadata({ params }) {
     openGraph: {
       images: [
         {
-          url: `/profile/${encodeURIComponent(id)}/og`,
+          url: `/profile/${encodeURIComponent(id)}/og?v=${data.stats.total || 0}`,
           width: 1200,
           height: 630,
         },

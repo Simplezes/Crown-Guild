@@ -213,6 +213,10 @@ export async function GET(request, { params }) {
         </div>
       </div>
     ),
-    { ...size }
+    { ...size,
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+      },
+    }
   );
 }

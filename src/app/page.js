@@ -4,6 +4,14 @@ import Link from "next/link";
 import Image from "next/image";
 import MonsterIcon from "@/components/MonsterIcon";
 
+export const metadata = {
+  openGraph: {
+    title: "Crown Guild | Monster Hunter Wilds Registry",
+    description: "The premium crown tracking and matchmaking hub for Monster Hunter Wilds.",
+    images: ["/hero.png"],
+  },
+};
+
 async function getHomeData() {
   try {
     const huntersRes = await db.execute("SELECT COUNT(*) as count FROM users");

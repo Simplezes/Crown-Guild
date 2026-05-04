@@ -13,11 +13,6 @@ export const metadata = {
   title: "Crown Guild | Monster Hunter Wilds Registry",
   description: "The premium crown tracking and matchmaking hub for Monster Hunter Wilds. Track collections, find hosts, and hunt together.",
   keywords: ["Monster Hunter", "MHWilds", "Crown Tracking", "Matchmaking", "LFG", "Crown Guild"],
-  openGraph: {
-    title: "Crown Guild | Monster Hunter Wilds Registry",
-    description: "The premium crown tracking and matchmaking hub for Monster Hunter Wilds.",
-    images: ["/hero.png"],
-  },
 };
 
 export default function RootLayout({ children }) {

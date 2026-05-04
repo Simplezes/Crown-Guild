@@ -79,8 +79,6 @@ export async function generateMetadata({ params, searchParams }) {
     title,
     description,
     openGraph: {
-      title,
-      description,
       images: [
         {
           url: imageUrl,
