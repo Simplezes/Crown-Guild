@@ -264,3 +264,51 @@
   padding: 10px 24px !important;
   font-size: 0.8rem !important;
 }
+
+.dangerZone {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px dashed var(--mh-red-dark);
+}
+
+.dangerHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  color: var(--mh-red);
+  font-family: 'Marcellus', serif;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.dangerHint {
+  font-size: 0.8rem;
+  color: var(--mh-tan-dark);
+  margin-bottom: 16px;
+}
+
+.deleteBtn {
+  width: 100%;
+  background: rgba(212, 59, 59, 0.1);
+  border: 1px solid var(--mh-red-dark);
+  color: var(--mh-red);
+  padding: 10px;
+  font-family: 'Marcellus', serif;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: var(--transition-mh);
+}
+
+.deleteBtn:hover:not(:disabled) {
+  background: var(--mh-red);
+  color: white;
+  border-color: var(--mh-red);
+}
+
+.deleteBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
