@@ -68,7 +68,7 @@ export default function DiscordShare({ id, username, crowns, wishlist }) {
     }
 
     lines.push('');
-    lines.push(`${process.env.NEXT_PUBLIC_WEB_URL}/profile/${id}`);
+    lines.push(`${process.env.NEXT_PUBLIC_WEB_URL}/profile/${id}?t=${Date.now()}`);
 
     return lines.join('\n');
   };
