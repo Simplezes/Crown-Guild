@@ -5,7 +5,7 @@ import { getMonsterCount } from "@/lib/monsters";
 export async function getProfileData(userId) {
   try {
     const userRes = await db.execute({
-      sql: "SELECT id, username, avatar_url, lobby_id, status_message FROM users WHERE id = ?",
+      sql: "SELECT id, username, avatar_url, lobby_id, quest_password, status_message, receive_dms FROM users WHERE id = ?",
       args: [userId]
     });
 

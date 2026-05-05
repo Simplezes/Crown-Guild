@@ -209,7 +209,10 @@ export default function AddCrownModal({ isOpen, onClose }) {
               </div>
 
               <div className={styles.field}>
-                <label>Crown</label>
+                <div className={styles.crownLabelRow}>
+                  <label>Crown</label>
+                  <span className={styles.crownHint}>Select both sizes to add multi-crown.</span>
+                </div>
                 <div className={styles.crownTypeToggle}>
                   {[{ label: "Small", value: "small", icon: "/icons/smallcrown.png" }, { label: "Large", value: "large", icon: "/icons/largecrown.png" }].map(opt => (
                     <div

@@ -118,6 +118,107 @@
   resize: none;
 }
 
+.serverPicker {
+  position: relative;
+}
+
+.serverTrigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--mh-black);
+  border: 1px solid var(--mh-border);
+  color: var(--mh-tan);
+  padding: 12px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.serverTrigger:hover {
+  border-color: var(--mh-gold);
+}
+
+.serverChevron {
+  color: var(--mh-gold);
+  flex-shrink: 0;
+}
+
+.serverMenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--mh-black);
+  border: 1px solid var(--mh-gold);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+  max-height: 240px;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.serverOption {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  color: var(--mh-tan);
+  cursor: pointer;
+  text-align: left;
+}
+
+.serverOption:hover {
+  background: rgba(181, 154, 93, 0.12);
+}
+
+.serverOptionActive {
+  background: rgba(181, 154, 93, 0.18);
+}
+
+.serverIcon,
+.serverIconFallback {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.serverIconFallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--mh-umber);
+  border: 1px solid var(--mh-border);
+  color: var(--mh-gold);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.serverMeta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.serverName {
+  font-size: 0.85rem;
+  color: var(--mh-tan);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.serverId {
+  font-size: 0.68rem;
+  color: var(--mh-tan-dark);
+}
+
 .checkboxField {
   margin-top: 10px;
 }

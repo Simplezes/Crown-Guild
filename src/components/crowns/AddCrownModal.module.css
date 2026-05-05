@@ -134,6 +134,21 @@
   color: var(--mh-gold);
 }
 
+.crownLabelRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.crownHint {
+  font-size: 0.68rem;
+  color: var(--mh-tan-dark);
+  letter-spacing: 0.03em;
+  text-transform: none;
+  font-family: 'Montserrat', sans-serif;
+}
+
 .select,
 .input {
   background: #000;
@@ -301,6 +316,16 @@
 
   .pickerGrid {
     grid-template-columns: repeat(5, 1fr);
+  }
+
+  .crownLabelRow {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .crownHint {
+    font-size: 0.72rem;
   }
 
   .successMessage h2 {

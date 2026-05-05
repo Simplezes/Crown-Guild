@@ -1,6 +1,33 @@
 import NextAuth from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
 import db from "@/lib/db";
+import { emojiservers } from "@/lib/emojiservers";
+
+async function fetchDiscordGuilds(accessToken) {
+  if (!accessToken) return [];
+
+  try {
+    const res = await fetch("https://discord.com/api/v10/users/@me/guilds", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      cache: "no-store",
+    });
+
+    if (!res.ok) return [];
+
+    const guilds = await res.json();
+    if (!Array.isArray(guilds)) return [];
+
+    return guilds.map((guild) => ({
+      id: String(guild?.id || ""),
+      name: String(guild?.name || "Unknown Server"),
+      icon: guild?.icon ? String(guild.icon) : null,
+    })).filter((guild) => guild.id);
+  } catch {
+    return [];
+  }
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -32,14 +59,39 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return true;
     },
-    async jwt({ token, profile }) {
+    async jwt({ token, profile, account }) {
       if (profile?.id) {
         token.discordId = profile.id;
       }
+
+      if (account?.provider === "discord" && account?.access_token) {
+        token.discordAccessToken = account.access_token;
+      }
+
+      if (token.discordAccessToken && (!Array.isArray(token.guilds) || account?.access_token)) {
+        token.guilds = await fetchDiscordGuilds(token.discordAccessToken);
+      }
+
       return token;
     },
     async session({ session, token }) {
       session.user.id = token.discordId ?? token.sub;
+      session.user.guilds = Array.isArray(token.guilds) ? token.guilds : [];
+
+      try {
+        const res = await db.execute({
+          sql: "SELECT main_crown_server_id FROM users WHERE id = ?",
+          args: [session.user.id],
+        });
+
+        const selectedServer = String(res.rows?.[0]?.main_crown_server_id || "");
+        session.user.mainCrownServerId = selectedServer || null;
+        session.user.canUseEmojiShare = !!selectedServer && !!emojiservers[selectedServer];
+      } catch {
+        session.user.mainCrownServerId = null;
+        session.user.canUseEmojiShare = false;
+      }
+
       return session;
     },
   },

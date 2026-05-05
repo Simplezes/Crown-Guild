@@ -49,6 +49,7 @@ export async function GET(request, { params }) {
   }
 
   const { user, crowns, stats, activity, completion, topAssist, wishlist } = data;
+  const wishlistItems = Array.isArray(wishlist) ? wishlist : [];
   const userRank = getHunterRank(activity.hosted || 0, activity.joined || 0);
   const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
   const linkedNames = new Set();
@@ -87,7 +88,10 @@ export async function GET(request, { params }) {
   const largeOnly  = allMonsters.filter(m => m.large && !m.linked);
 
 
-  const uniqueImageNames = [...new Set(allMonsters.map(m => m.image_name).filter(Boolean))];
+  const uniqueImageNames = [...new Set([
+    ...allMonsters.map(m => m.image_name),
+    ...wishlistItems.map(w => w.image_name),
+  ].filter(Boolean))];
   const validImageSet = new Set(
     (await Promise.all(
       uniqueImageNames.map(async (name) => {
@@ -145,6 +149,8 @@ export async function GET(request, { params }) {
       </div>
     );
   };
+
+  const wishlistPreview = filterValid(wishlistItems).slice(0, 8);
 
   return new ImageResponse(
     (
@@ -289,11 +295,31 @@ export async function GET(request, { params }) {
               </>
             )}
 
-            {wishlist?.length > 0 && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: 10, color: colors.tanDark, letterSpacing: '2px', display: 'flex' }}>WISHLIST</span>
-                <span style={{ fontSize: 12, color: colors.gold, display: 'flex' }}>{wishlist.length} monsters</span>
-              </div>
+            {wishlistItems.length > 0 && (
+              <>
+                <div style={{ display: 'flex', height: '1px', background: colors.border }} />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: 10, color: colors.gold, letterSpacing: '3px', display: 'flex' }}>WISHLIST</span>
+                    <span style={{ fontSize: 10, color: colors.tanDark, letterSpacing: '1px', display: 'flex' }}>{wishlistItems.length} monsters</span>
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    {wishlistPreview.map((item) => (
+                      <div key={item.monster_id} style={{ display: 'flex', alignItems: 'center', gap: '6px', border: `1px solid ${colors.border}`, background: 'rgba(255,255,255,0.03)', padding: '3px 6px', minWidth: '92px' }}>
+                        <img src={`${baseUrl}/monsters/${item.image_name}`} width={24} height={24} style={{ objectFit: 'contain', imageRendering: 'pixelated' }} />
+                        <span style={{ fontSize: 9, color: colors.tanDark, letterSpacing: '1px', display: 'flex' }}>
+                          {item.type === 'both' ? 'Small & Large' : item.type === 'small' ? 'Small' : 'Large'}
+                        </span>
+                      </div>
+                    ))}
+                    {wishlistItems.length > wishlistPreview.length && (
+                      <div style={{ display: 'flex', alignItems: 'center', border: `1px solid ${colors.border}`, background: 'rgba(255,255,255,0.03)', padding: '3px 6px' }}>
+                        <span style={{ fontSize: 9, color: colors.tanDark, letterSpacing: '1px', display: 'flex' }}>+{wishlistItems.length - wishlistPreview.length} more</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
             )}
 
             <div style={{ display: 'flex', marginTop: 'auto', justifyContent: 'flex-end' }}>
