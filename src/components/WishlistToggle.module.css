@@ -44,3 +44,22 @@
 .active .label {
   color: var(--mh-gold);
 }
+
+@media (max-width: 768px) {
+  .dualToggle {
+    gap: 6px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .toggleBtn {
+    flex: 1;
+    justify-content: center;
+    padding: 10px 12px;
+    min-height: 44px;
+  }
+
+  .label {
+    font-size: 0.8rem;
+  }
+}
