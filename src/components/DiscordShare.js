@@ -13,21 +13,43 @@ export default function DiscordShare({ id, username, crowns, wishlist }) {
     if (crowns && crowns.length > 0) {
       const monsterData = {};
       crowns.forEach(c => {
-        if (!monsterData[c.name]) monsterData[c.name] = { small: null, large: null };
-        monsterData[c.name][c.type] = c.strength_rating || 1;
+        const key = `${c.name}||${c.tempered ? 1 : 0}`;
+        if (!monsterData[key]) {
+          monsterData[key] = { name: c.name, tempered: !!c.tempered, small: null, large: null };
+        }
+        monsterData[key][c.type] = {
+          rating: c.strength_rating || 1,
+          isInvestigation: !!c.investigation_id,
+          remainingUses: c.remaining_uses,
+        };
       });
+
+      const formatCrown = (info) => {
+        if (!info) return null;
+        let s = `${info.rating}★`;
+        if (info.isInvestigation) s += ` Investigation: ${info.remainingUses ?? '?'} left`;
+        return s;
+      };
+
+      const formatEntry = (entry) => {
+        const prefix = entry.tempered ? 'Tempered ' : '';
+        const small = formatCrown(entry.small);
+        const large = formatCrown(entry.large);
+        const parts = [small, large].filter(Boolean).join(' | ');
+        return `• **${prefix}${entry.name}** (${parts})`;
+      };
 
       const completed = [];
       const partialSmall = [];
       const partialLarge = [];
 
-      Object.entries(monsterData).forEach(([name, status]) => {
-        if (status.small && status.large) {
-          completed.push(`• **${name}** (${status.small}★ | ${status.large}★)`);
-        } else if (status.small) {
-          partialSmall.push(`• **${name}** (${status.small}★)`);
-        } else if (status.large) {
-          partialLarge.push(`• **${name}** (${status.large}★)`);
+      Object.values(monsterData).forEach(entry => {
+        if (entry.small && entry.large) {
+          completed.push(formatEntry(entry));
+        } else if (entry.small) {
+          partialSmall.push(formatEntry(entry));
+        } else if (entry.large) {
+          partialLarge.push(formatEntry(entry));
         }
       });
 
