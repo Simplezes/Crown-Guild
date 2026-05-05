@@ -8,6 +8,41 @@ import { notFound } from "next/navigation";
 import { getCrownById } from "@/lib/profile";
 import { getMonsterByName, getQuestIcon } from "@/lib/monsters";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+function buildFeaturedCrownVersion(crown) {
+  if (!crown) return '0';
+
+  const parts = [
+    Number(crown.id || 0),
+    Number(crown.tempered || 0),
+    Number(crown.strength_rating || 0),
+    Number(crown.remaining_uses ?? 0),
+    Number(crown.investigation_id || 0),
+    String(crown.type || ''),
+    String(crown.quest || ''),
+    String(crown.username || ''),
+    String(crown.status_message || ''),
+  ];
+
+  let checksum = 0;
+  for (const value of parts.join('|')) {
+    checksum = (checksum * 31 + value.charCodeAt(0)) >>> 0;
+  }
+  return `${Number(crown.id || 0)}-${checksum.toString(36)}`;
+}
+
+function buildMonsterSummaryVersion(row) {
+  const total = Number(row?.total || 0);
+  const small = Number(row?.small || 0);
+  const large = Number(row?.large || 0);
+  const tempered = Number(row?.tempered || 0);
+  const latest = Number(row?.latest_id || 0);
+  const wish = Number(row?.wishlist_total || 0);
+  return `${latest}-${total}-${small}-${large}-${tempered}-${wish}`;
+}
+
 async function getMonsterData(name) {
   try {
     const monster = await getMonsterByName(name);
@@ -54,8 +89,10 @@ async function getMonsterData(name) {
 
 export async function generateMetadata({ params, searchParams }) {
   const { name } = await params;
-  const crownId = (await searchParams)?.crownId;
-  const userId = (await searchParams)?.user;
+  const search = await searchParams;
+  const crownId = search?.crownId;
+  const userId = search?.user;
+  const shareNonce = search?.share || search?.t || null;
   const data = await getMonsterByName(name);
 
   if (!data) {
@@ -63,6 +100,7 @@ export async function generateMetadata({ params, searchParams }) {
   }
 
   let imageUrl = `/monster/${encodeURIComponent(name)}/og`;
+  let ogVersion = '0';
 
   let featuredCrown = null;
   if (crownId) {
@@ -81,13 +119,38 @@ export async function generateMetadata({ params, searchParams }) {
   let description = `${data.is_large ? 'Large Monster' : 'Small Monster'} • View S&L crown records and tactical field intelligence.`;
 
   if (featuredCrown) {
-    imageUrl += `?crownId=${featuredCrown.id}`;
+    ogVersion = buildFeaturedCrownVersion(featuredCrown);
+    imageUrl += `?crownId=${featuredCrown.id}&v=${encodeURIComponent(ogVersion)}`;
     const crownSize = featuredCrown.type === 'small' ? 'Small' : 'Large';
     const tempStr = featuredCrown.tempered ? 'Tempered ' : '';
     title = `${tempStr}${crownSize} Crown ${data.name}`;
     description = `Secured by ${featuredCrown.username} • View the full S&L ledger on Crown Guild.`;
   } else {
-    imageUrl += `?v=${Date.now()}`;
+    const summaryRes = await db.execute({
+      sql: `
+        SELECT
+          COUNT(*) AS total,
+          SUM(CASE WHEN type = 'small' THEN 1 ELSE 0 END) AS small,
+          SUM(CASE WHEN type = 'large' THEN 1 ELSE 0 END) AS large,
+          SUM(CASE WHEN tempered = 1 THEN 1 ELSE 0 END) AS tempered,
+          MAX(id) AS latest_id,
+          (
+            SELECT COUNT(*)
+            FROM wishlist w
+            WHERE w.monster_id = ?
+          ) AS wishlist_total
+        FROM crowns
+        WHERE monster_id = ?
+      `,
+      args: [data.id, data.id],
+    });
+
+    ogVersion = buildMonsterSummaryVersion(summaryRes.rows?.[0]);
+    imageUrl += `?v=${encodeURIComponent(ogVersion)}`;
+  }
+
+  if (shareNonce) {
+    imageUrl += `${imageUrl.includes('?') ? '&' : '?'}share=${encodeURIComponent(String(shareNonce))}`;
   }
 
   return {

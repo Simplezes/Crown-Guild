@@ -13,6 +13,8 @@ export default function ContactButton({ hostId, monsterId, monsterName, crownId,
   const [errorMsg, setErrorMsg] = useState('');
   const menuRef = useRef(null);
 
+  const buildShareNonce = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+
   const isOwnCrown = session?.user?.id === hostId;
 
   useEffect(() => {
@@ -161,7 +163,7 @@ export default function ContactButton({ hostId, monsterId, monsterName, crownId,
               <button
                 className={styles.option}
                 onClick={() => {
-                  const url = `${window.location.origin}/monster/${encodeURIComponent(monsterName)}?crownId=${crownId}&user=${hostId}`;
+                  const url = `${window.location.origin}/monster/${encodeURIComponent(monsterName)}?crownId=${crownId}&user=${hostId}&share=${buildShareNonce()}`;
                   navigator.clipboard.writeText(url);
                   setStatus('shared');
                   setTimeout(() => setStatus('idle'), 2000);

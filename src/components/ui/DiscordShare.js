@@ -7,6 +7,8 @@ import Image from 'next/image';
 export default function DiscordShare({ id, username, crowns, wishlist }) {
   const [copied, setCopied] = useState(false);
 
+  const buildShareNonce = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+
   const generateMarkdown = () => {
     const lines = [];
 
@@ -68,7 +70,7 @@ export default function DiscordShare({ id, username, crowns, wishlist }) {
     }
 
     lines.push('');
-    lines.push(`${process.env.NEXT_PUBLIC_WEB_URL}/profile/${id}?t=${Date.now()}`);
+    lines.push(`${process.env.NEXT_PUBLIC_WEB_URL}/profile/${id}?share=${buildShareNonce()}`);
 
     return lines.join('\n');
   };

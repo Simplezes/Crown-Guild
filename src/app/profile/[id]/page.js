@@ -12,15 +12,53 @@ import DiscordShare from "@/components/ui/DiscordShare";
 import { getAllMonsters } from "@/lib/monsters";
 import WishlistGrid from "@/components/wishlist/WishlistGrid";
 
-export async function generateMetadata({ params }) {
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+function buildProfileOgVersion(data) {
+  let checksum = 0;
+
+  for (const crown of data.crowns || []) {
+    checksum = (checksum * 31 + Number(crown.id || 0)) >>> 0;
+    checksum = (checksum * 31 + Number(crown.tempered || 0)) >>> 0;
+    checksum = (checksum * 31 + Number(crown.strength_rating || 0)) >>> 0;
+    checksum = (checksum * 31 + Number(crown.remaining_uses ?? 0)) >>> 0;
+    checksum = (checksum * 31 + Number(crown.investigation_id || 0)) >>> 0;
+  }
+
+  for (const w of data.wishlist || []) {
+    checksum = (checksum * 31 + Number(w.monster_id || 0)) >>> 0;
+    checksum = (checksum * 31 + Number(w.tempered || 0)) >>> 0;
+    checksum = (checksum * 31 + String(w.type || "").length) >>> 0;
+  }
+
+  checksum = (checksum * 31 + String(data.user?.username || "").length) >>> 0;
+  checksum = (checksum * 31 + String(data.user?.status_message || "").length) >>> 0;
+
+  return [
+    Number(data.stats?.total || 0),
+    Number(data.stats?.small || 0),
+    Number(data.stats?.large || 0),
+    Number(data.activity?.hosted || 0),
+    Number(data.activity?.joined || 0),
+    String(data.completion || 0),
+    checksum.toString(36),
+  ].join("-");
+}
+
+export async function generateMetadata({ params, searchParams }) {
   const { id } = await params;
+  const search = await searchParams;
+  const shareNonce = search?.share || search?.t || null;
   const data = await getProfileData(id);
 
   if (!data) {
     return { title: "Hunter Not Found" };
   }
 
-  const imageUrl = `/profile/${encodeURIComponent(id)}/opengraph-image?v=${Date.now()}`;
+  const ogVersion = buildProfileOgVersion(data);
+  const nonceParam = shareNonce ? `&share=${encodeURIComponent(String(shareNonce))}` : "";
+  const imageUrl = `/profile/${encodeURIComponent(id)}/og?v=${encodeURIComponent(ogVersion)}${nonceParam}`;
 
   return {
     openGraph: {
