@@ -4,12 +4,14 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
-import AddCrownModal from "../crowns/AddCrownModal";
+import { useRouter } from "next/navigation";
+import UnifiedQuestModal from "../crowns/UnifiedQuestModal";
 import BeaconCenter from "../beacon/BeaconCenter";
 import styles from "./Nav.module.css";
 
 export default function Nav() {
   const { data: session } = useSession();
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -132,7 +134,11 @@ export default function Nav() {
         </div>
       </div>
 
-      <AddCrownModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <UnifiedQuestModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onUpdated={() => { router.refresh(); }}
+      />
     </nav>
   );
 }

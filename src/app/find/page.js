@@ -19,16 +19,37 @@ async function getHostsData() {
       WHERE inv.remaining_uses IS NULL OR inv.remaining_uses > 0
       ORDER BY c.monster_id, c.type DESC
     `);
-    
+
     const plainRows = JSON.parse(JSON.stringify(crownsRes.rows));
-    
+
+    const pairMonsterMap = {};
+    for (const row of plainRows) {
+      if (row.pair_id) {
+        const key = `${row.pair_id}|${row.user_id}`;
+        if (!pairMonsterMap[key]) pairMonsterMap[key] = [];
+        if (!pairMonsterMap[key].find(m => m.id === row.monster_id)) {
+          const pm = monsters.find(m => m.id === row.monster_id);
+          if (pm) pairMonsterMap[key].push({ id: pm.id, name: pm.name, image_name: pm.image_name, emoji: pm.emoji });
+        }
+      }
+    }
+
     const hosts = plainRows.map(crown => {
       const monster = monsters.find(m => m.id === crown.monster_id);
+
+      let pair_monster = null;
+      if (crown.pair_id) {
+        const key = `${crown.pair_id}|${crown.user_id}`;
+        const partners = (pairMonsterMap[key] || []).filter(m => m.id !== crown.monster_id);
+        if (partners.length > 0) pair_monster = partners[0];
+      }
+
       return {
         ...crown,
         monster_name: monster?.name || "Unknown Monster",
         monster_image: monster?.image_name || null,
-        monster_emoji: monster?.emoji || "🐉"
+        monster_emoji: monster?.emoji || "🐉",
+        pair_monster,
       };
     });
 

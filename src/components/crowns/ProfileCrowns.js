@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import MonsterIcon from "@/components/ui/MonsterIcon";
-import EditCrownModal from "./EditCrownModal";
+import UnifiedQuestModal from "./UnifiedQuestModal";
 import styles from "@/app/profile/[id]/profile.module.css";
 import { useRouter } from "next/navigation";
 import { useToast, useConfirm } from "@/app/UIProvider";
@@ -117,10 +117,10 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
             <h3>{crown.name}</h3>
           </Link>
           <div className={styles.crownDetail}>
-            <span className={styles.ratingBadge}>
-              {crown.strength_rating}★
+            <span className={crown.type === 'small' ? styles.crownChipSmall : styles.crownChipLarge}>
+              {crown.type === 'small' ? 'S' : 'L'} {crown.strength_rating}★
             </span>
-            {!!crown.tempered && <span className={styles.temperedBadge}>Tempered</span>}
+            {!!crown.tempered && <span className={styles.crownChipTempered}>Tempered</span>}
           </div>
           {investigationLabel && (
             <div className={styles.crownInvestigation}>{investigationLabel}</div>
@@ -160,6 +160,11 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
   };
 
   const renderGroupCard = (group) => {
+    const uniqueMonsterIds = [...new Set(group.map(c => c.monster_id))];
+    if (uniqueMonsterIds.length > 1) {
+      return renderMultiMonsterGroupCard(group);
+    }
+
     const first = group[0];
     const titleCase = (str) => str ? str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : "??";
     const hasInvestigation = first.quest === "Investigation Quests";
@@ -177,7 +182,7 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
     }
 
     return (
-      <div className={styles.crownCard}>
+      <div className={`${styles.crownCard} ${styles.crownCardDual}`}>
         <div className={styles.crownCornerLeft}>
           <Image src="/icons/MHWilds-Link_Party_Icon.png" width={12} height={12} alt="linked" className="pixel-art" />
         </div>
@@ -202,14 +207,12 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
           <div className={styles.linkedCrownRows}>
             {group.map(c => (
               <div key={c.id} className={styles.linkedCrownRow}>
-                <Image
-                  src={c.type === 'small' ? "/icons/smallcrown.png" : "/icons/largecrown.png"}
-                  width={10} height={10}
-                  alt={c.type}
-                  className="pixel-art"
-                />
-                <span className={styles.ratingBadge}>{c.strength_rating}★</span>
-                {!!c.tempered && <span className={styles.temperedBadge}>T</span>}
+                <div className={styles.crownDetail}>
+                  <span className={c.type === 'small' ? styles.crownChipSmall : styles.crownChipLarge}>
+                    {c.type === 'small' ? 'S' : 'L'} {c.strength_rating}★
+                  </span>
+                  {!!c.tempered && <span className={styles.crownChipTempered}>T</span>}
+                </div>
               </div>
             ))}
           </div>
@@ -250,6 +253,104 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
     );
   };
 
+  const renderMultiMonsterGroupCard = (group) => {
+    const titleCase = (str) => str ? str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : "??";
+    const byMonster = {};
+    for (const c of group) {
+      if (!byMonster[c.monster_id]) byMonster[c.monster_id] = { crowns: [], name: c.name, image_name: c.image_name };
+      byMonster[c.monster_id].crowns.push(c);
+    }
+    const sides = Object.values(byMonster);
+    const quest = group[0]?.quest;
+    const isQuad = sides.length > 2;
+
+    return (
+      <div className={`${styles.crownCard} ${styles.crownCardDual} ${isQuad ? styles.crownCardQuad : ""}`}>
+        <div className={styles.crownCornerLeft}>
+          <Image src="/icons/MHWilds-Link_Party_Icon.png" width={12} height={12} alt="linked" className="pixel-art" />
+        </div>
+        <div className={`${styles.crownCornerRight} ${styles.linkedCrownTypes}`}>
+          {group.map(c => (
+            <Image
+              key={c.id}
+              src={c.type === 'small' ? "/icons/smallcrown.png" : "/icons/largecrown.png"}
+              width={14} height={14}
+              alt={c.type}
+              className="pixel-art"
+            />
+          ))}
+        </div>
+
+        <div className={styles.dualSides}>
+          {sides.map((side, idx) => (
+            <React.Fragment key={side.name}>
+              <Link href={`/monster/${side.name}?user=${userId}`} className={`${styles.dualSide}`}>
+                <MonsterIcon
+                  imageName={side.image_name}
+                  name={side.name}
+                  tempered={side.crowns.some(c => c.tempered)}
+                  size={isQuad ? 48 : 56}
+                />
+                <div className={styles.dualOverlay}>
+                  <span className={styles.dualMonsterName}>{titleCase(side.name)}</span>
+                  <div className={styles.linkedCrownRows}>
+                    {side.crowns.map(c => (
+                      <div key={c.id} className={styles.linkedCrownRow}>
+                        <div className={styles.crownDetail}>
+                          <span className={c.type === 'small' ? styles.crownChipSmall : styles.crownChipLarge}>
+                            {c.type === 'small' ? 'S' : 'L'} {c.strength_rating}★
+                          </span>
+                          {!!c.tempered && <span className={styles.crownChipTempered}>T</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Link>
+              {idx < sides.length - 1 && (
+                <div className={styles.dualDivider}>+</div>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+
+        {quest && (
+          <div className={styles.dualQuestLabel}>{quest}</div>
+        )}
+
+        {isOwner && (
+          <div className={styles.cardActions}>
+            <button
+              onClick={() => {
+                const url = `${window.location.origin}/monster/${encodeURIComponent(group[0].name)}?crownId=${group[0].id}&user=${userId}&share=${buildShareNonce()}`;
+                navigator.clipboard.writeText(url);
+                toast.info("Link copied to clipboard!");
+              }}
+              className={styles.actionBtn}
+              title="Share Pair"
+            >
+              <Image src="/icons/MHWilds-Link_Party_Icon.png" width={14} height={14} alt="Share" className="pixel-art" />
+            </button>
+            <button
+              onClick={() => setEditingGroup(group)}
+              className={styles.actionBtn}
+              title="Edit Quest Pair"
+            >
+              <Image src="/icons/MHWilds-Settings_Icon.png" width={14} height={14} alt="Edit" className="pixel-art" />
+            </button>
+            <button
+              onClick={() => handleDeleteGroup(group)}
+              className={`${styles.actionBtn} ${styles.deleteBtn}`}
+              title="Delete Quest Pair"
+            >
+              <Image src="/icons/MHWilds-Notes_X_Icon.png" width={14} height={14} alt="Delete" className="pixel-art" />
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const totalPages = Math.max(1, Math.ceil(groupedCrowns.length / CROWNS_PER_PAGE));
   const pagedGroups = groupedCrowns.slice((page - 1) * CROWNS_PER_PAGE, page * CROWNS_PER_PAGE);
 
@@ -258,13 +359,16 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
       <div className={styles.scrollArea}>
         <div className={styles.crownGrid}>
           {crowns.length > 0 ? pagedGroups.map((group) => {
+            const isMultiMonster = group.length > 1 && group.some(c => c.monster_id !== group[0].monster_id);
+            const key = group[0].pair_id ? `pair-${group[0].pair_id}` : (group[0].investigation_id ? `inv-${group[0].investigation_id}` : `single-${group[0].id}`);
+
             if (group.length === 1) {
-              return <div key={group[0].id}>{renderCard(group[0])}</div>;
+              return <React.Fragment key={key}>{renderCard(group[0])}</React.Fragment>;
             }
             return (
-              <div key={group[0].pair_id ? `pair-${group[0].pair_id}` : `inv-${group[0].investigation_id}`}>
-                {renderGroupCard(group)}
-              </div>
+              <React.Fragment key={key}>
+                {isMultiMonster ? renderMultiMonsterGroupCard(group) : renderGroupCard(group)}
+              </React.Fragment>
             );
           }) : (
             <div className={styles.noRecords}>
@@ -290,19 +394,20 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
         )}
       </div>
 
-      <EditCrownModal
+      <UnifiedQuestModal
         isOpen={!!editingCrown}
         onClose={() => setEditingCrown(null)}
-        crown={editingCrown}
+        initialGroup={editingCrown ? [editingCrown] : null}
         onUpdated={() => { router.refresh(); }}
       />
-      <EditCrownModal
+
+      <UnifiedQuestModal
         isOpen={!!editingGroup}
         onClose={() => setEditingGroup(null)}
-        crown={editingGroup?.[0] ?? null}
-        group={editingGroup}
+        initialGroup={editingGroup}
         onUpdated={() => { router.refresh(); }}
       />
     </>
   );
 }
+

@@ -31,6 +31,9 @@ export default function AddCrownModal({ isOpen, onClose }) {
     remaining_uses: 3,
     investigation_id: "",
     show_host: false,
+    show_multi_monster: false,
+    monster2_id: "",
+    monster2_types: [{ value: "small", tempered: false, strength_rating: 1 }],
   });
 
   useEffect(() => {
@@ -90,6 +93,28 @@ export default function AddCrownModal({ isOpen, onClose }) {
     }));
   };
 
+  const toggleType2 = (val) => {
+    setFormData(prev => {
+      const existing = prev.monster2_types.find(t => t.value === val);
+      if (existing && prev.monster2_types.length === 1) return prev;
+      return {
+        ...prev,
+        monster2_types: existing
+          ? prev.monster2_types.filter(t => t.value !== val)
+          : [...prev.monster2_types, { value: val, tempered: false, strength_rating: 1 }],
+      };
+    });
+  };
+
+  const toggleTempered2 = (typeVal) => {
+    setFormData(prev => ({
+      ...prev,
+      monster2_types: prev.monster2_types.map(t =>
+        t.value === typeVal ? { ...t, tempered: !t.tempered } : t
+      ),
+    }));
+  };
+
   const effectiveHostId = formData.show_host ? (formData.inv_monster_id || formData.monster_id) : formData.monster_id;
   const matchingInvestigations = investigations.filter(
     inv => String(inv.monster_id) === String(effectiveHostId)
@@ -119,22 +144,41 @@ export default function AddCrownModal({ isOpen, onClose }) {
         }
       }
 
-      const pairId = formData.types.length > 1 ? crypto.randomUUID() : undefined;
-      const results = await Promise.all(
-        formData.types.map(t =>
-          fetch("/api/crowns", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              ...basePayload,
-              type: t.value,
-              tempered: t.tempered,
-              strength_rating: t.strength_rating,
-              ...(pairId ? { pair_id: pairId } : {}),
-            }),
-          })
-        )
+      const hasPair = formData.types.length > 1 || formData.show_multi_monster;
+      const pairId = hasPair ? crypto.randomUUID() : undefined;
+
+      const monster1Requests = formData.types.map(t =>
+        fetch("/api/crowns", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...basePayload,
+            type: t.value,
+            tempered: t.tempered,
+            strength_rating: t.strength_rating,
+            ...(pairId ? { pair_id: pairId } : {}),
+          }),
+        })
       );
+
+      const monster2Requests = formData.show_multi_monster && formData.monster2_id
+        ? formData.monster2_types.map(t =>
+            fetch("/api/crowns", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                monster_id: parseInt(formData.monster2_id),
+                quest: formData.quest,
+                type: t.value,
+                tempered: t.tempered,
+                strength_rating: t.strength_rating,
+                pair_id: pairId,
+              }),
+            })
+          )
+        : [];
+
+      const results = await Promise.all([...monster1Requests, ...monster2Requests]);
 
       const failed = results.find(r => !r.ok);
       if (failed) {
@@ -211,7 +255,9 @@ export default function AddCrownModal({ isOpen, onClose }) {
               <div className={styles.field}>
                 <div className={styles.crownLabelRow}>
                   <label>Crown</label>
-                  <span className={styles.crownHint}>Select both sizes to add multi-crown.</span>
+                  {!formData.show_multi_monster && (
+                    <span className={styles.crownHint}>Select both sizes to add multi-crown.</span>
+                  )}
                 </div>
                 <div className={styles.crownTypeToggle}>
                   {[{ label: "Small", value: "small", icon: "/icons/smallcrown.png" }, { label: "Large", value: "large", icon: "/icons/largecrown.png" }].map(opt => (
@@ -291,6 +337,73 @@ export default function AddCrownModal({ isOpen, onClose }) {
                       }
                       placeholder="Select host monster"
                     />
+                  </div>
+                )}
+              </div>
+
+              <div className={styles.field}>
+                <label>Multi-Crown Quest</label>
+                <Toggle
+                  checked={formData.show_multi_monster}
+                  onChange={e => setFormData(prev => ({
+                    ...prev,
+                    show_multi_monster: e.target.checked,
+                    monster2_id: e.target.checked ? (prev.monster2_id || prev.monster_id) : "",
+                    monster2_types: [{ value: "small", tempered: false, strength_rating: 1 }],
+                  }))}
+                  labelOn="Different monster in same quest"
+                  labelOff="Single monster quest"
+                />
+                {formData.show_multi_monster && (
+                  <div className={`${styles.animateIn}`} style={{ marginTop: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <CustomSelect
+                      options={monsterOptions.filter(m => String(m.value) !== String(formData.monster_id))}
+                      value={formData.monster2_id}
+                      onChange={val => setFormData(prev => ({ ...prev, monster2_id: val }))}
+                      placeholder="Select second monster"
+                    />
+                    <div className={styles.crownTypeToggle}>
+                      {[{ label: "Small", value: "small", icon: "/icons/smallcrown.png" }, { label: "Large", value: "large", icon: "/icons/largecrown.png" }].map(opt => (
+                        <div
+                          key={opt.value}
+                          className={`${styles.crownTypeChip} ${formData.monster2_types.some(t => t.value === opt.value) ? styles.crownTypeChipActive : ""}`}
+                          onClick={() => toggleType2(opt.value)}
+                        >
+                          <Image src={opt.icon} width={18} height={18} alt="" className="pixel-art" />
+                          {opt.label}
+                        </div>
+                      ))}
+                    </div>
+                    {formData.monster2_types.map(t => (
+                      <div key={t.value} className={styles.field}>
+                        <div className={styles.typeHeader}>
+                          <label>
+                            <Image src={t.value === 'small' ? "/icons/smallcrown.png" : "/icons/largecrown.png"} width={13} height={13} alt="" className="pixel-art" style={{ marginRight: 5 }} />
+                            {t.value === 'small' ? 'Small' : 'Large'} Crown
+                          </label>
+                          <Toggle
+                            checked={t.tempered}
+                            onChange={() => toggleTempered2(t.value)}
+                            labelOn="Tempered"
+                            labelOff="Normal"
+                          />
+                        </div>
+                        <div className={styles.pickerGrid}>
+                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                            <div
+                              key={num}
+                              className={`${styles.pickerItem} ${t.strength_rating === num ? styles.pickerItemActive : ""}`}
+                              onClick={() => setFormData(prev => ({
+                                ...prev,
+                                monster2_types: prev.monster2_types.map(tp => tp.value === t.value ? { ...tp, strength_rating: num } : tp),
+                              }))}
+                            >
+                              {num}★
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

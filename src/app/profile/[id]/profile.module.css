@@ -302,6 +302,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 20px;
+  grid-auto-flow: dense;
 }
 
 .crownCard {
@@ -314,6 +315,96 @@
   align-items: center;
   justify-content: center;
   transition: var(--transition-mh);
+}
+
+.crownCardDual {
+  grid-column: span 2;
+  height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.crownCardQuad {
+  grid-column: span 3;
+  height: 200px;
+}
+
+.dualSides {
+  display: flex;
+  flex: 1;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.dualSide {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  position: relative;
+  text-decoration: none;
+  overflow: hidden;
+  padding: 6px;
+  min-width: 0;
+}
+
+.dualSide::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 13, 10, 0);
+  transition: background 0.2s;
+}
+
+.dualSide:hover::after {
+  background: rgba(181, 154, 93, 0.06);
+}
+
+.dualOverlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.dualMonsterName {
+  font-family: 'Marcellus', serif;
+  font-size: 0.75rem;
+  color: var(--mh-tan);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.dualDivider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  font-family: 'Marcellus', serif;
+  font-size: 1.1rem;
+  color: var(--mh-gold);
+  opacity: 0.6;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.dualQuestLabel {
+  font-size: 0.55rem;
+  color: var(--mh-tan-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-align: center;
+  padding: 4px 0 6px;
+  border-top: 1px solid rgba(181, 154, 93, 0.1);
 }
 
 .crownCard:hover {
@@ -365,13 +456,65 @@
 .crownDetail {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
-.ratingBadge {
+.linkedCrownRows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.linkedCrownRows .crownChipSmall,
+.linkedCrownRows .crownChipLarge,
+.linkedCrownRows .crownChipTempered {
+  font-size: 0.55rem;
+  padding: 0 4px;
+  height: 15px;
+  font-weight: 700;
+}
+
+
+.linkedCrownRow {
+  display: flex;
+  align-items: center;
+}
+
+
+.crownChipSmall,
+.crownChipLarge,
+.crownChipTempered {
   font-size: 0.65rem;
+  font-weight: 800;
+  padding: 1px 6px;
+  border: 1px solid;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  height: 18px;
+  border-radius: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.crownChipSmall {
+  color: #a8c8e8;
+  border-color: rgba(168, 200, 232, 0.35);
+  background: rgba(168, 200, 232, 0.05);
+}
+
+.crownChipLarge {
   color: var(--mh-gold);
-  font-weight: bold;
+  border-color: rgba(181, 154, 93, 0.35);
+  background: rgba(181, 154, 93, 0.05);
+}
+
+.crownChipTempered {
+  color: #a335ee;
+  border-color: rgba(163, 53, 238, 0.4);
+  background: rgba(163, 53, 238, 0.1);
+  box-shadow: 0 0 10px rgba(163, 53, 238, 0.1);
 }
 
 .temperedBadge {
@@ -483,5 +626,34 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 20px;
+  }
+
+  .crownGrid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .crownCardDual,
+  .crownCardQuad {
+    grid-column: span 1 !important;
+    height: auto !important;
+    min-height: 200px;
+  }
+
+  .dualSides {
+    flex-direction: column !important;
+    height: auto !important;
+  }
+
+  .dualSide {
+    border-bottom: 1px solid rgba(181, 154, 93, 0.1);
+    padding: 20px 0 !important;
+  }
+
+  .dualSide:last-child {
+    border-bottom: none;
+  }
+
+  .dualDivider {
+    display: none !important;
   }
 }
