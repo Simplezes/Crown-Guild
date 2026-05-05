@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og';
 import { getProfileData, getHunterRank } from "@/lib/profile";
 
 export const runtime = 'edge';
-
+export const dynamic = 'force-dynamic';
 export const alt = 'Hunter Card';
 export const size = {
   width: 1200,

@@ -15,16 +15,28 @@ import WishlistGrid from "@/components/wishlist/WishlistGrid";
 export async function generateMetadata({ params }) {
   const { id } = await params;
   const data = await getProfileData(id);
-  if (!data) return { title: "Hunter Not Found" };
 
-  const imageUrl = `/profile/${encodeURIComponent(id)}/og?v=${data.stats.total || 0}`;
+  if (!data) {
+    return { title: "Hunter Not Found" };
+  }
+
+  const imageUrl = `/profile/${encodeURIComponent(id)}/opengraph-image?v=${Date.now()}`;
+
   return {
     openGraph: {
       title: `${data.user.username}'s Guild Card`,
       description: `MR ${data.stats.total || 0} Hunter • Guide Progress: ${data.completion}%`,
-      images: [{ url: imageUrl, width: 1200, height: 630 }],
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+        },
+      ],
     },
-    twitter: { card: 'summary_large_image' }
+    twitter: {
+      card: "summary_large_image",
+    },
   };
 }
 

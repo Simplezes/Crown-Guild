@@ -108,8 +108,6 @@ export async function GET(request, { params }) {
   }
 
   const iconGap = 4;
-  // Left panel usable area: 1200 - 56(outer pad) - 1(border) - 300(sidebar) - 28(left pad) - 16(right pad) = 799px wide
-  // Height: 630 - 56(outer pad) - 44(header) - 44(panel pad) = 486px
   const availW = 799;
   const availH = 486;
   const iconSizeCandidates = [96, 80, 72, 64, 56, 48, 40, 32];
@@ -119,8 +117,8 @@ export async function GET(request, { params }) {
     if (perRow === 0) return false;
     let h = 0;
     for (let i = 0; i < groups.length; i++) {
-      if (i > 0) h += 10; // group gap
-      h += 24; // label row
+      if (i > 0) h += 10;
+      h += 24;
       h += Math.ceil(groups[i] / perRow) * (s + iconGap);
     }
     return h <= availH;
