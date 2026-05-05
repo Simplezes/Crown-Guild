@@ -400,6 +400,7 @@
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s;
+  z-index: 2;
 }
 
 .crownCard:hover .cardActions {
