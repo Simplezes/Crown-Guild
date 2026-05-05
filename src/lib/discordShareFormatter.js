@@ -50,7 +50,6 @@ export function formatEmojiGrid(data, useEmojis = true) {
   const profileUrl = `${DISCORD_PROFILE_BASE_URL}/profile/${userId}?share=${shareId}`;
 
   if (!shouldUseEmojis) {
-    // Text format
     const slCount = monsters.filter((m) => m?.category === 'S+L').length;
     const smallCount = monsters.filter((m) => m?.category === 'Small').length;
     const largeCount = monsters.filter((m) => m?.category === 'Large').length;
@@ -73,7 +72,6 @@ export function formatEmojiGrid(data, useEmojis = true) {
     return lines.join('\n');
   }
 
-  // Emoji format
   const grouped = {
     'S+L': [],
     Small: [],

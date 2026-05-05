@@ -242,6 +242,18 @@
   opacity: 0.8;
 }
 
+.pairMonsterLine {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.7rem;
+  color: var(--mh-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 3px;
+  opacity: 0.85;
+}
+
 .hostActions {
   display: flex;
   align-items: flex-start;

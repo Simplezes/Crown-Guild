@@ -119,6 +119,14 @@ export default function FindSearch({ initialHosts }) {
                             </span>
                           </div>
                         )}
+                        {host.pair_monster && (
+                          <div className={styles.pairMonsterLine}>
+                            <Image src="/icons/largecrown.png" width={10} height={10} alt="" className="pixel-art" />
+                            <span>
+                              + {host.pair_monster.name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} in same quest
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
 
