@@ -45,6 +45,9 @@ export async function DELETE() {
 
   try {
     await db.batch([
+      { sql: "DELETE FROM web_notifications WHERE user_id = ? OR host_id = ? OR recipient_id = ?", args: [userId, userId, userId] },
+      { sql: "DELETE FROM flare_queue WHERE user_id = ?", args: [userId] },
+      { sql: "DELETE FROM active_flares WHERE host_id = ?", args: [userId] },
       { sql: "DELETE FROM crowns WHERE user_id = ?", args: [userId] },
       { sql: "DELETE FROM wishlist WHERE user_id = ?", args: [userId] },
       { sql: "DELETE FROM investigations WHERE user_id = ?", args: [userId] },
