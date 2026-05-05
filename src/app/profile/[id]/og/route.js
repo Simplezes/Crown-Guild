@@ -174,7 +174,7 @@ export async function GET(request, { params }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
               <img src={`${baseUrl}/icons/MHWilds-Expedition_Record_Board_Icon.png`} width={30} height={30} style={{ imageRendering: 'pixelated' }} />
               <span style={{ fontSize: 22, letterSpacing: '4px', color: colors.gold, display: 'flex' }}>CROWN IN STOCK</span>
-              <span style={{ fontSize: 14, color: colors.tanDark, marginLeft: '8px', display: 'flex' }}>— {allMonsters.length} monsters</span>
+              <span style={{ fontSize: 14, color: colors.tanDark, marginLeft: '8px', display: 'flex' }}>- {allMonsters.length} monsters</span>
             </div>
 
             {renderGroup('SMALL', smallOnly)}
