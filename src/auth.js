@@ -40,18 +40,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async signIn({ account, profile }) {
       try {
+        const guilds = await fetchDiscordGuilds(account?.access_token);
+        const isInMainGuild = guilds.some(g => String(g.id) === '854896452131094559');
+
         await db.execute({
           sql: `
-            INSERT INTO users (id, username, avatar_url)
-            VALUES (?, ?, ?)
+            INSERT INTO users (id, username, avatar_url, main_crown_server_id)
+            VALUES (?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
               username = excluded.username,
-              avatar_url = excluded.avatar_url
+              avatar_url = excluded.avatar_url,
+              main_crown_server_id = CASE 
+                WHEN (users.main_crown_server_id IS NULL OR users.main_crown_server_id = '') AND ? = 1 
+                THEN '854896452131094559' 
+                ELSE users.main_crown_server_id 
+              END
           `,
           args: [
             profile.id,
             profile.username || profile.global_name,
-            profile.image_url || `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png`
+            profile.image_url || `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png`,
+            isInMainGuild ? '854896452131094559' : '',
+            isInMainGuild ? 1 : 0
           ]
         });
       } catch (e) {

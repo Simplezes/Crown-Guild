@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './ProfileSettings.module.css';
 import Image from 'next/image';
-import { useToast } from '@/app/UIProvider';
-import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useToast, useConfirm } from '@/app/UIProvider';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
 import { emojiservers } from '@/lib/emojiservers';
 
 function getGuildIconUrl(guild) {
@@ -14,10 +14,12 @@ function getGuildIconUrl(guild) {
   return `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png?size=64`;
 }
 
-export default function ProfileSettings({ user, isOwner }) {
+function SettingsContent({ user, isOwner }) {
   const { data: session, update } = useSession();
   const toast = useToast();
+  const confirm = useConfirm();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [serverMenuOpen, setServerMenuOpen] = useState(false);
@@ -25,7 +27,12 @@ export default function ProfileSettings({ user, isOwner }) {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    if (searchParams.get('settings') === 'true') {
+      setIsEditing(true);
+      const newUrl = window.location.pathname;
+      window.history.replaceState({ ...window.history.state, as: newUrl, url: newUrl }, '', newUrl);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const sessionServerId = String(session?.user?.mainCrownServerId || '');
@@ -78,6 +85,29 @@ export default function ProfileSettings({ user, isOwner }) {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    const ok = await confirm(
+      "This will permanently delete your account, all your crowns, and your mission history. This action cannot be undone.",
+      { title: "Delete Account", danger: true, confirmLabel: "Delete My Account" }
+    );
+    if (!ok) return;
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/user/settings", { method: "DELETE" });
+      if (res.ok) {
+        signOut({ callbackUrl: "/" });
+      } else {
+        toast.error("Failed to delete account. Please try again.");
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("An error occurred while deleting your account.");
+      setLoading(false);
+    }
+  };
+
   const modalContent = isEditing && (
     <div className={styles.overlay} onClick={() => setIsEditing(false)}>
       <div className={`${styles.modal} animate-mh-slide-down`} onClick={e => e.stopPropagation()}>
@@ -93,10 +123,10 @@ export default function ProfileSettings({ user, isOwner }) {
           <div className={styles.field}>
             <label>Default Session ID</label>
             <div className={styles.inputWrapper}>
-              <input 
-                type="text" 
-                value={formData.lobby_id} 
-                onChange={e => setFormData({...formData, lobby_id: e.target.value})}
+              <input
+                type="text"
+                value={formData.lobby_id}
+                onChange={e => setFormData({ ...formData, lobby_id: e.target.value })}
                 placeholder="e.g. 4Y8x h3Wn ZvB2"
               />
             </div>
@@ -105,10 +135,10 @@ export default function ProfileSettings({ user, isOwner }) {
           <div className={styles.field}>
             <label>Quest Password</label>
             <div className={styles.inputWrapper}>
-              <input 
-                type="text" 
-                value={formData.quest_password} 
-                onChange={e => setFormData({...formData, quest_password: e.target.value})}
+              <input
+                type="text"
+                value={formData.quest_password}
+                onChange={e => setFormData({ ...formData, quest_password: e.target.value })}
                 placeholder="e.g. 1234"
               />
             </div>
@@ -117,9 +147,9 @@ export default function ProfileSettings({ user, isOwner }) {
           <div className={styles.field}>
             <label>Status Message</label>
             <div className={styles.inputWrapper}>
-              <textarea 
-                value={formData.status_message} 
-                onChange={e => setFormData({...formData, status_message: e.target.value})}
+              <textarea
+                value={formData.status_message}
+                onChange={e => setFormData({ ...formData, status_message: e.target.value })}
                 placeholder="Share a status note with other hunters..."
                 maxLength={100}
               />
@@ -186,13 +216,29 @@ export default function ProfileSettings({ user, isOwner }) {
 
           <div className={styles.field + " " + styles.checkboxField}>
             <label className={styles.checkboxLabel}>
-              <input 
-                type="checkbox" 
-                checked={formData.receive_dms} 
-                onChange={e => setFormData({...formData, receive_dms: e.target.checked})}
+              <input
+                type="checkbox"
+                checked={formData.receive_dms}
+                onChange={e => setFormData({ ...formData, receive_dms: e.target.checked })}
               />
               <span>Receive Discord DMs for Beacon Requests</span>
             </label>
+          </div>
+
+          <div className={styles.dangerZone}>
+            <div className={styles.dangerHeader}>
+              <Image src="/icons/MHWilds-Notes_X_Icon.png" width={18} height={18} alt="" className="pixel-art" />
+              <span>Danger Zone</span>
+            </div>
+            <p className={styles.dangerHint}>Permanently remove your data from the Guild Registry.</p>
+            <button
+              type="button"
+              onClick={handleDeleteAccount}
+              className={styles.deleteBtn}
+              disabled={loading}
+            >
+              Delete Account
+            </button>
           </div>
         </div>
 
@@ -208,7 +254,7 @@ export default function ProfileSettings({ user, isOwner }) {
 
   return (
     <div className={styles.container}>
-      <button 
+      <button
         className={`mh-button ${styles.toggleBtn}`}
         onClick={() => setIsEditing(true)}
       >
@@ -218,5 +264,13 @@ export default function ProfileSettings({ user, isOwner }) {
 
       {mounted && createPortal(modalContent, document.body)}
     </div>
+  );
+}
+
+export default function ProfileSettings(props) {
+  return (
+    <Suspense fallback={null}>
+      <SettingsContent {...props} />
+    </Suspense>
   );
 }

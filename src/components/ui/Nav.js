@@ -106,8 +106,8 @@ export default function Nav() {
                   >
                     Profile
                   </Link>
-                  <Link
-                    href={`/settings`}
+                   <Link
+                    href={`/profile/${session.user.id}?settings=true`}
                     className={styles.dropdownItem}
                     onClick={() => { setIsDropdownOpen(false); setIsMenuOpen(false); }}
                   >
