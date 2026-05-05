@@ -8,7 +8,9 @@ export default function DiscordShare({ id, username, crowns, wishlist }) {
   const [copied, setCopied] = useState(false);
 
   const generateMarkdown = () => {
-    let text = `### 👑 Crown Collection: ${username}\n\n`;
+    const lines = [];
+
+    lines.push(`**${username} — Crown Collection**`);
 
     if (crowns && crowns.length > 0) {
       const monsterData = {};
@@ -25,56 +27,50 @@ export default function DiscordShare({ id, username, crowns, wishlist }) {
       });
 
       const formatCrown = (info) => {
-        if (!info) return null;
         let s = `${info.rating}★`;
-        if (info.isInvestigation) s += ` Investigation: ${info.remainingUses ?? '?'} left`;
+        if (info.isInvestigation) s += ` (${info.remainingUses ?? '?'} uses)`;
         return s;
       };
 
-      const formatEntry = (entry) => {
-        const prefix = entry.tempered ? 'Tempered ' : '';
-        const small = formatCrown(entry.small);
-        const large = formatCrown(entry.large);
-        const parts = [small, large].filter(Boolean).join(' | ');
-        return `• **${prefix}${entry.name}** (${parts})`;
-      };
+      const formatName = (entry) => entry.tempered ? `Tempered ${entry.name}` : entry.name;
 
-      const completed = [];
-      const partialSmall = [];
-      const partialLarge = [];
-
+      const both = [], smallOnly = [], largeOnly = [];
       Object.values(monsterData).forEach(entry => {
-        if (entry.small && entry.large) {
-          completed.push(formatEntry(entry));
-        } else if (entry.small) {
-          partialSmall.push(formatEntry(entry));
-        } else if (entry.large) {
-          partialLarge.push(formatEntry(entry));
-        }
+        if (entry.small && entry.large) both.push(entry);
+        else if (entry.small) smallOnly.push(entry);
+        else if (entry.large) largeOnly.push(entry);
       });
 
-      if (completed.length > 0) {
-        text += `**✨ Small + Large:**\n${completed.join('\n')}\n\n`;
+      if (both.length > 0) {
+        lines.push('');
+        lines.push('**Small + Large**');
+        both.forEach(e => lines.push(`${formatName(e)} — S ${formatCrown(e.small)}  L ${formatCrown(e.large)}`));
       }
-      if (partialSmall.length > 0) {
-        text += `**🔸 Small Only:**\n${partialSmall.join('\n')}\n\n`;
+      if (smallOnly.length > 0) {
+        lines.push('');
+        lines.push('**Small Crown**');
+        smallOnly.forEach(e => lines.push(`${formatName(e)} — ${formatCrown(e.small)}`));
       }
-      if (partialLarge.length > 0) {
-        text += `**🔹Large Only:**\n${partialLarge.join('\n')}\n\n`;
+      if (largeOnly.length > 0) {
+        lines.push('');
+        lines.push('**Large Crown**');
+        largeOnly.forEach(e => lines.push(`${formatName(e)} — ${formatCrown(e.large)}`));
       }
     }
 
     if (wishlist && wishlist.length > 0) {
-      text += `**📝 My Wishlist:**\n`;
-      wishlist.forEach(w => {
-        const typeLabel = w.type === 'both' ? 'S+L' : (w.type === 'small' ? 'Small' : 'Large');
-        text += `• **${w.monster_name}** [${typeLabel}]\n`;
+      const wishlistItems = wishlist.map(w => {
+        const typeLabel = w.type === 'both' ? 'S+L' : (w.type === 'small' ? 'S' : 'L');
+        return `${w.monster_name} (${typeLabel})`;
       });
-      text += `\n`;
+      lines.push('');
+      lines.push(`**Wishlist:** ${wishlistItems.join(' · ')}`);
     }
 
-    text += `*View Full Collection: https://crownguild.vercel.app/profile/${id}?*`;
-    return text;
+    lines.push('');
+    lines.push(`${process.env.NEXT_PUBLIC_WEB_URL}/profile/${id}`);
+
+    return lines.join('\n');
   };
 
   const handleCopy = () => {

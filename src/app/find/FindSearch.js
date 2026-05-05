@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from './find.module.css';
-import MonsterIcon from '@/components/MonsterIcon';
+import MonsterIcon from '@/components/ui/MonsterIcon';
 
 export default function FindSearch({ initialHosts }) {
   const [search, setSearch] = useState('');

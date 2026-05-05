@@ -1,9 +1,9 @@
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
-import Nav from "@/components/Nav";
-import ToastManager from "@/components/ToastManager";
-import MissionControl from "@/components/MissionControl";
+import Nav from "@/components/ui/Nav";
+import ToastManager from "@/components/ui/ToastManager";
+import MissionControl from "@/components/missions/MissionControl";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });

@@ -2,7 +2,7 @@ import db from "@/lib/db";
 import styles from "./page.module.css";
 import Link from "next/link";
 import Image from "next/image";
-import LiveRadarWrapper from "@/components/LiveRadarWrapper";
+import LiveRadarWrapper from "@/components/beacon/LiveRadarWrapper";
 
 export const dynamic = "force-dynamic";
 
@@ -72,7 +72,6 @@ async function getHomeData() {
 export default async function Home() {
   const { stats, wanted, recent, activeMissions } = await getHomeData();
 
-  // Collapse group missions into a single card
   const displayMissions = [];
   const seenGroups = new Set();
   for (const m of activeMissions) {
@@ -141,7 +140,7 @@ export default async function Home() {
           <section className={styles.intelCard}>
             <header className={styles.cardHeader}>
               <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={20} height={20} alt="" className="pixel-art" />
-              <h2 className="mh-title">Latest Verified</h2>
+              <h2 className="mh-title">Latest Crowns</h2>
             </header>
             <div className={styles.list}>
               {recent.map((c) => (

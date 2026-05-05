@@ -12,7 +12,7 @@ export async function GET(request) {
     type: "photo",
     version: "1.0",
     provider_name: "Crown Guild",
-    provider_url: process.env.NEXTAUTH_URL || "https://crownguild.vercel.app",
+    provider_url: process.env.NEXTAUTH_URL,
     url: imageUrl,
     width: 1200,
     height: 630

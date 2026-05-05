@@ -44,7 +44,6 @@ export default function ContactButton({ hostId, monsterId, monsterName, crownId,
     setTimeout(() => setStatus('idle'), 2000);
   };
 
-  // For seekers: request a specific host to run a hunt for you
   const handleRequestSOS = async () => {
     setStatus('loading');
     try {
@@ -73,7 +72,6 @@ export default function ContactButton({ hostId, monsterId, monsterName, crownId,
     }
   };
 
-  // For hosts: broadcast your own crown to the Live Radar
   const handleBroadcastSOS = async () => {
     setStatus('loading');
     try {

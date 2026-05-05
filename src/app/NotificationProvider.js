@@ -77,9 +77,6 @@ export function NotificationProvider({ children }) {
       router.refresh();
     });
 
-    // Re-fetch notifications when a hunt is accepted (creates hunt_accepted notification)
-    // or when any beacon-related update occurs — avoids router.refresh() which can
-    // briefly destabilise the session and cause useEffect to re-run / re-add stale data.
     channel.bind('mission_update', () => {
       fetchNotifications();
     });

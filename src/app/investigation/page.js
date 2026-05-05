@@ -4,7 +4,7 @@ import Image from "next/image";
 import { getAllMonsters } from "@/lib/monsters";
 import { auth } from "@/auth";
 import db from "@/lib/db";
-import WishlistToggle from "@/components/WishlistToggle";
+import WishlistToggle from "@/components/wishlist/WishlistToggle";
 
 export default async function FieldGuide() {
   const session = await auth();

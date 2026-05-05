@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import MonsterIcon from "./MonsterIcon";
+import MonsterIcon from "../ui/MonsterIcon";
 import styles from "./CrownSummary.module.css";
 
 export default function CrownSummary({ crowns, allMonsters }) {

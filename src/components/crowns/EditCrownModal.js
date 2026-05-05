@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import styles from "./EditCrownModal.module.css";
-import MonsterIcon from "./MonsterIcon";
+import MonsterIcon from "../ui/MonsterIcon";
 import Image from "next/image";
-import CustomSelect from "./CustomSelect";
+import CustomSelect from "../ui/CustomSelect";
 import { useToast } from "@/app/UIProvider";
-import Toggle from "./Toggle";
+import Toggle from "../ui/Toggle";
 
 const QUEST_TYPES = [
   { label: "Event Quests", value: "Event Quests" },

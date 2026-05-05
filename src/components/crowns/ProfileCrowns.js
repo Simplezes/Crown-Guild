@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import MonsterIcon from "@/components/MonsterIcon";
+import MonsterIcon from "@/components/ui/MonsterIcon";
 import EditCrownModal from "./EditCrownModal";
 import styles from "@/app/profile/[id]/profile.module.css";
 import { useRouter } from "next/navigation";

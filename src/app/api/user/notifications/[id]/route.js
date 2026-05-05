@@ -44,7 +44,6 @@ export async function POST(request, { params }) {
       return NextResponse.json({ error: "Crown not found" }, { status: 400 });
     }
 
-    // Guard: prevent accepting more missions than investigation uses allow
     if (crown.quest === 'Investigation Quests' && crown.remaining_uses !== null) {
       const activeCountRes = await db.execute({
         sql: `SELECT COUNT(*) as count FROM active_missions

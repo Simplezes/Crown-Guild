@@ -46,7 +46,6 @@ export async function GET(request) {
       }
     }
 
-    // Deduplicate by mission id (defensive)
     const seenIds = new Set();
     const dedupedMissions = missions.filter(({ mission }) => {
       const key = String(mission.id);
