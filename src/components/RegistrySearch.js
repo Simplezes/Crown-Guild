@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from './RegistrySearch.module.css';
+import WishlistToggle from './WishlistToggle';
 
 export default function RegistrySearch({ initialRegistry }) {
   const [search, setSearch] = useState('');
@@ -61,7 +62,17 @@ export default function RegistrySearch({ initialRegistry }) {
                   )}
                 </div>
                 <div className={styles.cardMeta}>
-                  <h3>{monster.name}</h3>
+                  <div className={styles.nameRow}>
+                    <h3>{monster.name}</h3>
+                    <div className={styles.badgeGroup}>
+                      {monster.demand > 0 && (
+                        <div className={styles.demandBadge} title={`${monster.demand} hunters have this on their wishlist`}>
+                          <Image src="/icons/MHWilds-Wishlist_Pin_Icon.png" width={16} height={16} alt="" className="pixel-art" />
+                          <span>{monster.demand}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                   {monster.extraInfo?.type && (
                     <span className={styles.monsterType}>{monster.extraInfo.type}</span>
                   )}

@@ -1,337 +1,277 @@
 .main {
-  min-height: 100vh;
-  padding-top: 100px;
-  padding-bottom: 60px;
-  overflow-x: hidden;
+  padding: 60px 0;
+  margin-top: 40px;
 }
 
-.layout {
-  display: grid;
-  grid-template-columns: 1fr 300px;
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 60px;
   gap: 40px;
 }
 
-.liveBoard {
-  display: flex;
-  flex-direction: column;
+.heroContent h1 {
+  font-size: 4rem;
+  margin: 0;
+  line-height: 1;
 }
 
-.boardHeader {
-  margin-bottom: 32px;
-  position: relative;
-}
-
-.boardHeader::after {
-  content: '';
-  position: absolute;
-  bottom: -12px;
-  left: 0;
-  width: 60px;
-  height: 2px;
-  background: var(--mh-gold);
-  box-shadow: 0 0 10px var(--mh-gold);
-}
-
-.liveIndicator {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.subtitle {
   font-family: 'Marcellus', serif;
-  color: var(--mh-red-bright);
-  font-size: 0.75rem;
+  color: var(--mh-tan-dark);
+  font-size: 1.1rem;
+  text-transform: uppercase;
   letter-spacing: 0.3em;
-  margin-bottom: 12px;
-  font-weight: 500;
+  margin-top: 10px;
+  margin-bottom: 30px;
 }
 
-.dot {
-  width: 8px;
-  height: 8px;
-  background: var(--mh-red-bright);
-  border-radius: 50%;
-  box-shadow: 0 0 10px var(--mh-red-bright);
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(1.3); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
-.boardHeader h1 {
-  font-size: 3.5rem;
-  line-height: 0.95;
-  font-weight: 400;
-}
-
-.missionsGrid {
+.heroActions {
   display: flex;
-  flex-direction: column;
   gap: 16px;
 }
 
-.missionCard {
-  background: var(--mh-glass);
-  backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--mh-border);
-  padding: 24px;
-  display: grid;
-  grid-template-columns: 1.1fr 1fr;
+.heroStats {
+  display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 40px;
+  background: var(--mh-glass);
+  padding: 30px 50px;
+  border: 1px solid var(--mh-border);
   position: relative;
-  transition: var(--transition-mh);
-  overflow: hidden;
 }
 
-.missionCard::before {
+.heroStats::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   bottom: 0;
   width: 2px;
-  background: linear-gradient(to bottom, var(--mh-red), transparent);
+  background: var(--mh-gold);
 }
 
-.missionCard:hover {
-  transform: translateX(8px);
-  border-color: var(--mh-gold);
-  background: rgba(26, 22, 20, 0.9);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(181, 154, 93, 0.05);
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.monsterSection {
+.statValue {
+  font-size: 2.2rem;
+  color: var(--mh-gold);
+  font-family: 'Marcellus', serif;
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 0.6rem;
+  color: var(--mh-tan-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-top: 8px;
+}
+
+.statDivider {
+  width: 1px;
+  height: 40px;
+  background: var(--mh-border);
+}
+
+/* RADAR */
+.radarWrapper {
+  margin-bottom: 60px;
+}
+
+/* INTEL GRID */
+.intelGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+
+.intelCard {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--mh-border);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardHeader {
+  padding: 24px 30px;
+  border-bottom: 1px solid var(--mh-border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.list {
+  padding: 10px 0;
+}
+
+.listItem {
+  display: flex;
+  align-items: center;
+  padding: 16px 30px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  gap: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.listItem:last-child {
+  border-bottom: none;
+}
+
+.listItem:hover {
+  background: rgba(181, 154, 93, 0.05);
+  padding-left: 36px;
+}
+
+.itemIcon {
+  width: 40px;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 4px;
+}
+
+.itemInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.itemName {
+  font-family: 'Marcellus', serif;
+  color: var(--mh-gold);
+  font-size: 1.1rem;
+}
+
+.itemMeta {
+  font-size: 0.75rem;
+  color: var(--mh-tan-dark);
+  margin-top: 2px;
+}
+
+.itemRank {
+  font-family: 'Marcellus', serif;
+  font-size: 1.2rem;
+  color: var(--mh-tan-dark);
+  opacity: 0.3;
+}
+
+.itemCrown {
+  filter: drop-shadow(0 0 5px var(--mh-gold-glow));
+}
+
+/* LIVE OPERATIONS */
+.opsSection {
+  margin-top: 60px;
+}
+
+.opsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.opCard {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--mh-border);
+  padding: 16px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: var(--transition-mh);
+}
+
+.opCard:hover {
+  border-color: var(--mh-gold-dim);
+  background: rgba(181, 154, 93, 0.03);
+}
+
+.opMonster {
   display: flex;
   align-items: center;
   gap: 20px;
 }
 
-.monsterInfo h3 {
-  font-size: 1.4rem;
-  margin-bottom: 4px;
-  transition: var(--transition-mh);
-}
-
-.missionCard:hover .monsterInfo h3 {
-  color: var(--mh-gold-bright);
-}
-
-.crownTag {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  color: var(--mh-tan-dark);
-  font-weight: 500;
-  letter-spacing: 0.08em;
-}
-
-.temperedCrown {
-  color: var(--mh-purple) !important;
-  text-shadow: 0 0 8px rgba(163, 53, 238, 0.5);
-  font-weight: 700;
-}
-
-.partySection {
-  border-left: 1px solid var(--mh-border);
-  padding-left: 32px;
-  display: flex;
-  justify-content: center;
-}
-
-.hunterPair {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-}
-
-.hunter {
+.opInfo {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  text-align: center;
-  min-width: 90px;
 }
 
-.miniAvatar {
-  width: 36px;
-  height: 36px;
-  border: 1px solid var(--mh-border);
-  background: var(--mh-black);
-  padding: 1px;
-  transition: var(--transition-mh);
+.opName {
+  font-family: 'Marcellus', serif;
+  color: var(--mh-gold);
+  font-size: 1.1rem;
 }
 
-.missionCard:hover .miniAvatar {
-  border-color: var(--mh-gold);
-  transform: scale(1.05);
-}
-
-.hunter label {
-  font-size: 0.6rem;
-  text-transform: uppercase;
+.opGoal {
+  font-size: 0.7rem;
   color: var(--mh-tan-dark);
+  text-transform: uppercase;
   letter-spacing: 0.1em;
-  opacity: 0.7;
 }
 
-.hunter span {
+.opParty {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.opHunter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.opHunter a {
   font-size: 0.8rem;
-  font-weight: 600;
   color: var(--mh-tan);
-  max-width: 100px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  transition: var(--transition-mh);
+  text-decoration: none;
+  font-family: 'Marcellus', serif;
 }
 
-.hunter:hover span {
+.opHunter a:hover {
   color: var(--mh-gold);
 }
 
-.vs {
-  opacity: 0.3;
-  transition: var(--transition-mh);
-}
-
-.missionCard:hover .vs {
-  opacity: 0.8;
-  transform: scale(1.05) rotate(5deg);
-}
-
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-}
-
-.statBox {
-  display: grid;
-  gap: 24px;
-  background: rgba(26, 22, 20, 0.4);
-  padding: 24px;
+.opAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
   border: 1px solid var(--mh-border);
-  backdrop-filter: var(--glass-blur);
 }
 
-.statItem label {
-  display: block;
-  font-family: 'Marcellus', serif;
-  font-size: 0.75rem;
-  color: var(--mh-tan-dark);
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  margin-bottom: 8px;
+.opVs {
+  opacity: 0.4;
 }
 
-.statItem h2 {
-  font-size: 2.8rem;
-  line-height: 0.85;
-  margin-bottom: 2px;
-}
-
-.quickLinks {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.discordLink {
-  font-family: 'Marcellus', serif;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  color: var(--mh-tan-dark);
-  letter-spacing: 0.15em;
-  text-align: center;
-  transition: var(--transition-mh);
-  padding: 8px;
-  border: 1px solid transparent;
-}
-
-.discordLink:hover {
-  color: #5865F2;
-  border-color: rgba(88, 101, 242, 0.3);
-  background: rgba(88, 101, 242, 0.05);
-}
-
-.emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 240px;
-  color: var(--mh-tan-dark);
+.emptyOps {
   text-align: center;
   padding: 40px;
-  background: var(--mh-glass);
+  background: rgba(0, 0, 0, 0.1);
   border: 1px dashed var(--mh-border);
+  color: var(--mh-tan-dark);
+  font-style: italic;
+  font-size: 0.9rem;
 }
 
-.emptyState p {
-  font-family: 'Marcellus', serif;
-  font-size: 1.2rem;
-  margin-top: 16px;
-  color: var(--mh-tan);
+@media (max-width: 1024px) {
+  .opCard { flex-direction: column; gap: 20px; padding: 20px; }
 }
 
-.emptyState span {
-  font-size: 0.8rem;
-  margin-top: 8px;
-  opacity: 0.6;
-}
-
-@media (max-width: 1100px) {
-  .layout {
-    grid-template-columns: 1fr;
-    gap: 40px;
+@media (max-width: 640px) {
+  .heroStats {
+    flex-direction: column;
+    width: 100%;
+    padding: 30px;
   }
-
-  .sidebar {
-    order: -1;
-  }
-
-  .statBox {
-    grid-template-columns: 1fr 1fr;
-    padding: 24px;
-  }
-}
-
-@media (max-width: 768px) {
-  .boardHeader h1 {
-    font-size: 2.5rem;
-  }
-
-  .main {
-    padding-top: 80px;
-  }
-
-  .missionCard {
-    grid-template-columns: 1fr;
-    gap: 24px;
-    padding: 20px;
-  }
-
-  .partySection {
-    border-left: none;
-    border-top: 1px solid var(--mh-border);
-    padding-left: 0;
-    padding-top: 24px;
-  }
-
-  .monsterSection {
-    gap: 16px;
-  }
-
-  .monsterInfo h3 {
-    font-size: 1.2rem;
-  }
-
-  .statItem h2 {
-    font-size: 2.2rem;
+  .statDivider {
+    width: 60%;
+    height: 1px;
   }
 }

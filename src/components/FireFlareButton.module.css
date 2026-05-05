@@ -1,0 +1,70 @@
+.container {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--mh-border);
+}
+
+.title {
+  font-family: 'Marcellus', serif;
+  color: var(--mh-tan-dark);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.flareBtn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #1a1512;
+  border: 1px solid var(--mh-red-dim);
+  padding: 12px 20px;
+  color: var(--mh-red);
+  font-family: 'Marcellus', serif;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.flareBtn:hover:not(:disabled) {
+  background: rgba(255, 69, 0, 0.1);
+  border-color: #ff4500;
+  color: #fff;
+  box-shadow: 0 0 15px rgba(255, 69, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+.flareBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.fired {
+  background: #ff4500 !important;
+  color: #fff !important;
+  border-color: #ff4500 !important;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+.settingsLink {
+  display: block;
+  margin-top: 12px;
+  font-size: 0.7rem;
+  color: var(--mh-tan-dark);
+  text-decoration: underline;
+}

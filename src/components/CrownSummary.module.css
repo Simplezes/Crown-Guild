@@ -1,54 +1,102 @@
-.summary {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+.completionWall {
+  padding: 20px 0;
 }
 
-.group {
-  display: flex;
-  flex-direction: column;
+.wallGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   gap: 8px;
 }
 
-.groupLabel {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: 'Marcellus', serif;
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--mh-tan-dark);
-}
-
-.multiIcon {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-
-.count {
-  margin-left: auto;
-  font-family: 'Marcellus', serif;
-  font-size: 0.65rem;
-  color: var(--mh-gold);
-  opacity: 0.8;
-}
-
-.iconGrid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.iconLink {
-  display: block;
+.slot {
+  background: var(--mh-glass);
   border: 1px solid var(--mh-border);
-  transition: border-color 0.15s ease, transform 0.15s ease;
-  line-height: 0;
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none !important;
+  color: inherit !important;
+  transition: all 0.2s ease;
+  position: relative;
 }
 
-.iconLink:hover {
-  border-color: var(--mh-gold);
-  transform: scale(1.12);
+.slot:hover {
+  transform: translateY(-2px);
+  border-color: var(--mh-gold-dim) !important;
+  background: rgba(45, 38, 34, 0.6);
+}
+
+.completed {
+  border-color: var(--mh-gold) !important;
+  background: rgba(181, 154, 93, 0.05) !important;
+  box-shadow: inset 0 0 15px rgba(181, 154, 93, 0.1);
+}
+
+.completed .monsterName {
+  color: var(--mh-gold);
+}
+
+.partial {
+  border-color: rgba(181, 154, 93, 0.4);
+}
+
+.empty {
+  opacity: 0.6;
+}
+
+.monsterIconWrapper {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.silhouette {
+  filter: grayscale(1) brightness(0.2);
+  opacity: 0.5;
+}
+
+.crownIndicators {
+  display: flex;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.dot {
+  opacity: 0.15;
+  filter: grayscale(1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.active {
+  opacity: 1 !important;
+  filter: none !important;
+  drop-shadow: 0 0 5px var(--mh-gold);
+}
+
+.monsterName {
+  font-family: 'Marcellus', serif;
+  font-size: 0.55rem;
+  color: var(--mh-tan-dark);
+  text-transform: uppercase;
+  text-align: center;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .wallGrid {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 8px;
+  }
 }

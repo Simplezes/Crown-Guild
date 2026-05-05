@@ -60,8 +60,8 @@ export default function Nav() {
 
       <div className={`${styles.navLinks} ${isMenuOpen ? styles.mobileActive : ""}`}>
         <Link href="/" className="nav-link" onClick={() => setIsMenuOpen(false)}>Hub</Link>
-        <Link href="/registry" className="nav-link" onClick={() => setIsMenuOpen(false)}>Ledger</Link>
-        <Link href="/investigation" className="nav-link" onClick={() => setIsMenuOpen(false)}>Investigation</Link>
+        <Link href="/registry" className="nav-link" onClick={() => setIsMenuOpen(false)}>Global List</Link>
+        <Link href="/investigation" className="nav-link" onClick={() => setIsMenuOpen(false)}>Monsters</Link>
         <Link href="/missions" className="nav-link" onClick={() => setIsMenuOpen(false)}>Missions</Link>
 
         {session && (
@@ -126,7 +126,7 @@ export default function Nav() {
               className="mh-button"
               style={{ padding: '8px 20px', fontSize: '0.75rem' }}
             >
-              Enlist
+              Sign In
             </button>
           )}
         </div>

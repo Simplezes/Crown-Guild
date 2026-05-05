@@ -5,7 +5,7 @@ import Image from "next/image";
 import MonsterIcon from "@/components/MonsterIcon";
 import HunterItem from "@/components/HunterItem";
 import { notFound } from "next/navigation";
-
+import { getCrownById } from "@/lib/profile";
 import { getMonsterByName, getQuestIcon } from "@/lib/monsters";
 
 async function getMonsterData(name) {
@@ -29,18 +29,28 @@ async function getMonsterData(name) {
       args: [monster.id]
     });
 
+    const wishlistRes = await db.execute({
+      sql: `
+        SELECT w.*, u.username, u.avatar_url, u.id as user_id, u.status_message
+        FROM wishlist w
+        JOIN users u ON w.user_id = u.id
+        WHERE w.monster_id = ?
+        ORDER BY u.username ASC
+      `,
+      args: [monster.id]
+    });
+
     return {
       monster,
       extraInfo: monster.extraInfo,
-      crowns: crownsRes.rows
+      crowns: crownsRes.rows.map(r => ({ ...r })),
+      wishlist: wishlistRes.rows.map(r => ({ ...r }))
     };
   } catch (e) {
     console.error("Monster fetch error", e);
     return null;
   }
 }
-
-import { getCrownById } from "@/lib/profile";
 
 export async function generateMetadata({ params, searchParams }) {
   const { name } = await params;
@@ -71,14 +81,12 @@ export async function generateMetadata({ params, searchParams }) {
   let description = `${data.is_large ? 'Large Monster' : 'Small Monster'} • View S&L crown records and tactical field intelligence.`;
 
   if (featuredCrown) {
-    // If sharing a specific record, ensure the og image targets that record
     imageUrl += `?crownId=${featuredCrown.id}`;
     const crownSize = featuredCrown.type === 'small' ? 'Small' : 'Large';
     const tempStr = featuredCrown.tempered ? 'Tempered ' : '';
     title = `${tempStr}${crownSize} Crown ${data.name}`;
     description = `Secured by ${featuredCrown.username} • View the full S&L ledger on Crown Guild.`;
   } else {
-    // Basic cache buster for the general monster page
     imageUrl += `?v=${Date.now()}`;
   }
 
@@ -105,6 +113,7 @@ export default async function MonsterDetail({ params, searchParams }) {
   const search = await searchParams;
   let highlightCrownId = search?.crownId;
   const userId = search?.user;
+  const activeTab = search?.tab || 'hosts';
 
   const data = await getMonsterData(name);
   if (!data) notFound();
@@ -114,9 +123,8 @@ export default async function MonsterDetail({ params, searchParams }) {
     if (userCrown) highlightCrownId = userCrown.id;
   }
 
-  const { monster, extraInfo, crowns } = data;
+  const { monster, extraInfo, crowns, wishlist } = data;
 
-  // Group complete S&L pairs by pair_id
   const pairMap = new Map();
   for (const c of crowns) {
     if (c.pair_id) {
@@ -181,62 +189,112 @@ export default async function MonsterDetail({ params, searchParams }) {
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className={styles.records}>
-            {pairedGroups.length > 0 && (
-              <section className={styles.crownSection} style={{ marginBottom: '40px' }}>
-                <div className={styles.sectionTitle}>
-                  <Image src="/icons/largecrown.png" width={20} height={20} alt="" className="pixel-art" />
-                  <Image src="/icons/smallcrown.png" width={16} height={16} alt="" className="pixel-art" style={{ marginLeft: -8 }} />
-                  <h2 className="mh-title">S&amp;L Pair Records</h2>
-                </div>
-                <div className={styles.hunterList}>
-                  {pairedGroups.map((group) => {
-                    const smallC = group.find(c => c.type === 'small');
-                    const largeC = group.find(c => c.type === 'large');
-                    const isHl = group.some(c => String(c.id) === String(highlightCrownId));
-                    return (
-                      <HunterItem
-                        key={smallC.id}
-                        crown={smallC}
-                        linkedCrown={largeC}
-                        monsterName={monster.name}
-                        isHighlighted={isHl}
-                      />
-                    );
-                  })}
-                </div>
-              </section>
-            )}
+            <div className={styles.records}>
+              <div className={styles.tabs}>
+                <Link
+                  href={`?tab=hosts`}
+                  className={`${styles.tab} ${activeTab === 'hosts' ? styles.tabActive : ''}`}
+                  scroll={false}
+                >
+                  Hosts ({crowns.length})
+                </Link>
+                <Link
+                  href={`?tab=seeking`}
+                  className={`${styles.tab} ${activeTab === 'seeking' ? styles.tabActive : ''}`}
+                  scroll={false}
+                >
+                  Seeking ({wishlist.length})
+                </Link>
+              </div>
 
-            <section className={styles.crownSection} style={{ marginBottom: '40px' }}>
-              <div className={styles.sectionTitle}>
-                <Image src="/icons/largecrown.png" width={24} height={24} alt="" className="pixel-art" />
-                <h2 className="mh-title">Large Crown Records</h2>
-              </div>
-              <div className={styles.hunterList}>
-                {largeCrowns.length > 0 ? largeCrowns.map((c, i) => (
-                  <HunterItem key={i} crown={c} monsterName={monster.name} isHighlighted={String(c.id) === String(highlightCrownId)} />
-                )) : (
-                  <p className={styles.empty}>No large crowns recorded for this specimen.</p>
-                )}
-              </div>
-            </section>
+              {activeTab === 'hosts' ? (
+                <>
+                  {pairedGroups.length > 0 && (
+                    <section className={styles.crownSection} style={{ marginBottom: '40px' }}>
+                      <div className={styles.sectionTitle}>
+                        <Image src="/icons/largecrown.png" width={20} height={20} alt="" className="pixel-art" />
+                        <Image src="/icons/smallcrown.png" width={16} height={16} alt="" className="pixel-art" style={{ marginLeft: -8 }} />
+                        <h2 className="mh-title">Crown Pairs</h2>
+                      </div>
+                      <div className={styles.hunterList}>
+                        {pairedGroups.map((group) => {
+                          const smallC = group.find(c => c.type === 'small');
+                          const largeC = group.find(c => c.type === 'large');
+                          const isHl = group.some(c => String(c.id) === String(highlightCrownId));
+                          return (
+                            <HunterItem
+                              key={smallC.id}
+                              crown={smallC}
+                              linkedCrown={largeC}
+                              monsterName={monster.name}
+                              isHighlighted={isHl}
+                            />
+                          );
+                        })}
+                      </div>
+                    </section>
+                  )}
 
-            <section className={styles.crownSection}>
-              <div className={styles.sectionTitle}>
-                <Image src="/icons/smallcrown.png" width={24} height={24} alt="" className="pixel-art" />
-                <h2 className="mh-title">Small Crown Records</h2>
-              </div>
-              <div className={styles.hunterList}>
-                {smallCrowns.length > 0 ? smallCrowns.map((c, i) => (
-                  <HunterItem key={i} crown={c} monsterName={monster.name} isHighlighted={String(c.id) === String(highlightCrownId)} />
-                )) : (
-                  <p className={styles.empty}>No small crowns recorded for this specimen.</p>
-                )}
-              </div>
-            </section>
+                  <section className={styles.crownSection} style={{ marginBottom: '40px' }}>
+                    <div className={styles.sectionTitle}>
+                      <Image src="/icons/largecrown.png" width={24} height={24} alt="" className="pixel-art" />
+                      <h2 className="mh-title">Large Crowns</h2>
+                    </div>
+                    <div className={styles.hunterList}>
+                      {largeCrowns.length > 0 ? largeCrowns.map((c, i) => (
+                        <HunterItem key={i} crown={c} monsterName={monster.name} isHighlighted={String(c.id) === String(highlightCrownId)} />
+                      )) : (
+                        <p className={styles.empty}>No large crowns recorded yet.</p>
+                      )}
+                    </div>
+                  </section>
+
+                  <section className={styles.crownSection}>
+                    <div className={styles.sectionTitle}>
+                      <Image src="/icons/smallcrown.png" width={24} height={24} alt="" className="pixel-art" />
+                      <h2 className="mh-title">Small Crowns</h2>
+                    </div>
+                    <div className={styles.hunterList}>
+                      {smallCrowns.length > 0 ? smallCrowns.map((c, i) => (
+                        <HunterItem key={i} crown={c} monsterName={monster.name} isHighlighted={String(c.id) === String(highlightCrownId)} />
+                      )) : (
+                        <p className={styles.empty}>No small crowns recorded yet.</p>
+                      )}
+                    </div>
+                  </section>
+                </>
+              ) : (
+                <section className={styles.crownSection}>
+                  <div className={styles.sectionTitle}>
+                    <Image src="/icons/MHWilds-Wishlist_Pin_Icon.png" width={24} height={24} alt="" className="pixel-art" />
+                    <h2 className="mh-title">Hunters Seeking This Monster</h2>
+                  </div>
+                  <div className={styles.hunterList}>
+                    {wishlist.length > 0 ? wishlist.map((w, i) => (
+                      <Link href={`/profile/${w.user_id}`} key={i} className={styles.wishlistUser}>
+                        <div className={styles.userLeft}>
+                          {w.avatar_url && <img src={w.avatar_url} alt="" className={styles.userAvatar} />}
+                          <div className={styles.userInfo}>
+                            <span className={styles.userName}>{w.username}</span>
+                            <span className={styles.userStatus}>{w.status_message || "Active Hunter"}</span>
+                          </div>
+                        </div>
+                        <div className={styles.userRight}>
+                          <div className={styles.needsLabel}>NEEDS:</div>
+                          <div className={styles.needsIcons}>
+                            {(w.type === 'small' || w.type === 'both') && <Image src="/icons/smallcrown.png" width={16} height={16} alt="S" className="pixel-art" />}
+                            {(w.type === 'large' || w.type === 'both') && <Image src="/icons/largecrown.png" width={16} height={16} alt="L" className="pixel-art" />}
+                          </div>
+                        </div>
+                      </Link>
+                    )) : (
+                      <p className={styles.empty}>No hunters are currently tracking this monster.</p>
+                    )}
+                  </div>
+                </section>
+              )}
+            </div>
           </div>
         </div>
       </div>

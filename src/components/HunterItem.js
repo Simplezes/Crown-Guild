@@ -27,7 +27,6 @@ export default function HunterItem({ crown, linkedCrown = null, monsterName, isH
     ? inv_monster_name?.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
     : null;
 
-  // For linked S&L pairs
   const smallC = linkedCrown ? (crown.type === 'small' ? crown : linkedCrown) : null;
   const largeC = linkedCrown ? (crown.type === 'large' ? crown : linkedCrown) : null;
   const anyTempered = linkedCrown ? (crown.tempered || linkedCrown.tempered) : null;

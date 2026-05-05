@@ -110,6 +110,102 @@
   gap: 24px;
 }
 
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  background: #1a1512;
+  border: 1px solid #4a3c35;
+  color: #d4c2a8;
+  padding: 12px 24px;
+  text-decoration: none;
+  font-family: 'Marcellus', serif;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+  letter-spacing: 0.1em;
+}
+
+.tab:hover {
+  border-color: var(--mh-gold);
+  color: #fff;
+  background: #251e1a;
+}
+
+.tabActive {
+  background: var(--mh-gold);
+  border-color: #f1e4c1;
+  color: #000;
+  font-weight: bold;
+}
+
+.wishlistUser {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--mh-glass);
+  border: 1px solid var(--mh-border);
+  padding: 16px 24px;
+  text-decoration: none;
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
+}
+
+.wishlistUser:hover {
+  border-color: var(--mh-gold);
+  background: rgba(181, 154, 93, 0.05);
+  transform: translateX(4px);
+}
+
+.userLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.userAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--mh-gold-dim);
+}
+
+.userName {
+  display: block;
+  font-family: 'Marcellus', serif;
+  font-size: 1.1rem;
+  color: var(--mh-gold);
+}
+
+.userStatus {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--mh-tan-dark);
+  font-style: italic;
+}
+
+.userRight {
+  text-align: right;
+}
+
+.needsLabel {
+  font-size: 0.6rem;
+  color: var(--mh-tan-dark);
+  margin-bottom: 4px;
+  letter-spacing: 0.1em;
+}
+
+.needsIcons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
 .attrGroup label {
   display: block;
   font-family: 'Marcellus', serif;

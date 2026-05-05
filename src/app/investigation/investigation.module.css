@@ -1,84 +1,84 @@
 .main {
   min-height: 100vh;
   padding-top: 140px;
-  padding-bottom: 60px;
+  padding-bottom: 80px;
 }
 
 .pageHeader {
-  margin-bottom: 40px;
-  border-bottom: 1px solid var(--mh-border);
-  padding-bottom: 24px;
+  margin-bottom: 60px;
+  text-align: center;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.titleGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 24px;
 }
 
 .indicator {
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: var(--mh-tan-dark);
+  gap: 10px;
+  background: var(--mh-glass);
+  border: 1px solid var(--mh-border);
+  padding: 6px 16px;
   font-family: 'Marcellus', serif;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
   font-size: 0.75rem;
-  margin-bottom: 8px;
-}
-
-.titleGroup h1 {
-  font-size: 3rem;
-  margin-bottom: 16px;
+  color: var(--mh-tan-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
 }
 
 .description {
-  color: var(--mh-tan);
-  max-width: 600px;
+  color: var(--mh-tan-dark);
+  font-size: 0.95rem;
   line-height: 1.6;
-}
-
-.sectionTitle {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
 }
 
 .monsterGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-auto-rows: 1fr;
+  gap: 24px;
+}
+
+.monsterCardWrapper {
+  position: relative;
+  transition: var(--transition-mh);
+  display: flex;
+  flex-direction: column;
+  background: var(--mh-glass);
+  border: 1px solid var(--mh-border);
+}
+
+.monsterCardWrapper:hover {
+  transform: translateY(-5px);
+  border-color: var(--mh-gold);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
 
 .monsterCard {
-  background: var(--mh-glass);
-  border: 1px solid var(--mh-border);
-  padding: 16px;
+  padding: 30px 20px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  gap: 16px;
   text-decoration: none;
-  color: inherit;
-  transition: var(--transition-mh);
   position: relative;
+  flex: 1;
 }
 
-.monsterCard::before {
-  content: '';
+.completedBadge {
   position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 2px;
-  background: var(--mh-red);
-  opacity: 0;
-  transition: var(--transition-mh);
-}
-
-.monsterCard:hover {
-  border-color: var(--mh-gold);
-  transform: translateY(-2px);
-}
-
-.monsterCard:hover::before {
-  opacity: 1;
+  top: 10px;
+  left: 10px;
+  opacity: 0.8;
 }
 
 .iconWrapper {
@@ -87,64 +87,65 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.fallback {
-  font-size: 2.5rem;
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
 }
 
 .monsterName {
   font-family: 'Marcellus', serif;
-  font-size: 1rem;
-  text-align: center;
+  font-size: 1.1rem;
   color: var(--mh-tan);
-  transition: var(--transition-mh);
-}
-
-.monsterCard:hover .monsterName {
-  color: var(--mh-gold);
-}
-
-.completedBadge {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  background: var(--mh-glass);
-  border: 1px solid var(--mh-gold);
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  min-height: 2.6em;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 8px rgba(181, 154, 93, 0.4);
-  z-index: 5;
+}
+
+.demandStat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.demandLabel {
+  font-size: 0.6rem;
+  color: var(--mh-tan-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.demandValue {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--mh-gold);
+  font-weight: bold;
+}
+
+.wishlistControl {
+  background: rgba(0, 0, 0, 0.4);
+  border-top: 1px solid var(--mh-border);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.controlLabel {
+  font-size: 0.65rem;
+  color: var(--mh-tan-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
 @media (max-width: 768px) {
-  .main {
-    padding-top: 100px;
-  }
-
-  .titleGroup h1 {
-    font-size: 2.2rem;
-  }
-
   .monsterGrid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 12px;
-  }
-
-  .monsterCard {
-    padding: 12px;
-  }
-
-  .iconWrapper {
-    width: 60px;
-    height: 60px;
-  }
-
-  .monsterName {
-    font-size: 0.85rem;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
   }
 }

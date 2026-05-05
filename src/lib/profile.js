@@ -88,9 +88,33 @@ export async function getProfileData(userId) {
       args: [userId]
     });
 
+    const wishlistRes = await db.execute({
+      sql: `SELECT w.*, m.name as monster_name, m.emoji, m.image_name
+            FROM wishlist w
+            JOIN monsters m ON w.monster_id = m.id
+            WHERE w.user_id = ?
+            ORDER BY m.name ASC`,
+      args: [userId]
+    });
+
+    const wishlistMap = {};
+    wishlistRes.rows.forEach(row => {
+      const mid = row.monster_id;
+      if (!wishlistMap[mid]) {
+        wishlistMap[mid] = { ...row };
+      } else {
+        const existing = wishlistMap[mid].type;
+        const incoming = row.type;
+        if (existing === 'both' || incoming === 'both' || (existing !== incoming)) {
+          wishlistMap[mid].type = 'both';
+        }
+      }
+    });
+
     return {
       user: { ...user },
       crowns: crownsRes.rows.map(row => ({ ...row })),
+      wishlist: Object.values(wishlistMap),
       stats: statsRes.rows[0],
       activity: activityRes.rows[0],
       completion,

@@ -102,7 +102,7 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
             width={16} height={16} alt={crown.type} className="pixel-art"
           />
         </div>
-        <Link href={`/monster/${crown.name}`} className={styles.monsterLink}>
+        <Link href={`/monster/${crown.name}?crownId=${crown.id}&user=${userId}`} className={styles.monsterLink}>
           <MonsterIcon
             imageName={crown.image_name}
             name={crown.name}
@@ -111,7 +111,7 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
           />
         </Link>
         <div className={styles.crownOverlay}>
-          <Link href={`/monster/${crown.name}`} className={styles.nameLink}>
+          <Link href={`/monster/${crown.name}?crownId=${crown.id}&user=${userId}`} className={styles.nameLink}>
             <h3>{crown.name}</h3>
           </Link>
           <div className={styles.crownDetail}>
@@ -190,11 +190,11 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
             />
           ))}
         </div>
-        <Link href={`/monster/${first.name}`} className={styles.monsterLink}>
+        <Link href={`/monster/${first.name}?crownId=${first.id}&user=${userId}`} className={styles.monsterLink}>
           <MonsterIcon imageName={first.image_name} name={first.name} tempered={anyTempered} size={64} />
         </Link>
         <div className={styles.crownOverlay}>
-          <Link href={`/monster/${first.name}`} className={styles.nameLink}>
+          <Link href={`/monster/${first.name}?crownId=${first.id}&user=${userId}`} className={styles.nameLink}>
             <h3>{first.name}</h3>
           </Link>
           <div className={styles.linkedCrownRows}>

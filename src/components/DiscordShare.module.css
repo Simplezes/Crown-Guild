@@ -1,0 +1,26 @@
+.shareBtn {
+  gap: 12px !important;
+  background: var(--mh-gold) !important;
+  color: var(--mh-black) !important;
+  border: 1px solid var(--mh-gold-bright) !important;
+  box-shadow: 0 4px 15px rgba(181, 154, 93, 0.15) !important;
+  font-family: 'Marcellus', serif !important;
+  font-size: 0.8rem !important;
+}
+
+.shareBtn:hover {
+  background: var(--mh-gold-bright) !important;
+  transform: translateY(-2px) scale(1.02) !important;
+}
+
+.shareBtn.copied {
+  background: #2ecc71 !important;
+  border-color: #27ae60 !important;
+  color: #fff !important;
+}
+
+.shareBtn span {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}

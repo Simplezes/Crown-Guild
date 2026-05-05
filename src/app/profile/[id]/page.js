@@ -3,44 +3,28 @@ import styles from "./profile.module.css";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { fetchDiscordUser } from "@/lib/discord";
-import { getMonsterCount } from "@/lib/monsters";
 import { auth } from "@/auth";
 import ProfileCrowns from "@/components/ProfileCrowns";
-import StatusEditor from "@/components/StatusEditor";
-
+import ProfileSettings from "@/components/ProfileSettings";
 import { getProfileData, getHunterRank } from "@/lib/profile";
 import CrownSummary from "@/components/CrownSummary";
-
+import DiscordShare from "@/components/DiscordShare";
+import { getAllMonsters } from "@/lib/monsters";
+import WishlistGrid from "@/components/WishlistGrid";
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
   const data = await getProfileData(id);
-
-  if (!data) {
-    return {
-      title: "Hunter Not Found | Crown Guild",
-    };
-  }
+  if (!data) return { title: "Hunter Not Found" };
 
   const imageUrl = `/profile/${encodeURIComponent(id)}/og?v=${data.stats.total || 0}`;
-  const userRank = getHunterRank(data.activity.hosted || 0, data.activity.joined || 0);
-
   return {
     openGraph: {
       title: `${data.user.username}'s Guild Card`,
-      description: `${userRank} • ${data.stats.total || 0} Total Crowns (S: ${data.stats.small || 0} | L: ${data.stats.large || 0} | T: ${data.stats.tempered || 0}) • Field Guide: ${data.completion}%`,
-      images: [
-        {
-          url: imageUrl,
-          width: 1200,
-          height: 630,
-        },
-      ],
+      description: `MR ${data.stats.total || 0} Hunter • Guide Progress: ${data.completion}%`,
+      images: [{ url: imageUrl, width: 1200, height: 630 }],
     },
-    twitter: {
-      card: 'summary_large_image',
-    }
+    twitter: { card: 'summary_large_image' }
   };
 }
 
@@ -54,136 +38,121 @@ export default async function Profile({ params }) {
 
   const { user, crowns, stats, activity, completion, topAssist } = data;
   const userRank = getHunterRank(activity.hosted || 0, activity.joined || 0);
+  const allMonsters = await getAllMonsters(true);
 
   return (
     <main className={styles.main}>
       <div className="premium-container">
-        <div className={styles.layout + " animate-mh"}>
-          <aside className={styles.sidebar}>
-            <div className={styles.hunterCard}>
-              <div className={styles.cardHeader}>
-                <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={40} height={40} alt="" className="pixel-art" style={{ borderRadius: 10 }} />
-                <h2 className="mh-title">Hunter Card</h2>
-              </div>
-
-              <div className={styles.profileTop}>
-                <div className={styles.avatarWrapper}>
-                  <img
-                    src={user.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"}
-                    alt=""
-                    className={styles.profileAvatar}
-                    style={{ borderRadius: 10 }}
-                  />
+        <div className={styles.bentoGrid + " animate-mh"}>
+          <div className={styles.tile + " " + styles.identityTile}>
+            <div className={styles.avatarGlow}>
+              <img src={user.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" className={styles.avatar} />
+            </div>
+            <div className={styles.idContent}>
+              <div className={styles.rankBadge}>{userRank}</div>
+              <h1 className="gold-text">{user.username}</h1>
+              <p className={styles.memberId}>ID: {user.id}</p>
+              
+              {user.status_message && (
+                <div className={styles.statusBox}>
+                  <p>"{user.status_message}"</p>
                 </div>
-                <div className={styles.identity}>
-                  <h1 className="gold-text">{user.username}</h1>
-                  <p className={styles.hunterRank}>{userRank}</p>
-                  <p className={styles.guildId}>Member ID: {user.id}</p>
-                </div>
-              </div>
+              )}
+            </div>
+          </div>
 
-              <StatusEditor initialStatus={user.status_message} isOwner={isOwner} />
-
-              {user.lobby_id && (
-                <div className={styles.lobbyBlock}>
-                  <div className={styles.lobbyHeader}>
-                    <Image src="/icons/MHWilds-Lobby_Icon.png" width={18} height={18} alt="" className="pixel-art" />
-                    <label>Lobby</label>
-                  </div>
+          <div className={styles.tile + " " + styles.opTile}>
+            <div className={styles.tileHeader}>
+              <Image src="/icons/MHWilds-Lobby_Icon.png" width={16} height={16} alt="" className="pixel-art" />
+              <span>LOBBY INFO</span>
+            </div>
+            {user.lobby_id ? (
+              <div className={styles.opBody}>
+                <div className={styles.opData}>
+                  <label>LOBBY ID</label>
                   <code>{user.lobby_id}</code>
                 </div>
-              )}
-
-              <div className={styles.section}>
-                <div className={styles.sectionHeader}>
-                  <Image src="/icons/smallcrown.png" width={14} height={14} alt="" className="pixel-art" />
-                  <span className="mh-title">Crown Collection</span>
-                </div>
-                <div className={styles.statLine}>
-                  <label>Small</label>
-                  <span>{stats.small || 0}</span>
-                </div>
-                <div className={styles.statLine}>
-                  <label>Large</label>
-                  <span>{stats.large || 0}</span>
-                </div>
-                <div className={styles.statLine}>
-                  <label>Tempered</label>
-                  <span style={{ color: 'var(--mh-red)' }}>{stats.tempered || 0}</span>
-                </div>
-                <div className={styles.totalLine}>
-                  <label>Total</label>
-                  <span className="gold-text">{stats.total || 0}</span>
-                </div>
-                <div className={styles.crownSummaryWrapper}>
-                  <CrownSummary crowns={crowns} />
-                </div>
+                {user.quest_password && (
+                  <div className={styles.opData}>
+                    <label>PASSCODE</label>
+                    <code>{user.quest_password}</code>
+                  </div>
+                )}
               </div>
+            ) : (
+              <div className={styles.noOp}>Standby - No Active Operation</div>
+            )}
+            <div className={styles.opActions}>
+              <ProfileSettings user={user} isOwner={isOwner} />
+            </div>
+          </div>
 
-              <div className={styles.section}>
-                <div className={styles.sectionHeader}>
-                  <Image src="/icons/MHWilds-Squad_Information_Counter_Icon.png" width={14} height={14} alt="" className="pixel-art" />
-                  <span className="mh-title">Guild Activity</span>
+          <div className={styles.tile + " " + styles.progressTile}>
+            <div className={styles.tileHeader}>
+              <Image src="/icons/MHWilds-Notes_Checkmark_Icon.png" width={16} height={16} alt="" className="pixel-art" />
+              <span>COLLECTION PROGRESS</span>
+            </div>
+            <div className={styles.progressBody}>
+              <div className={styles.completionVal}>{completion}%</div>
+              <div className={styles.miniStats}>
+                <div className={styles.miniStat}>
+                  <label>S</label><span>{stats.small || 0}</span>
                 </div>
-                <div className={styles.statLine}>
-                  <div className={styles.iconLabel}>
-                    <Image src="/icons/MHWilds-Quest_Members_Icon.png" width={12} height={12} alt="" className="pixel-art" />
-                    <label>Hosted</label>
-                  </div>
-                  <span>{activity.hosted || 0}</span>
+                <div className={styles.miniStat}>
+                  <label>L</label><span>{stats.large || 0}</span>
                 </div>
-                <div className={styles.statLine}>
-                  <div className={styles.iconLabel}>
-                    <Image src="/icons/MHWilds-Completed_Objective_Icon.png" width={12} height={12} alt="" className="pixel-art" />
-                    <label>Joined</label>
-                  </div>
-                  <span>{activity.joined || 0}</span>
+                <div className={styles.miniStat}>
+                  <label>T</label><span>{stats.tempered || 0}</span>
                 </div>
               </div>
             </div>
-          </aside>
-
-          <section className={styles.gallery}>
-            <div className={styles.topDashboard}>
-              <div className={styles.dashboardCard}>
-                <div className={styles.dbHeader}>
-                  <div className={styles.dbTitle}>
-                    <Image src="/icons/MHWilds-Notes_Checkmark_Icon.png" width={20} height={20} alt="" className="pixel-art" />
-                    <h3 className="mh-title">Field Guide Completion</h3>
-                  </div>
-                  <span className="gold-text">{completion}%</span>
-                </div>
-                <div className={styles.progressBar}>
-                  <div className={styles.progressFill} style={{ width: `${completion}%` }}></div>
-                </div>
-              </div>
-
-              {topAssist && (
-                <div className={styles.dashboardCard}>
-                  <div className={styles.dbTitle} style={{ marginBottom: '12px' }}>
-                    <Image src="/icons/MHWilds-Link_Party_Icon.png" width={20} height={20} alt="" className="pixel-art" />
-                    <h3 className="mh-title">Top Assist</h3>
-                  </div>
-                  <div className={styles.assistBox}>
-                    <Image src={`/monsters/${topAssist.image_name}`} width={40} height={40} alt="" className="pixel-art" />
-                    <div className={styles.assistDetails}>
-                      <span className={styles.assistMonster}>{topAssist.name}</span>
-                      <span className={styles.assistNote}>Shared {topAssist.count} times</span>
-                    </div>
-                  </div>
-                </div>
-              )}
+            <div className={styles.progressBar}>
+              <div className={styles.progressFill} style={{ width: `${completion}%` }} />
             </div>
+          </div>
 
-            <header className={styles.galleryHeader}>
-              <h2 className="mh-title">Crown in Stock</h2>
-              <div className={styles.recordCount}>
-                <span>{crowns.length} Crowns</span>
-              </div>
-            </header>
+          <div className={styles.tile + " " + styles.wishlistTile}>
+            <div className={styles.tileHeader}>
+              <Image src="/icons/MHWilds-Wishlist_Pin_Icon.png" width={16} height={16} alt="" className="pixel-art" />
+              <span>MY WISHLIST</span>
+            </div>
+            <div className={styles.wishlistScroll}>
+              <WishlistGrid wishlist={data.wishlist} isOwner={isOwner} userId={user.id} />
+            </div>
+          </div>
+        </div>
 
-            <ProfileCrowns initialCrowns={crowns} isOwner={isOwner} userId={user.id} />
-          </section>
+        <section className={styles.ledgerSection}>
+          <header className={styles.ledgerHeader}>
+            <div className={styles.ledgerTitle}>
+              <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={24} height={24} alt="" className="pixel-art" />
+              <h2 className="mh-title">Crown Collection</h2>
+            </div>
+            <div className={styles.ledgerMeta}>
+              <DiscordShare id={user.id} username={user.username} crowns={crowns} wishlist={data.wishlist} />
+            </div>
+          </header>
+
+          <div className={styles.summarySection}>
+            <div className={styles.summaryHeader}>
+              <h3 className="mh-title">Completion Tracker</h3>
+              <p>Visual view of all monsters in the game and your current progress.</p>
+            </div>
+            <CrownSummary crowns={crowns} allMonsters={allMonsters} />
+          </div>
+
+          <div className={styles.galleryHeader} style={{ marginTop: '60px' }}>
+            <h2 className="mh-title">My Crowns</h2>
+            <div className={styles.recordCount}>
+              <span>{crowns.length} Crowns</span>
+            </div>
+          </div>
+
+          <ProfileCrowns initialCrowns={crowns} isOwner={isOwner} userId={user.id} />
+        </section>
+
+        <div className={styles.footer}>
+          <Link href="/registry" className={styles.backLink}>← Back to Global Crown List</Link>
         </div>
       </div>
     </main>
