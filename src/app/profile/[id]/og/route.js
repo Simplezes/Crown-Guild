@@ -2,6 +2,8 @@ import { ImageResponse } from 'next/og';
 import { getProfileData, getHunterRank } from "@/lib/profile";
 
 export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET(request, { params }) {
   const { id } = await params;
@@ -304,7 +306,9 @@ export async function GET(request, { params }) {
     {
       ...size,
       headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Cache-Control': 'no-store, no-cache, max-age=0, must-revalidate, proxy-revalidate',
+        Pragma: 'no-cache',
+        Expires: '0',
       },
     }
   );

@@ -19,6 +19,8 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
   const toast = useToast();
   const confirm = useConfirm();
 
+  const buildShareNonce = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+
   useEffect(() => {
     setCrowns(initialCrowns);
     setPage(1);
@@ -128,7 +130,7 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
           <div className={styles.cardActions}>
             <button
               onClick={() => {
-                const url = `${window.location.origin}/monster/${encodeURIComponent(crown.name)}?crownId=${crown.id}&user=${userId}`;
+                const url = `${window.location.origin}/monster/${encodeURIComponent(crown.name)}?crownId=${crown.id}&user=${userId}&share=${buildShareNonce()}`;
                 navigator.clipboard.writeText(url);
                 toast.info("Link copied to clipboard!");
               }}
@@ -219,7 +221,7 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
           <div className={styles.cardActions}>
             <button
               onClick={() => {
-                const url = `${window.location.origin}/monster/${encodeURIComponent(first.name)}?crownId=${first.id}&user=${userId}`;
+                const url = `${window.location.origin}/monster/${encodeURIComponent(first.name)}?crownId=${first.id}&user=${userId}&share=${buildShareNonce()}`;
                 navigator.clipboard.writeText(url);
                 toast.info("Link copied to clipboard!");
               }}
