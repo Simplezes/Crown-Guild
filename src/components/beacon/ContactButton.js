@@ -168,7 +168,7 @@ export default function ContactButton({ hostId, monsterId, monsterName, crownId,
                 }}
               >
                 <div className={styles.optionIcon}>
-                  <Image src="/icons/MHWilds-Notes_Checkmark_Icon.png" width={18} height={18} alt="" className="pixel-art" />
+                  <Image src="/icons/MHWilds-Link_Party_Icon.png" width={18} height={18} alt="" className="pixel-art" />
                 </div>
                 <div className={styles.optionText}>
                   <span className={styles.label}>{status === 'shared' ? 'Link Copied!' : 'Share Crown'}</span>
@@ -178,7 +178,7 @@ export default function ContactButton({ hostId, monsterId, monsterName, crownId,
 
               <button className={styles.option + ' ' + styles.sos} onClick={handleRequestSOS}>
                 <div className={styles.optionIcon}>
-                  <Image src="/icons/MHWilds-Link_Party_Icon.png" width={18} height={18} alt="" className="pixel-art" />
+                  <Image src="/icons/MHWilds-Quest_Menu_Icon.png" width={18} height={18} alt="" className="pixel-art" />
                 </div>
                 <div className={styles.optionText}>
                   <span className={styles.label}>
