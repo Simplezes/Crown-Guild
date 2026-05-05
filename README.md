@@ -215,7 +215,7 @@ CREATE TABLE active_missions (
 
 ## Related Projects
 
-- **[Crown Guild Bot](../bot/)** — The companion Discord bot that handles slash commands (`/crown`, `/hunt`, `/beacon`) and triggers Pusher events to keep the website in sync.
+- **[Crown Guild Bot](https://github.com/Simplezes/Crown-Guild-Discord)** — The companion Discord bot that handles slash commands (`/crown`, `/hunt`, etc) and triggers Pusher events to keep the website in sync.
 
 ---
 
