@@ -117,7 +117,6 @@ export default function ContactButton({ hostId, monsterId, monsterName, crownId,
             <span className="mh-title">{isOwnCrown ? 'Host Controls' : 'Contact Options'}</span>
           </div>
 
-          {/* ── Host-only options ─────────────────────── */}
           {isOwnCrown && (
             <button className={styles.option + ' ' + styles.sos} onClick={handleBroadcastSOS}>
               <div className={styles.optionIcon}>
@@ -132,7 +131,6 @@ export default function ContactButton({ hostId, monsterId, monsterName, crownId,
             </button>
           )}
 
-          {/* ── Seeker-only options ───────────────────── */}
           {!isOwnCrown && (
             <>
               <a

@@ -46,7 +46,7 @@ export async function GET(request, { params }) {
     );
   }
 
-  const { user, crowns, stats, activity, completion, topAssist } = data;
+  const { user, crowns, stats, activity, completion, topAssist, wishlist } = data;
   const userRank = getHunterRank(activity.hosted || 0, activity.joined || 0);
   const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
   const linkedNames = new Set();
@@ -83,7 +83,7 @@ export async function GET(request, { params }) {
   const multi      = allMonsters.filter(m => m.linked);
   const smallOnly  = allMonsters.filter(m => m.small && !m.linked);
   const largeOnly  = allMonsters.filter(m => m.large && !m.linked);
-  const MAX_ROW    = 14;
+
 
   const uniqueImageNames = [...new Set(allMonsters.map(m => m.image_name).filter(Boolean))];
   const validImageSet = new Set(
@@ -107,31 +107,40 @@ export async function GET(request, { params }) {
     avatarUrl = avatarUrl.replace('.webp', '.png');
   }
 
-  const iconSize = 70;
-  const iconGap  = 6;
+  const iconGap = 4;
+  // Left panel usable area: 1200 - 56(outer pad) - 1(border) - 300(sidebar) - 28(left pad) - 16(right pad) = 799px wide
+  // Height: 630 - 56(outer pad) - 44(header) - 44(panel pad) = 486px
+  const availW = 799;
+  const availH = 486;
+  const iconSizeCandidates = [96, 80, 72, 64, 56, 48, 40, 32];
+  const groups = [smallOnly.length, largeOnly.length, multi.length].filter(n => n > 0);
+  const iconSize = iconSizeCandidates.find(s => {
+    const perRow = Math.floor(availW / (s + iconGap));
+    if (perRow === 0) return false;
+    let h = 0;
+    for (let i = 0; i < groups.length; i++) {
+      if (i > 0) h += 10; // group gap
+      h += 24; // label row
+      h += Math.ceil(groups[i] / perRow) * (s + iconGap);
+    }
+    return h <= availH;
+  }) ?? 32;
 
   const renderGroup = (label, rawItems) => {
     const items = filterValid(rawItems);
     if (items.length === 0) return null;
-    const visible = items.slice(0, MAX_ROW);
-    const overflow = items.length - MAX_ROW;
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: 13, color: colors.gold, letterSpacing: '3px', fontWeight: 'bold', display: 'flex' }}>{label}</span>
-          <span style={{ fontSize: 11, color: colors.tanDark, display: 'flex' }}>×{rawItems.length}</span>
+          <span style={{ fontSize: 10, color: colors.gold, letterSpacing: '3px', fontWeight: 'bold', display: 'flex' }}>{label}</span>
+          <span style={{ fontSize: 9, color: colors.tanDark, display: 'flex' }}>×{items.length}</span>
         </div>
         <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: `${iconGap}px` }}>
-          {visible.map(m => (
+          {items.map(m => (
             <div key={m.name} style={{ width: iconSize, height: iconSize, border: `1px solid ${colors.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.03)' }}>
-              <img src={`${baseUrl}/monsters/${m.image_name}`} width={iconSize - 6} height={iconSize - 6} style={{ objectFit: 'contain', imageRendering: 'pixelated' }} />
+              <img src={`${baseUrl}/monsters/${m.image_name}`} width={iconSize - 4} height={iconSize - 4} style={{ objectFit: 'contain', imageRendering: 'pixelated' }} />
             </div>
           ))}
-          {overflow > 0 && (
-            <div style={{ width: iconSize, height: iconSize, border: `1px solid ${colors.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.03)', fontSize: 12, color: colors.tanDark }}>
-              +{overflow}
-            </div>
-          )}
         </div>
       </div>
     );
@@ -157,24 +166,29 @@ export async function GET(request, { params }) {
         <div
           style={{
             display: 'flex',
-            flexDirection: 'column',
+            flexDirection: 'row',
             width: '100%',
             height: '100%',
             background: colors.glass,
             border: `1px solid ${colors.border}`,
             position: 'relative',
-            padding: '24px 28px',
-            gap: '0px',
           }}
         >
           <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: '4px', background: `linear-gradient(to bottom, ${colors.red}, transparent)` }} />
 
-          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, gap: '16px' }}>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
-              <img src={`${baseUrl}/icons/MHWilds-Expedition_Record_Board_Icon.png`} width={30} height={30} style={{ imageRendering: 'pixelated' }} />
-              <span style={{ fontSize: 22, letterSpacing: '4px', color: colors.gold, display: 'flex' }}>CROWN IN STOCK</span>
-              <span style={{ fontSize: 14, color: colors.tanDark, marginLeft: '8px', display: 'flex' }}>- {allMonsters.length} monsters</span>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            flex: 1,
+            padding: '22px 16px 22px 28px',
+            borderRight: `1px solid ${colors.border}`,
+            gap: '10px',
+            overflow: 'hidden',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '2px' }}>
+              <img src={`${baseUrl}/icons/MHWilds-Expedition_Record_Board_Icon.png`} width={24} height={24} style={{ imageRendering: 'pixelated' }} />
+              <span style={{ fontSize: 16, letterSpacing: '4px', color: colors.gold, display: 'flex' }}>CROWN REGISTRY</span>
+              <span style={{ fontSize: 11, color: colors.tanDark, marginLeft: '6px', display: 'flex' }}>— {allMonsters.length} species</span>
             </div>
 
             {renderGroup('SMALL', smallOnly)}
@@ -182,41 +196,122 @@ export async function GET(request, { params }) {
             {renderGroup('S & L', multi)}
 
             {allMonsters.length === 0 && (
-              <span style={{ fontSize: 18, color: colors.tanDark, display: 'flex' }}>No crowns recorded yet.</span>
+              <span style={{ fontSize: 16, color: colors.tanDark, display: 'flex' }}>No crowns recorded yet.</span>
             )}
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '20px', paddingTop: '16px', borderTop: `1px solid ${colors.border}`, marginTop: '16px' }}>
-            <div style={{ width: '72px', height: '72px', border: `1px solid ${colors.border}`, display: 'flex', flexShrink: 0 }}>
-              <img src={avatarUrl} width={72} height={72} style={{ objectFit: 'cover' }} />
-            </div>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            width: '300px',
+            padding: '22px 20px',
+            gap: '11px',
+          }}>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', marginRight: 'auto' }}>
-              <span style={{ fontSize: 30, color: colors.goldBright, display: 'flex' }}>{user.username}</span>
-              <span style={{ fontSize: 13, color: colors.gold, letterSpacing: '2px', display: 'flex' }}>{userRank}</span>
-            </div>
-
-            {[
-              { label: 'CROWNS',     value: stats.total || 0 },
-              { label: 'SMALL',      value: stats.small  || 0 },
-              { label: 'LARGE',      value: stats.large  || 0 },
-              { label: 'COMPLETION', value: `${completion}%` },
-            ].map(({ label, value }) => (
-              <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: '8px 16px', border: `1px solid ${colors.border}`, gap: '2px' }}>
-                <span style={{ fontSize: 10, color: colors.tanDark, letterSpacing: '1px', display: 'flex' }}>{label}</span>
-                <span style={{ fontSize: 22, fontWeight: 'bold', color: colors.goldBright, display: 'flex' }}>{value}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '58px', height: '58px', border: `1px solid ${colors.border}`, display: 'flex', flexShrink: 0 }}>
+                <img src={avatarUrl} width={58} height={58} style={{ objectFit: 'cover' }} />
               </div>
-            ))}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <span style={{ fontSize: 20, color: colors.goldBright, display: 'flex', lineHeight: '1.1' }}>{user.username}</span>
+                <div style={{ display: 'flex', background: colors.umber, padding: '3px 8px', border: `1px solid ${colors.border}` }}>
+                  <span style={{ fontSize: 10, color: colors.gold, letterSpacing: '1px', display: 'flex' }}>{userRank.toUpperCase()}</span>
+                </div>
+              </div>
+            </div>
 
-            <span style={{ fontSize: 11, color: colors.tanDark, opacity: 0.5, display: 'flex', alignSelf: 'flex-end' }}>CROWN GUILD</span>
+            {user.status_message && (
+              <div style={{ display: 'flex', padding: '8px 10px', background: 'rgba(181,154,93,0.05)', borderLeft: `2px solid ${colors.gold}` }}>
+                <span style={{ fontSize: 12, color: colors.tan, fontStyle: 'italic', display: 'flex' }}>"{user.status_message}"</span>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', height: '1px', background: colors.border }} />
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <span style={{ fontSize: 10, color: colors.gold, letterSpacing: '3px', display: 'flex' }}>CROWN STATS</span>
+              <div style={{ display: 'flex', gap: '5px' }}>
+                {[
+                  { label: 'TOTAL',    value: stats.total    || 0, color: colors.goldBright },
+                  { label: 'LARGE',    value: stats.large    || 0, color: colors.gold },
+                  { label: 'SMALL',    value: stats.small    || 0, color: colors.gold },
+                  { label: 'TEMPERED', value: stats.tempered || 0, color: '#e06060' },
+                ].map(({ label, value, color }) => (
+                  <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: '6px 4px', border: `1px solid ${colors.border}`, flex: 1, gap: '2px' }}>
+                    <span style={{ fontSize: 8, color: colors.tanDark, letterSpacing: '0.5px', display: 'flex' }}>{label}</span>
+                    <span style={{ fontSize: 18, fontWeight: 'bold', color, display: 'flex' }}>{value}</span>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: 9, color: colors.tanDark, letterSpacing: '2px', display: 'flex' }}>COMPLETION</span>
+                  <span style={{ fontSize: 13, color: colors.goldBright, fontWeight: 'bold', display: 'flex' }}>{completion}%</span>
+                </div>
+                <div style={{ display: 'flex', height: '6px', background: 'rgba(255,255,255,0.06)', border: `1px solid ${colors.border}` }}>
+                  <div style={{ display: 'flex', height: '100%', width: `${parseFloat(completion)}%`, background: `linear-gradient(to right, ${colors.gold}, ${colors.goldBright})` }} />
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', height: '1px', background: colors.border }} />
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <span style={{ fontSize: 10, color: colors.gold, letterSpacing: '3px', display: 'flex' }}>GUILD ACTIVITY</span>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                {[
+                  { label: 'HUNTS HOSTED', value: activity.hosted || 0 },
+                  { label: 'HUNTS JOINED', value: activity.joined || 0 },
+                ].map(({ label, value }) => (
+                  <div key={label} style={{ display: 'flex', flexDirection: 'column', flex: 1, alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: '8px 4px', border: `1px solid ${colors.border}`, gap: '3px' }}>
+                    <span style={{ fontSize: 8, color: colors.tanDark, letterSpacing: '0.5px', display: 'flex' }}>{label}</span>
+                    <span style={{ fontSize: 22, fontWeight: 'bold', color: colors.goldBright, display: 'flex' }}>{value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {topAssist && (
+              <>
+                <div style={{ display: 'flex', height: '1px', background: colors.border }} />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <span style={{ fontSize: 10, color: colors.gold, letterSpacing: '3px', display: 'flex' }}>TOP ASSIST</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.03)', padding: '8px 10px', border: `1px solid ${colors.border}` }}>
+                    {topAssist.image_name && (
+                      <img src={`${baseUrl}/monsters/${topAssist.image_name}`} width={36} height={36} style={{ objectFit: 'contain', imageRendering: 'pixelated' }} />
+                    )}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      <span style={{ fontSize: 13, color: colors.tan, display: 'flex' }}>{topAssist.name}</span>
+                      <span style={{ fontSize: 10, color: colors.tanDark, display: 'flex' }}>{topAssist.count}× hosted</span>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {wishlist?.length > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: 10, color: colors.tanDark, letterSpacing: '2px', display: 'flex' }}>WISHLIST</span>
+                <span style={{ fontSize: 12, color: colors.gold, display: 'flex' }}>{wishlist.length} monsters</span>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', marginTop: 'auto', justifyContent: 'flex-end' }}>
+              <span style={{ fontSize: 10, color: colors.tanDark, opacity: 0.5, letterSpacing: '2px', display: 'flex' }}>CROWN GUILD</span>
+            </div>
           </div>
         </div>
       </div>
     ),
-    { ...size,
+    {
+      ...size,
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
       },
     }
   );
 }
+
+
+
+

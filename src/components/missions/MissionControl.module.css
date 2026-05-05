@@ -340,8 +340,6 @@
   transform: scale(1.1);
 }
 
-/* ── Group mission card ─────────────────────────────────── */
-
 .groupCard {
   pointer-events: auto;
   background: rgba(20, 22, 25, 0.85);
