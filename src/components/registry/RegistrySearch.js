@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from './RegistrySearch.module.css';
-import WishlistToggle from './WishlistToggle';
+import WishlistToggle from '../wishlist/WishlistToggle';
 
 export default function RegistrySearch({ initialRegistry }) {
   const [search, setSearch] = useState('');

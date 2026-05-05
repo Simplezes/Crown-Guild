@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import ContactButton from "./ContactButton";
+import ContactButton from "../beacon/ContactButton";
 import { getQuestIcon } from "@/lib/monsters";
 import styles from "@/app/monster/[name]/monster.module.css";
 

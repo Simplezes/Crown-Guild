@@ -45,7 +45,6 @@ export async function POST(request) {
     const hostId = mission.host_id;
     const requesterId = mission.requester_id;
 
-    // ── Group mission (SOS flare) ──────────────────────────────────────
     if (mission.group_id) {
       await db.execute({
         sql: "UPDATE active_missions SET hunter_confirmed = 1 WHERE requester_id = ? AND group_id = ?",
@@ -58,7 +57,6 @@ export async function POST(request) {
       });
 
       if (Number(pendingRes.rows[0].count) > 0) {
-        // Still waiting on others — notify everyone to refresh
         await pusherServer.trigger("public-channel", "mission_update", {
           type: "group_confirmed",
           groupId: mission.group_id,
@@ -67,7 +65,6 @@ export async function POST(request) {
         return NextResponse.json({ success: true, allDone: false });
       }
 
-      // Everyone confirmed — complete all missions in the group
       const groupRes = await db.execute({
         sql: "SELECT * FROM active_missions WHERE group_id = ?",
         args: [mission.group_id]
@@ -91,7 +88,6 @@ export async function POST(request) {
         });
       }
 
-      // Deduct investigation uses once (shared crown, one hunt)
       const firstMission = groupMissions[0];
       const hostCrownRes = await db.execute({
         sql: `SELECT c.id, c.quest, c.investigation_id,
@@ -126,7 +122,7 @@ export async function POST(request) {
       return NextResponse.json({ success: true, allDone: true });
     }
 
-    // ── Single mission ─────────────────────────────────────────────────
+
     await db.execute({ sql: "INSERT OR IGNORE INTO users(id) VALUES (?)", args: [requesterId] });
 
     await db.execute({

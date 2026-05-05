@@ -1,4 +1,3 @@
-// Force browser build — avoids CJS/ESM interop issue with Turbopack using the Node build
 import Pusher from 'pusher-js/dist/web/pusher.js';
 
 export const pusherClient = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {

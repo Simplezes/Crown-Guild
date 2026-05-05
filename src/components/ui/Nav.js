@@ -4,8 +4,8 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
-import AddCrownModal from "./AddCrownModal";
-import BeaconCenter from "./BeaconCenter";
+import AddCrownModal from "../crowns/AddCrownModal";
+import BeaconCenter from "../beacon/BeaconCenter";
 import styles from "./Nav.module.css";
 
 export default function Nav() {

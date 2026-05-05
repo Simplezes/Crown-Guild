@@ -2,7 +2,7 @@ import { getAllMonsters } from "@/lib/monsters";
 import styles from "./registry.module.css";
 import Image from "next/image";
 import db from "@/lib/db";
-import RegistrySearch from "@/components/RegistrySearch";
+import RegistrySearch from "@/components/registry/RegistrySearch";
 import { auth } from "@/auth";
 
 async function getRegistryData() {

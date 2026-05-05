@@ -4,13 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { auth } from "@/auth";
-import ProfileCrowns from "@/components/ProfileCrowns";
-import ProfileSettings from "@/components/ProfileSettings";
+import ProfileCrowns from "@/components/crowns/ProfileCrowns";
+import ProfileSettings from "@/components/profile/ProfileSettings";
 import { getProfileData, getHunterRank } from "@/lib/profile";
-import CrownSummary from "@/components/CrownSummary";
-import DiscordShare from "@/components/DiscordShare";
+import CrownSummary from "@/components/crowns/CrownSummary";
+import DiscordShare from "@/components/ui/DiscordShare";
 import { getAllMonsters } from "@/lib/monsters";
-import WishlistGrid from "@/components/WishlistGrid";
+import WishlistGrid from "@/components/wishlist/WishlistGrid";
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
