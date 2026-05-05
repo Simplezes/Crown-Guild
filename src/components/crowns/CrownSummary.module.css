@@ -100,3 +100,25 @@
     gap: 8px;
   }
 }
+
+.slot.editable:hover {
+  border-color: var(--mh-gold);
+  background: rgba(181, 154, 93, 0.05);
+}
+
+.interactiveDot {
+  cursor: pointer;
+  pointer-events: all;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.interactiveDot:hover {
+  transform: scale(1.4);
+  background: rgba(181, 154, 93, 0.2);
+  box-shadow: 0 0 10px var(--mh-gold-glow);
+}
+
+.interactiveDot.active:hover {
+  background: rgba(255, 0, 0, 0.2);
+}
