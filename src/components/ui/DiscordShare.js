@@ -1,97 +1,89 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './DiscordShare.module.css';
 import Image from 'next/image';
+import { buildShareMonstersFromCrowns, formatEmojiGrid } from '@/lib/discordShareFormatter';
+import { useSession } from 'next-auth/react';
 
 export default function DiscordShare({ id, username, crowns, wishlist }) {
-  const [copied, setCopied] = useState(false);
+  const { data: session } = useSession();
+  const [isOpen, setIsOpen] = useState(false);
+  const [copiedMode, setCopiedMode] = useState('');
+  const wrapperRef = useRef(null);
+  const canUseEmojiMode = !!session?.user?.canUseEmojiShare;
+  const selectedServerName = (Array.isArray(session?.user?.guilds)
+    ? session.user.guilds.find((guild) => String(guild?.id) === String(session?.user?.mainCrownServerId || ''))?.name
+    : null) || 'Selected Server';
 
   const buildShareNonce = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
-  const generateMarkdown = () => {
-    const lines = [];
-
-    lines.push(`**${username} - Crown Collection**`);
-
-    if (crowns && crowns.length > 0) {
-      const monsterData = {};
-      crowns.forEach(c => {
-        const key = `${c.name}||${c.tempered ? 1 : 0}`;
-        if (!monsterData[key]) {
-          monsterData[key] = { name: c.name, tempered: !!c.tempered, small: null, large: null };
-        }
-        monsterData[key][c.type] = {
-          rating: c.strength_rating || 1,
-          isInvestigation: !!c.investigation_id,
-          remainingUses: c.remaining_uses,
-        };
-      });
-
-      const formatCrown = (info) => {
-        let s = `${info.rating}★`;
-        if (info.isInvestigation) s += ` (${info.remainingUses ?? '?'} uses)`;
-        return s;
-      };
-
-      const formatName = (entry) => entry.tempered ? `Tempered ${entry.name}` : entry.name;
-
-      const both = [], smallOnly = [], largeOnly = [];
-      Object.values(monsterData).forEach(entry => {
-        if (entry.small && entry.large) both.push(entry);
-        else if (entry.small) smallOnly.push(entry);
-        else if (entry.large) largeOnly.push(entry);
-      });
-
-      if (both.length > 0) {
-        lines.push('');
-        lines.push('**Small + Large**');
-        both.forEach(e => lines.push(`${formatName(e)} - S ${formatCrown(e.small)}  L ${formatCrown(e.large)}`));
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setIsOpen(false);
       }
-      if (smallOnly.length > 0) {
-        lines.push('');
-        lines.push('**Small Crown**');
-        smallOnly.forEach(e => lines.push(`${formatName(e)} - ${formatCrown(e.small)}`));
-      }
-      if (largeOnly.length > 0) {
-        lines.push('');
-        lines.push('**Large Crown**');
-        largeOnly.forEach(e => lines.push(`${formatName(e)} - ${formatCrown(e.large)}`));
-      }
-    }
+    };
 
-    if (wishlist && wishlist.length > 0) {
-      const wishlistItems = wishlist.map(w => {
-        const typeLabel = w.type === 'both' ? 'S+L' : (w.type === 'small' ? 'S' : 'L');
-        return `${w.monster_name} (${typeLabel})`;
-      });
-      lines.push('');
-      lines.push(`**Wishlist:** ${wishlistItems.join(' · ')}`);
-    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-    lines.push('');
-    lines.push(`${process.env.NEXT_PUBLIC_WEB_URL}/profile/${id}?share=${buildShareNonce()}`);
-
-    return lines.join('\n');
+  const generateShareText = (useEmojis) => {
+    const shareId = buildShareNonce();
+    return formatEmojiGrid({
+      username,
+      userId: id,
+      shareId,
+      emojiServerId: session?.user?.mainCrownServerId,
+      monsters: buildShareMonstersFromCrowns(crowns),
+      wishlist: wishlist || [],
+      useEmojis,
+    });
   };
 
-  const handleCopy = () => {
-    const text = generateMarkdown();
+  const copyShare = (useEmojis) => {
+    const text = generateShareText(useEmojis);
     navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setCopiedMode(useEmojis ? 'emoji' : 'text');
+      setIsOpen(false);
+      setTimeout(() => setCopiedMode(''), 2000);
     });
   };
 
   return (
-    <button
-      className={`mh-button ${styles.shareBtn} ${copied ? styles.copied : ''}`}
-      onClick={handleCopy}
-      title="Copy markdown for Discord"
-      style={{ width: '100%', marginTop: '12px' }}
-    >
-      <Image src="/icons/MHWilds-Link_Party_Icon.png" width={18} height={18} alt="" className="pixel-art" />
-      <span>{copied ? 'Copied to Clipboard!' : 'Share to Discord'}</span>
-    </button>
+    <div className={styles.wrapper} ref={wrapperRef}>
+      <button
+        className={`mh-button ${styles.shareBtn} ${copiedMode ? styles.copied : ''}`}
+        onClick={() => {
+          if (!canUseEmojiMode) {
+            copyShare(false);
+            return;
+          }
+
+          setIsOpen((prev) => !prev);
+        }}
+        title="Share for discord"
+        style={{ width: '100%', marginTop: '12px' }}
+      >
+        <Image src="/icons/MHWilds-Link_Party_Icon.png" width={18} height={18} alt="" className="pixel-art" />
+        <span>
+          {copiedMode === 'text' && 'Text Copied!'}
+          {copiedMode === 'emoji' && 'Emoji Share Copied!'}
+          {!copiedMode && 'Share for discord'}
+        </span>
+      </button>
+
+      {isOpen && canUseEmojiMode && (
+        <div className={styles.menu}>
+          <button className={styles.option} onClick={() => copyShare(false)}>
+            Text
+          </button>
+          <button className={styles.option} onClick={() => copyShare(true)}>
+            Emojis for {selectedServerName}
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
