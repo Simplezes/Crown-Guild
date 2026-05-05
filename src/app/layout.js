@@ -13,6 +13,15 @@ export const metadata = {
   title: "Crown Guild | Monster Hunter Wilds Registry",
   description: "Track Monster Hunter Wilds collections, find hosts, and hunt together.",
   keywords: ["Monster Hunter", "MHWilds", "Crown", "Guild", "LFG", "Crown Guild"],
+  openGraph: {
+    title: "Crown Guild | Monster Hunter Wilds Registry",
+    description: "Track Monster Hunter Wilds collections, find hosts, and hunt together.",
+    images: [{ url: "/og" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: [{ url: "/og" }],
+  },
 };
 
 export default function RootLayout({ children }) {
