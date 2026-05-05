@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import LiveRadarWrapper from "@/components/LiveRadarWrapper";
 
-export const revalidate = 60; // revalidate every 60 seconds
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Guild Hub | Crown Guild",
