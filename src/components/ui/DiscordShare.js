@@ -10,7 +10,7 @@ export default function DiscordShare({ id, username, crowns, wishlist }) {
   const generateMarkdown = () => {
     const lines = [];
 
-    lines.push(`**${username} — Crown Collection**`);
+    lines.push(`**${username} - Crown Collection**`);
 
     if (crowns && crowns.length > 0) {
       const monsterData = {};
@@ -44,17 +44,17 @@ export default function DiscordShare({ id, username, crowns, wishlist }) {
       if (both.length > 0) {
         lines.push('');
         lines.push('**Small + Large**');
-        both.forEach(e => lines.push(`${formatName(e)} — S ${formatCrown(e.small)}  L ${formatCrown(e.large)}`));
+        both.forEach(e => lines.push(`${formatName(e)} - S ${formatCrown(e.small)}  L ${formatCrown(e.large)}`));
       }
       if (smallOnly.length > 0) {
         lines.push('');
         lines.push('**Small Crown**');
-        smallOnly.forEach(e => lines.push(`${formatName(e)} — ${formatCrown(e.small)}`));
+        smallOnly.forEach(e => lines.push(`${formatName(e)} - ${formatCrown(e.small)}`));
       }
       if (largeOnly.length > 0) {
         lines.push('');
         lines.push('**Large Crown**');
-        largeOnly.forEach(e => lines.push(`${formatName(e)} — ${formatCrown(e.large)}`));
+        largeOnly.forEach(e => lines.push(`${formatName(e)} - ${formatCrown(e.large)}`));
       }
     }
 
