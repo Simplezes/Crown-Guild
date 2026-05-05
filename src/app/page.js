@@ -2,7 +2,7 @@ import db from "@/lib/db";
 import styles from "./page.module.css";
 import Link from "next/link";
 import Image from "next/image";
-import LiveRadar from "@/components/LiveRadar";
+import LiveRadarWrapper from "@/components/LiveRadarWrapper";
 
 export const metadata = {
   title: "Guild Hub | Crown Guild",
@@ -34,7 +34,7 @@ async function getHomeData() {
 
     const activeMissionsRes = await db.execute(`
       SELECT 
-        am.id, am.type, am.tempered, am.strength_rating,
+        am.id, am.type, am.tempered, am.strength_rating, am.group_id,
         am.host_id, am.requester_id,
         m.name as monster_name, m.emoji, m.image_name,
         u_host.username as host_name, u_host.avatar_url as host_avatar,
@@ -44,7 +44,7 @@ async function getHomeData() {
       JOIN users u_host ON am.host_id = u_host.id
       JOIN users u_req ON am.requester_id = u_req.id
       ORDER BY am.id DESC
-      LIMIT 6
+      LIMIT 20
     `);
 
     return {
@@ -69,6 +69,21 @@ async function getHomeData() {
 
 export default async function Home() {
   const { stats, wanted, recent, activeMissions } = await getHomeData();
+
+  // Collapse group missions into a single card
+  const displayMissions = [];
+  const seenGroups = new Set();
+  for (const m of activeMissions) {
+    if (m.group_id) {
+      if (seenGroups.has(m.group_id)) continue;
+      seenGroups.add(m.group_id);
+      const hunters = activeMissions.filter(x => x.group_id === m.group_id);
+      displayMissions.push({ ...m, isGroup: true, hunters });
+    } else {
+      displayMissions.push({ ...m, isGroup: false });
+    }
+    if (displayMissions.length >= 6) break;
+  }
 
   return (
     <main className={styles.main}>
@@ -96,7 +111,7 @@ export default async function Home() {
         </div>
 
         <section className={styles.radarWrapper + " animate-mh"}>
-          <LiveRadar />
+          <LiveRadarWrapper />
         </section>
 
         <div className={styles.intelGrid + " animate-mh"}>
@@ -157,14 +172,14 @@ export default async function Home() {
             <h2 className="mh-title">Ongoing Hunts</h2>
           </header>
           <div className={styles.opsGrid}>
-            {activeMissions && activeMissions.length > 0 ? (
-              activeMissions.map((mission) => (
-                <div key={mission.id} className={styles.opCard}>
+            {displayMissions && displayMissions.length > 0 ? (
+              displayMissions.map((mission) => (
+                <div key={mission.isGroup ? mission.group_id : mission.id} className={styles.opCard}>
                   <div className={styles.opMonster}>
                     <Image src={`/monsters/${mission.image_name}`} width={40} height={40} alt="" className="pixel-art" />
                     <div className={styles.opInfo}>
                       <span className={styles.opName}>{mission.monster_name}</span>
-                      <span className={styles.opGoal}>{mission.strength_rating}★ {mission.type} Crown</span>
+                      <span className={styles.opGoal}>{mission.strength_rating}★ {mission.type} Crown{mission.isGroup ? ' · SOS' : ''}</span>
                     </div>
                   </div>
                   <div className={styles.opParty}>
@@ -172,13 +187,26 @@ export default async function Home() {
                       <img src={mission.host_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" className={styles.opAvatar} />
                       <Link href={`/profile/${mission.host_id}`}>{mission.host_name}</Link>
                     </div>
-                    <div className={styles.opVs}>
-                      <Image src="/icons/MHWilds-Squad_Information_Counter_Icon.png" width={30} height={30} alt="" className="pixel-art" />
-                    </div>
-                    <div className={styles.opHunter}>
-                      <img src={mission.requester_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" className={styles.opAvatar} />
-                      <Link href={`/profile/${mission.requester_id}`}>{mission.requester_name}</Link>
-                    </div>
+                    {mission.isGroup ? (
+                      <div className={styles.opGroupHunters}>
+                        {mission.hunters.map(h => (
+                          <div key={h.requester_id} className={styles.opHunter}>
+                            <img src={h.requester_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" className={styles.opAvatar} />
+                            <Link href={`/profile/${h.requester_id}`}>{h.requester_name}</Link>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <>
+                        <div className={styles.opVs}>
+                          <Image src="/icons/MHWilds-Squad_Information_Counter_Icon.png" width={30} height={30} alt="" className="pixel-art" />
+                        </div>
+                        <div className={styles.opHunter}>
+                          <img src={mission.requester_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" className={styles.opAvatar} />
+                          <Link href={`/profile/${mission.requester_id}`}>{mission.requester_name}</Link>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               ))

@@ -272,3 +272,19 @@
   background: #ff4500;
   color: #fff;
 }
+
+.startBtn {
+  background: rgba(46, 204, 113, 0.1);
+  color: #2ecc71;
+  border: 1px solid #2ecc71;
+  padding: 5px 12px;
+  font-family: 'Marcellus', serif;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.startBtn:hover {
+  background: #2ecc71;
+  color: #000;
+}

@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import styles from './LiveRadar.module.css';
 import Image from 'next/image';
 import { useToast } from '@/app/UIProvider';
 import { useSession } from 'next-auth/react';
-import { pusherClient } from '@/lib/pusher-client';
 
 export default function LiveRadar() {
   const { data: session } = useSession();
@@ -13,6 +12,7 @@ export default function LiveRadar() {
   const [loading, setLoading] = useState(true);
   const [now, setNow] = useState(Date.now());
   const toast = useToast();
+  const pusherRef = useRef(null);
 
   const fetchFlares = async () => {
     try {
@@ -29,15 +29,18 @@ export default function LiveRadar() {
   useEffect(() => {
     fetchFlares();
 
-    const channel = pusherClient.subscribe('public-channel');
-    channel.bind('flare_updated', () => {
-      fetchFlares();
+    import('@/lib/pusher-client').then(({ pusherClient }) => {
+      pusherRef.current = pusherClient;
+      const channel = pusherClient.subscribe('public-channel');
+      channel.bind('flare_updated', () => {
+        fetchFlares();
+      });
     });
 
     const timerInterval = setInterval(() => setNow(Date.now()), 1000);
 
     return () => {
-      pusherClient.unsubscribe('public-channel');
+      if (pusherRef.current) pusherRef.current.unsubscribe('public-channel');
       clearInterval(timerInterval);
     };
   }, []);
@@ -56,7 +59,7 @@ export default function LiveRadar() {
       });
 
       if (res.ok) {
-        toast.success(action === 'join' ? "Joined the queue!" : action === 'leave' ? "Left the queue." : "Flare closed.");
+        toast.success(action === 'join' ? "Joined the queue!" : action === 'leave' ? "Left the queue." : action === 'start' ? "Quest started! Missions assigned." : "Flare closed.");
         fetchFlares();
       } else {
         const err = await res.text();
@@ -85,7 +88,7 @@ export default function LiveRadar() {
       <div className={styles.flareList}>
         {flares.map(flare => {
           const createdAt = new Date(flare.created_at + 'Z').getTime();
-          const expiresAt = createdAt + (10 * 60 * 1000);
+          const expiresAt = createdAt + (5 * 60 * 1000);
           const timeLeft = Math.max(0, expiresAt - now);
 
           const mins = Math.floor(timeLeft / 60000);
@@ -129,7 +132,7 @@ export default function LiveRadar() {
                         title={m.username}
                       />
                     ))}
-                    <span className={styles.memberCount}>{flare.members.length} waiting</span>
+                    <span className={styles.memberCount}>{flare.members.length}/4 hunters</span>
                   </div>
                 )}
                 {(!flare.members || flare.members.length === 0) && (
@@ -139,13 +142,22 @@ export default function LiveRadar() {
 
               <div className={styles.actions}>
                 {isHost ? (
-                  <button
-                    onClick={() => handleAction(flare.id, 'close')}
-                    className={styles.closeBtn}
-                    title="Close SOS"
-                  >
-                    Close
-                  </button>
+                  <>
+                    <button
+                      onClick={() => handleAction(flare.id, 'start')}
+                      className={styles.startBtn}
+                      title="Start Quest"
+                    >
+                      Start
+                    </button>
+                    <button
+                      onClick={() => handleAction(flare.id, 'close')}
+                      className={styles.closeBtn}
+                      title="Close SOS"
+                    >
+                      Close
+                    </button>
+                  </>
                 ) : flare.is_joined ? (
                   <button
                     onClick={() => handleAction(flare.id, 'leave')}

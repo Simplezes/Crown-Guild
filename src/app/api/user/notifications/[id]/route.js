@@ -31,10 +31,33 @@ export async function POST(request, { params }) {
     }
 
     const crownRes = await db.execute({
-      sql: "SELECT strength_rating, tempered FROM crowns WHERE id = ?",
+      sql: `SELECT c.type, c.strength_rating, c.tempered, c.quest,
+                   COALESCE(inv.remaining_uses, c.remaining_uses) as remaining_uses
+            FROM crowns c
+            LEFT JOIN investigations inv ON c.investigation_id = inv.id
+            WHERE c.id = ?`,
       args: [beacon.crown_id]
     });
     const crown = crownRes.rows[0];
+
+    if (!crown) {
+      return NextResponse.json({ error: "Crown not found" }, { status: 400 });
+    }
+
+    // Guard: prevent accepting more missions than investigation uses allow
+    if (crown.quest === 'Investigation Quests' && crown.remaining_uses !== null) {
+      const activeCountRes = await db.execute({
+        sql: `SELECT COUNT(*) as count FROM active_missions
+              WHERE host_id = ? AND monster_id = ? AND type = ? AND tempered = ?`,
+        args: [session.user.id, beacon.monster_id, crown.type, crown.tempered]
+      });
+      const activeCount = Number(activeCountRes.rows[0].count);
+      if (activeCount >= crown.remaining_uses) {
+        return NextResponse.json({
+          error: `No investigation uses remaining. You already have ${activeCount} active mission(s) using this investigation.`
+        }, { status: 400 });
+      }
+    }
 
     await db.execute({
       sql: `INSERT INTO active_missions (host_id, requester_id, monster_id, type, tempered, strength_rating) 
@@ -43,7 +66,7 @@ export async function POST(request, { params }) {
         session.user.id,
         beacon.user_id,
         beacon.monster_id,
-        beacon.type === 'beacon' ? 'large' : beacon.type,
+        crown.type,
         crown.tempered,
         crown.strength_rating
       ]

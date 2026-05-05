@@ -158,8 +158,7 @@ export default async function MonsterDetail({ params, searchParams }) {
         </header>
 
         <div className={styles.infoGrid + " animate-mh"}>
-          <div className={styles.tactical}>
-            <div className={styles.tacticalCard}>
+          <div className={styles.tacticalCard}>
               <div className={styles.tacticalHeader}>
                 <Image src="/icons/MHWilds-Quest_Members_Icon.png" width={40} height={40} alt="" className="pixel-art" />
                 <h3 className="mh-title">Guild Intelligence</h3>
@@ -295,7 +294,6 @@ export default async function MonsterDetail({ params, searchParams }) {
                 </section>
               )}
             </div>
-          </div>
         </div>
       </div>
     </main>

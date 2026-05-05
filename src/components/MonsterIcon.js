@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-export default function MonsterIcon({ imageName, name, tempered, size = 64, className = "" }) {
+export default function MonsterIcon({ imageName, name, tempered, size = 64, className = "", loading }) {
   const iconClass = `${tempered ? "tempered-monster-icon" : ""} pixel-art ${className}`;
 
   if (!imageName) {
@@ -18,6 +18,7 @@ export default function MonsterIcon({ imageName, name, tempered, size = 64, clas
       width={size}
       height={size}
       className={iconClass}
+      loading={loading}
     />
   );
 }

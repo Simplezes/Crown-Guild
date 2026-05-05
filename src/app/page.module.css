@@ -250,6 +250,13 @@
   opacity: 0.4;
 }
 
+.opGroupHunters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
 .emptyOps {
   text-align: center;
   padding: 40px;

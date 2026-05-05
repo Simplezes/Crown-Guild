@@ -45,7 +45,88 @@ export async function POST(request) {
     const hostId = mission.host_id;
     const requesterId = mission.requester_id;
 
-    await db.execute({ sql: "INSERT OR IGNORE INTO users(id) VALUES (?)", args: [hostId] });
+    // ── Group mission (SOS flare) ──────────────────────────────────────
+    if (mission.group_id) {
+      await db.execute({
+        sql: "UPDATE active_missions SET hunter_confirmed = 1 WHERE requester_id = ? AND group_id = ?",
+        args: [userId, mission.group_id]
+      });
+
+      const pendingRes = await db.execute({
+        sql: "SELECT COUNT(*) as count FROM active_missions WHERE group_id = ? AND hunter_confirmed = 0",
+        args: [mission.group_id]
+      });
+
+      if (Number(pendingRes.rows[0].count) > 0) {
+        // Still waiting on others — notify everyone to refresh
+        await pusherServer.trigger("public-channel", "mission_update", {
+          type: "group_confirmed",
+          groupId: mission.group_id,
+          confirmedUserId: userId
+        });
+        return NextResponse.json({ success: true, allDone: false });
+      }
+
+      // Everyone confirmed — complete all missions in the group
+      const groupRes = await db.execute({
+        sql: "SELECT * FROM active_missions WHERE group_id = ?",
+        args: [mission.group_id]
+      });
+      const groupMissions = groupRes.rows;
+
+      for (const m of groupMissions) {
+        await db.execute({ sql: "INSERT OR IGNORE INTO users(id) VALUES (?)", args: [m.host_id] });
+        await db.execute({ sql: "INSERT OR IGNORE INTO users(id) VALUES (?)", args: [m.requester_id] });
+        await db.execute({
+          sql: "UPDATE users SET shared_crowns = shared_crowns + 1 WHERE id = ?",
+          args: [m.host_id]
+        });
+        await db.execute({
+          sql: "UPDATE users SET missions_completed = missions_completed + 1 WHERE id = ?",
+          args: [m.requester_id]
+        });
+        await db.execute({
+          sql: "INSERT INTO completed_missions (host_id, requester_id, monster_id, type, tempered, strength_rating) VALUES (?, ?, ?, ?, ?, ?)",
+          args: [m.host_id, m.requester_id, m.monster_id, m.type, m.tempered, m.strength_rating]
+        });
+      }
+
+      // Deduct investigation uses once (shared crown, one hunt)
+      const firstMission = groupMissions[0];
+      const hostCrownRes = await db.execute({
+        sql: `SELECT c.id, c.quest, c.investigation_id,
+                     COALESCE(inv.remaining_uses, c.remaining_uses) as remaining_uses,
+                     inv.id as inv_id
+              FROM crowns c
+              LEFT JOIN investigations inv ON c.investigation_id = inv.id
+              WHERE c.user_id = ? AND c.monster_id = ? AND c.type = ? AND c.tempered = ? AND c.strength_rating = ?
+              AND c.quest = 'Investigation Quests'
+              ORDER BY remaining_uses ASC LIMIT 1`,
+        args: [firstMission.host_id, firstMission.monster_id, firstMission.type, firstMission.tempered, firstMission.strength_rating]
+      });
+      const hostCrown = hostCrownRes.rows[0];
+      if (hostCrown && hostCrown.remaining_uses !== null) {
+        const newUses = hostCrown.remaining_uses - 1;
+        if (newUses <= 0) {
+          await db.execute({ sql: "UPDATE web_notifications SET crown_id = NULL WHERE crown_id = ?", args: [hostCrown.id] });
+          await db.execute({ sql: "DELETE FROM crowns WHERE id = ?", args: [hostCrown.id] });
+          if (hostCrown.inv_id) {
+            await db.execute({ sql: "DELETE FROM investigations WHERE id = ?", args: [hostCrown.inv_id] });
+          }
+        } else if (hostCrown.inv_id) {
+          await db.execute({ sql: "UPDATE investigations SET remaining_uses = ? WHERE id = ?", args: [newUses, hostCrown.inv_id] });
+        } else {
+          await db.execute({ sql: "UPDATE crowns SET remaining_uses = ? WHERE id = ?", args: [newUses, hostCrown.id] });
+        }
+      }
+
+      await db.execute({ sql: "DELETE FROM active_missions WHERE group_id = ?", args: [mission.group_id] });
+      await pusherServer.trigger("public-channel", "mission_update", { status: "completed", groupId: mission.group_id });
+      await pusherServer.trigger("public-channel", "crown_update", {});
+      return NextResponse.json({ success: true, allDone: true });
+    }
+
+    // ── Single mission ─────────────────────────────────────────────────
     await db.execute({ sql: "INSERT OR IGNORE INTO users(id) VALUES (?)", args: [requesterId] });
 
     await db.execute({
@@ -69,31 +150,34 @@ export async function POST(request) {
     });
 
     const hostCrownRes = await db.execute({
-      sql: "SELECT id, quest, remaining_uses FROM crowns WHERE user_id = ? AND monster_id = ? AND type = ? AND tempered = ? AND strength_rating = ? ORDER BY remaining_uses ASC LIMIT 1",
+      sql: `SELECT c.id, c.quest, c.investigation_id,
+                   COALESCE(inv.remaining_uses, c.remaining_uses) as remaining_uses,
+                   inv.id as inv_id
+            FROM crowns c
+            LEFT JOIN investigations inv ON c.investigation_id = inv.id
+            WHERE c.user_id = ? AND c.monster_id = ? AND c.type = ? AND c.tempered = ? AND c.strength_rating = ?
+            AND c.quest = 'Investigation Quests'
+            ORDER BY remaining_uses ASC LIMIT 1`,
       args: [hostId, mission.monster_id, mission.type, mission.tempered, mission.strength_rating]
     });
     const hostCrown = hostCrownRes.rows[0];
 
-    if (hostCrown && hostCrown.quest === "Investigation Quests" && hostCrown.remaining_uses !== null) {
+    if (hostCrown && hostCrown.remaining_uses !== null) {
       const newUses = hostCrown.remaining_uses - 1;
       if (newUses <= 0) {
-        await db.execute({
-          sql: "UPDATE web_notifications SET crown_id = NULL WHERE crown_id = ?",
-          args: [hostCrown.id]
-        });
-        await db.execute({
-          sql: "DELETE FROM crowns WHERE id = ?",
-          args: [hostCrown.id]
-        });
+        await db.execute({ sql: "UPDATE web_notifications SET crown_id = NULL WHERE crown_id = ?", args: [hostCrown.id] });
+        await db.execute({ sql: "DELETE FROM crowns WHERE id = ?", args: [hostCrown.id] });
+        if (hostCrown.inv_id) {
+          await db.execute({ sql: "DELETE FROM investigations WHERE id = ?", args: [hostCrown.inv_id] });
+        }
+      } else if (hostCrown.inv_id) {
+        await db.execute({ sql: "UPDATE investigations SET remaining_uses = ? WHERE id = ?", args: [newUses, hostCrown.inv_id] });
       } else {
-        await db.execute({
-          sql: "UPDATE crowns SET remaining_uses = ? WHERE id = ?",
-          args: [newUses, hostCrown.id]
-        });
+        await db.execute({ sql: "UPDATE crowns SET remaining_uses = ? WHERE id = ?", args: [newUses, hostCrown.id] });
       }
     }
 
-    await pusherServer.trigger("public-channel", "mission_update", { status: 'completed' });
+    await pusherServer.trigger("public-channel", "mission_update", { status: 'completed', hostId, requesterId });
     await pusherServer.trigger("public-channel", "crown_update", {});
 
     return NextResponse.json({ success: true });

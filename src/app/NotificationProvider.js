@@ -49,7 +49,10 @@ export function NotificationProvider({ children }) {
 
     channel.bind('notification', (notif) => {
       if (notif.recipient_id === session.user.id) {
-        setNotifications(prev => [notif, ...prev]);
+        setNotifications(prev => {
+          if (prev.some(n => n.id === notif.id)) return prev;
+          return [notif, ...prev];
+        });
         setUnreadCount(prev => prev + 1);
 
         const audio = new Audio('/sounds/MHWilds-Ping.mp3');
@@ -74,8 +77,15 @@ export function NotificationProvider({ children }) {
       router.refresh();
     });
 
+    // Re-fetch notifications when a hunt is accepted (creates hunt_accepted notification)
+    // or when any beacon-related update occurs — avoids router.refresh() which can
+    // briefly destabilise the session and cause useEffect to re-run / re-add stale data.
     channel.bind('mission_update', () => {
-      router.refresh();
+      fetchNotifications();
+    });
+
+    channel.bind('notification_created', () => {
+      fetchNotifications();
     });
 
     return () => {

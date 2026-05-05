@@ -7,7 +7,7 @@ export async function GET() {
     const session = await auth();
     const userId = session?.user?.id ?? null;
 
-    await db.execute("DELETE FROM active_flares WHERE created_at < datetime('now', '-10 minutes')");
+    await db.execute("DELETE FROM active_flares WHERE created_at < datetime('now', '-5 minutes')");
 
     const res = await db.execute({
       sql: `
