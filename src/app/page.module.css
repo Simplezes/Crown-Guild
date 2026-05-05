@@ -79,12 +79,10 @@
   background: var(--mh-border);
 }
 
-/* RADAR */
 .radarWrapper {
   margin-bottom: 60px;
 }
 
-/* INTEL GRID */
 .intelGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -166,7 +164,6 @@
   filter: drop-shadow(0 0 5px var(--mh-gold-glow));
 }
 
-/* LIVE OPERATIONS */
 .opsSection {
   margin-top: 60px;
 }
