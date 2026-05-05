@@ -111,10 +111,34 @@ export async function getProfileData(userId) {
       }
     });
 
+    const collectionRes = await db.execute({
+      sql: `SELECT hc.*, m.name as monster_name, m.emoji, m.image_name
+            FROM hunter_collection hc
+            JOIN monsters m ON hc.monster_id = m.id
+            WHERE hc.user_id = ?
+            ORDER BY m.name ASC`,
+      args: [userId]
+    });
+
+    const collectionMap = {};
+    collectionRes.rows.forEach(row => {
+      const mid = row.monster_id;
+      if (!collectionMap[mid]) {
+        collectionMap[mid] = { ...row };
+      } else {
+        const existing = collectionMap[mid].type;
+        const incoming = row.type;
+        if (existing === 'both' || incoming === 'both' || (existing !== incoming)) {
+          collectionMap[mid].type = 'both';
+        }
+      }
+    });
+
     return {
       user: { ...user },
       crowns: crownsRes.rows.map(row => ({ ...row })),
       wishlist: Object.values(wishlistMap),
+      collection: Object.values(collectionMap),
       stats: statsRes.rows[0],
       activity: activityRes.rows[0],
       completion,

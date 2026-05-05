@@ -15,9 +15,13 @@ export default function WishlistGrid({ wishlist, isOwner, userId }) {
 
   return (
     <div className={styles.grid}>
-      {wishlist.map((item) => {
+      {wishlist.map((item, index) => {
         return (
-          <div key={item.monster_id} className={styles.item}>
+          <div 
+            key={item.monster_id} 
+            className={styles.item}
+            style={{ animationDelay: `${index * 0.05}s` }}
+          >
             <Link 
               href={`/monster/${encodeURIComponent(item.monster_name)}?tab=seeking&user=${userId}`}
               className={styles.monsterLink}

@@ -7,10 +7,9 @@ import { auth } from "@/auth";
 import ProfileCrowns from "@/components/crowns/ProfileCrowns";
 import ProfileSettings from "@/components/profile/ProfileSettings";
 import { getProfileData, getHunterRank } from "@/lib/profile";
-import CrownSummary from "@/components/crowns/CrownSummary";
 import DiscordShare from "@/components/ui/DiscordShare";
 import { getAllMonsters } from "@/lib/monsters";
-import WishlistGrid from "@/components/wishlist/WishlistGrid";
+import CompletionTracker from "@/components/profile/CompletionTracker";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -160,16 +159,6 @@ export default async function Profile({ params }) {
               <div className={styles.progressFill} style={{ width: `${completion}%` }} />
             </div>
           </div>
-
-          <div className={styles.tile + " " + styles.wishlistTile}>
-            <div className={styles.tileHeader}>
-              <Image src="/icons/MHWilds-Wishlist_Pin_Icon.png" width={16} height={16} alt="" className="pixel-art" />
-              <span>MY WISHLIST</span>
-            </div>
-            <div className={styles.wishlistScroll}>
-              <WishlistGrid wishlist={data.wishlist} isOwner={isOwner} userId={user.id} />
-            </div>
-          </div>
         </div>
 
         <section className={styles.ledgerSection}>
@@ -184,11 +173,14 @@ export default async function Profile({ params }) {
           </header>
 
           <div className={styles.summarySection}>
-            <div className={styles.summaryHeader}>
-              <h3 className="mh-title">Completion Tracker</h3>
-              <p>Visual view of all monsters in the game and your current progress.</p>
-            </div>
-            <CrownSummary crowns={crowns} allMonsters={allMonsters} />
+            <CompletionTracker 
+              initialCrowns={crowns}
+              initialCollection={data.collection}
+              initialWishlist={data.wishlist}
+              allMonsters={allMonsters}
+              isOwner={isOwner}
+              userId={user.id}
+            />
           </div>
 
           <div className={styles.galleryHeader} style={{ marginTop: '60px' }}>
