@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import db from "@/lib/db";
 import { NextResponse } from "next/server";
 
-export async function POST(req) {
+async function updateSettings(req) {
   const session = await auth();
   if (!session) return new NextResponse("Unauthorized", { status: 401 });
 
@@ -26,6 +26,32 @@ export async function POST(req) {
       sql: `UPDATE users SET ${updates.join(", ")} WHERE id = ?`,
       args
     });
+
+    return NextResponse.json({ success: true });
+  } catch (e) {
+    console.error(e);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
+
+export const POST = updateSettings;
+export const PUT = updateSettings;
+
+export async function DELETE() {
+  const session = await auth();
+  if (!session) return new NextResponse("Unauthorized", { status: 401 });
+
+  const userId = session.user.id;
+
+  try {
+    await db.batch([
+      { sql: "DELETE FROM crowns WHERE user_id = ?", args: [userId] },
+      { sql: "DELETE FROM wishlist WHERE user_id = ?", args: [userId] },
+      { sql: "DELETE FROM investigations WHERE user_id = ?", args: [userId] },
+      { sql: "DELETE FROM active_missions WHERE host_id = ? OR requester_id = ?", args: [userId, userId] },
+      { sql: "DELETE FROM completed_missions WHERE host_id = ? OR requester_id = ?", args: [userId, userId] },
+      { sql: "DELETE FROM users WHERE id = ?", args: [userId] },
+    ]);
 
     return NextResponse.json({ success: true });
   } catch (e) {
