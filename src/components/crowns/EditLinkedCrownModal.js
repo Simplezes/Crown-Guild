@@ -8,6 +8,7 @@ import Image from "next/image";
 import CustomSelect from "../ui/CustomSelect";
 import { useToast } from "@/app/UIProvider";
 import Toggle from "../ui/Toggle";
+import InfoTrigger from "../ui/InfoTrigger";
 
 const QUEST_TYPES = [
   { label: "Event Quests", value: "Event Quests" },
@@ -156,7 +157,13 @@ export default function EditLinkedCrownModal({ isOpen, onClose, group, onUpdated
           <div className={styles.editorContent}>
             <div className={styles.formGrid}>
               <div className={styles.editRow}>
-                <label>Crown Classification & Ratings</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <label>Crown Classification & Ratings</label>
+                  <InfoTrigger
+                    title="Crown Classification & Ratings"
+                    content="Review the crown size, tempered state, and strength rating for each linked record. Keep them linked only if both sizes came from the same quest."
+                  />
+                </div>
                 <div className={styles.groupTemperedList}>
                   {formData.perCrown.map((pc, i) => (
                     <div key={pc.id} className={styles.groupTemperedRow}>
@@ -198,7 +205,13 @@ export default function EditLinkedCrownModal({ isOpen, onClose, group, onUpdated
               </div>
 
               <div className={styles.editRow}>
-                <label>Mission Source</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <label>Mission Source</label>
+                  <InfoTrigger
+                    title="Mission Source"
+                    content="Choose the quest type shared by these linked crown records. Investigation records can also store remaining uses."
+                  />
+                </div>
                 <div className={styles.questSelect}>
                   {QUEST_TYPES.map(q => (
                     <div
@@ -213,7 +226,13 @@ export default function EditLinkedCrownModal({ isOpen, onClose, group, onUpdated
 
                 {formData.quest === "Investigation Quests" && (
                   <div className={styles.investigationBlock}>
-                    <label>Remaining Uses</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                      <label>Remaining Uses</label>
+                      <InfoTrigger
+                        title="Remaining Uses"
+                        content="Record how many investigation runs were left when these linked crowns were recorded."
+                      />
+                    </div>
                     <div className={styles.permitChips}>
                       {[1, 2, 3].map(num => (
                         <div
@@ -229,7 +248,13 @@ export default function EditLinkedCrownModal({ isOpen, onClose, group, onUpdated
                 )}
 
                 <div className={styles.editRow} style={{ marginTop: '12px' }}>
-                  <label>Primary Quest Monster</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <label>Primary Quest Monster</label>
+                    <InfoTrigger
+                      title="Primary Quest Monster"
+                      content="Use this only if the quest's main listed monster was different from the monster that these linked crown records belong to."
+                    />
+                  </div>
                   <Toggle
                     checked={formData.show_host}
                     onChange={e => setFormData(prev => ({

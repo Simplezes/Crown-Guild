@@ -242,7 +242,13 @@ export default function AddCrownModal({ isOpen, onClose }) {
           ) : (
             <form className={styles.form} onSubmit={handleSubmit}>
               <div className={styles.field}>
-                <label>Monster</label>
+                <div className={styles.hostHeader}>
+                  <label>Monster</label>
+                  <InfoTrigger
+                    title="Recorded Monster"
+                    content="Select the monster this crown record belongs to. Only change the Primary Quest Monster below if the quest's main listed monster was different."
+                  />
+                </div>
                 <CustomSelect
                   options={monsterOptions}
                   value={formData.monster_id}
@@ -320,7 +326,13 @@ export default function AddCrownModal({ isOpen, onClose }) {
               ))}
 
               <div className={styles.field}>
-                <label>Quest Type</label>
+                <div className={styles.hostHeader}>
+                  <label>Quest Type</label>
+                  <InfoTrigger
+                    title="Quest Type"
+                    content="Choose the source of this record. Investigation records can also store remaining uses or link to an existing investigation entry."
+                  />
+                </div>
                 <CustomSelect
                   options={questOptions}
                   value={formData.quest}
@@ -365,7 +377,13 @@ export default function AddCrownModal({ isOpen, onClose }) {
               </div>
 
               <div className={styles.field}>
-                <label>Multi-Crown Quest</label>
+                <div className={styles.hostHeader}>
+                  <label>Multi-Crown Quest</label>
+                  <InfoTrigger
+                    title="Multi-Crown Quest"
+                    content="Turn this on only if one quest produced a second crown record for another monster. The second monster keeps its own crown size, tempered state, and strength rating."
+                  />
+                </div>
                 <Toggle
                   checked={formData.show_multi_monster}
                   onChange={e => setFormData(prev => ({
@@ -488,7 +506,13 @@ export default function AddCrownModal({ isOpen, onClose }) {
                     </div>
                   ) : (
                     <div className={`${styles.field} ${styles.animateIn}`}>
-                      <label>Uses</label>
+                      <div className={styles.hostHeader}>
+                        <label>Uses</label>
+                        <InfoTrigger
+                          title="Remaining Uses"
+                          content="For a new investigation entry, record how many runs were left when this crown record was found."
+                        />
+                      </div>
                       <div className={styles.permitChips}>
                         {[1, 2, 3].map(num => (
                           <div
