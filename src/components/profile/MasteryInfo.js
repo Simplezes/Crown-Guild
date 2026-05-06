@@ -40,7 +40,6 @@ export default function MasteryInfo({ points, rank, nextRank, progress }) {
           <li><span className={styles.mp}>+2 MP</span> Support Hunters (Join Hunt)</li>
         </ul>
         <div className={styles.feverPromo}>
-          <div className={styles.feverIcon}>✨</div>
           <div className={styles.feverText}>
             <strong>GUILD FEVER</strong>
             <span>Active for 1hr after a hunt. 3x MP for everyone!</span>

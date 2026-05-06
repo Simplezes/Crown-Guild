@@ -14,9 +14,8 @@ export default function Toggle({ checked, onChange, labelOn = "On", labelOff = "
       <div className={styles.switch}>
         <div className={styles.switchHandle} />
       </div>
-      <span className={styles.toggleText}>
-        <span className={`${styles.textOn} ${!checked ? styles.textHidden : ""}`}>{labelOn}</span>
-        <span className={`${styles.textOff} ${checked ? styles.textHidden : ""}`}>{labelOff}</span>
+      <span className={`${styles.toggleText} ${checked ? styles.textOn : styles.textOff}`}>
+        {checked ? labelOn : labelOff}
       </span>
     </label>
   );

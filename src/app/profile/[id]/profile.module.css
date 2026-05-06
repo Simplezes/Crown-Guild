@@ -365,7 +365,7 @@
 
 .crownCardDual {
   grid-column: span 2;
-  height: 220px;
+  height: 200px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -457,6 +457,24 @@
   border-color: var(--mh-gold);
   background: rgba(45, 38, 34, 0.9);
   transform: scale(1.02);
+}
+
+.ghostHost {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.15;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ghostImage {
+  object-fit: contain;
+  transform: scale(1.5);
+  filter: grayscale(80%) sepia(20%);
 }
 
 .crownCornerLeft {
@@ -592,9 +610,9 @@
   z-index: 2;
 }
 
-.crownCard:hover .cardActions {
-  opacity: 1;
-  pointer-events: all;
+.cardActionsActive {
+  opacity: 1 !important;
+  pointer-events: all !important;
 }
 
 .actionBtn {
@@ -608,6 +626,32 @@
 .actionBtn:hover {
   border-color: var(--mh-gold);
   color: var(--mh-gold);
+}
+
+.actionsTrigger {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  z-index: 3;
+  background: rgba(18, 13, 10, 0.75);
+  border: 1px solid var(--mh-border);
+  color: var(--mh-tan-dark);
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.actionsTrigger:hover,
+.actionsTriggerActive {
+  border-color: var(--mh-gold);
+  color: var(--mh-gold);
+  background: rgba(45, 38, 34, 0.95);
 }
 
 .noRecords {

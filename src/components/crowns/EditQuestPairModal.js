@@ -39,7 +39,7 @@ export default function EditQuestPairModal({ isOpen, onClose, group, onUpdated }
         quest: ref.quest || "Optional Quests",
         inv_monster_id: ref.inv_monster_id || ref.monster_id,
         remaining_uses: ref.remaining_uses || 3,
-        show_host: !!(ref.inv_monster_id && String(ref.inv_monster_id) !== String(ref.monster_id)),
+        show_host: !!ref.investigation_id,
         unlink: false,
         perCrown: group.map(c => ({
           id: c.id,
@@ -76,7 +76,7 @@ export default function EditQuestPairModal({ isOpen, onClose, group, onUpdated }
     return perCrownChanged ||
       formData.quest !== (ref.quest || "Optional Quests") ||
       (formData.quest === "Investigation Quests" && formData.remaining_uses !== (ref.remaining_uses || 3)) ||
-      String(formData.show_host ? (formData.inv_monster_id || ref.monster_id) : ref.monster_id) !== String(ref.inv_monster_id || ref.monster_id) ||
+        String(formData.show_host ? (formData.inv_monster_id || ref.monster_id) : "") !== String(ref.investigation_id ? (ref.inv_monster_id || ref.monster_id) : "") ||
       formData.unlink;
   })();
 
@@ -87,9 +87,10 @@ export default function EditQuestPairModal({ isOpen, onClose, group, onUpdated }
     try {
       const basePayload = {
         quest: formData.quest,
+        mission_host_enabled: formData.show_host,
       };
 
-      if (formData.quest === "Investigation Quests") {
+      if (formData.show_host && formData.quest === "Investigation Quests") {
         basePayload.investigation_monster_id = parseInt(formData.show_host ? (formData.inv_monster_id || group[0].monster_id) : group[0].monster_id);
         basePayload.remaining_uses = parseInt(formData.remaining_uses);
       } else if (formData.show_host) {

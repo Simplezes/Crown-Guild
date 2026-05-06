@@ -4,27 +4,33 @@
   gap: 10px;
   cursor: pointer;
   user-select: none;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .switch {
   position: relative;
   flex-shrink: 0;
   width: 44px;
-  height: 22px;
-  background: #111;
+  height: 24px;
+  border-radius: 999px;
+  background: #151311;
   border: 1px solid #3a3532;
-  transition: background 0.25s ease, border-color 0.25s ease;
+  transition: background 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
 }
 
 .switchHandle {
   position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 14px;
-  height: 14px;
-  background: #555;
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s ease;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #f4efe3;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  transition: transform 0.22s ease, background 0.22s ease;
 }
 
 .toggleInput {
@@ -36,37 +42,70 @@
 }
 
 .toggleInput:checked + .switch {
-  border-color: var(--mh-purple);
-  background: rgba(163, 53, 238, 0.15);
+  border-color: var(--mh-gold);
+  background: rgba(181, 154, 93, 0.24);
+  box-shadow: 0 0 0 1px rgba(181, 154, 93, 0.1);
 }
 
 .toggleInput:checked + .switch .switchHandle {
-  transform: translateX(24px);
-  background: var(--mh-purple);
+  transform: translateX(20px);
+  background: #fff7e6;
+}
+
+.toggleInput:focus-visible + .switch {
+  outline: 2px solid rgba(181, 154, 93, 0.55);
+  outline-offset: 2px;
+}
+
+.toggleLabel:active .switchHandle {
+  transform: scale(0.96);
 }
 
 .toggleText {
-  display: inline-grid;
+  display: inline-block;
   font-family: 'Marcellus', serif;
   font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  white-space: nowrap;
-}
-
-.toggleText > span {
-  grid-area: 1 / 1;
+  letter-spacing: 0.07em;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
+  width: 11ch;
+  flex-shrink: 0;
 }
 
 .textOn {
-  color: var(--mh-purple);
+  color: var(--mh-gold);
   font-weight: 700;
 }
 
 .textOff {
-  color: #555;
+  color: #83776b;
 }
 
-.textHidden {
-  visibility: hidden;
+@media (max-width: 380px) {
+  .toggleLabel {
+    gap: 8px;
+    align-items: center;
+  }
+
+  .switch {
+    width: 40px;
+    height: 22px;
+  }
+
+  .switchHandle {
+    width: 16px;
+    height: 16px;
+  }
+
+  .toggleInput:checked + .switch .switchHandle {
+    transform: translateX(18px);
+  }
+
+  .toggleText {
+    font-size: 0.64rem;
+    letter-spacing: 0.03em;
+    width: 9ch;
+  }
 }

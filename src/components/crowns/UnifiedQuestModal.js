@@ -57,7 +57,7 @@ export default function UnifiedQuestModal({ isOpen, onClose, initialGroup, onUpd
         const ref = initialGroup[0];
         setQuestData({
           quest: ref.quest || "Optional Quests",
-          show_host: !!(ref.inv_monster_id && String(ref.inv_monster_id) !== String(ref.monster_id)),
+          show_host: !!ref.investigation_id,
           inv_monster_id: ref.inv_monster_id || ref.monster_id,
           remaining_uses: ref.remaining_uses || 3,
         });
