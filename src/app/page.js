@@ -57,10 +57,11 @@ async function getHomeData() {
     const bounties = QUEST_SYSTEM_ENABLED ? monsters.filter(m => bountyIds.includes(m.id)) : [];
 
     const renownRes = await db.execute(`
-      SELECT id, username, avatar_url, renown
-      FROM users
-      WHERE renown > 0
-      ORDER BY renown DESC
+      SELECT u.id, u.username, u.avatar_url, COUNT(c.id) as crown_count
+      FROM users u
+      JOIN crowns c ON c.user_id = u.id
+      GROUP BY u.id
+      ORDER BY crown_count DESC
       LIMIT 4
     `);
 
@@ -217,7 +218,7 @@ export default async function Home() {
               <h2 className="mh-title">Guild Legends</h2>
               <InfoTrigger 
                 title="Guild Legends" 
-                content="The top hunters in the community ranked by Commendations. Earn Commendations by contributing crown data and helping others." 
+                content="The top crown hunters in the community, ranked by total crowns contributed to the Guild registry." 
                 align="left"
               />
             </header>
@@ -229,7 +230,7 @@ export default async function Home() {
                   </div>
                   <div className={styles.itemInfo}>
                     <span className={styles.itemName}>{u.username}</span>
-                    <span className={styles.itemMeta}>{u.renown} Commendations</span>
+                    <span className={styles.itemMeta}>{u.crown_count} Crowns</span>
                   </div>
                   <div className={styles.itemRank}>#{i + 1}</div>
                 </Link>
