@@ -330,10 +330,10 @@ export default function AddCrownModal({ isOpen, onClose }) {
 
               <div className={styles.field}>
                 <div className={styles.hostHeader}>
-                  <label>Quest Host Monster</label>
+                  <label>Primary Quest Monster</label>
                   <InfoTrigger 
-                    title="Quest Host" 
-                    content="The primary monster of the quest. In some games, the RNG for crowns is tied to the host monster even if you are hunting a different target." 
+                    title="Primary Quest Monster" 
+                    content="Use this only if the quest's main listed monster is different from the monster tied to the crown record you are adding." 
                   />
                 </div>
                 <div className={styles.hostToggleRow}>
@@ -346,8 +346,8 @@ export default function AddCrownModal({ isOpen, onClose }) {
                       inv_mode: "new",
                       investigation_id: "",
                     }))}
-                    labelOn="Different host"
-                    labelOff="Same host"
+                    labelOn="Different from recorded monster"
+                    labelOff="Same as recorded monster"
                   />
                 </div>
                 {formData.show_host && (
@@ -358,7 +358,7 @@ export default function AddCrownModal({ isOpen, onClose }) {
                       onChange={(val) =>
                         setFormData(prev => ({ ...prev, inv_monster_id: val, inv_mode: "new", investigation_id: "" }))
                       }
-                      placeholder="Select host monster"
+                      placeholder="Select primary quest monster"
                     />
                   </div>
                 )}

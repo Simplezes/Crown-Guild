@@ -246,7 +246,7 @@ export default function EditQuestPairModal({ isOpen, onClose, group, onUpdated }
                 )}
 
                 <div className={styles.editRow} style={{ marginTop: '12px' }}>
-                  <label>Common Quest Host</label>
+                  <label>Primary Quest Monster</label>
                   <Toggle
                     checked={formData.show_host}
                     onChange={e => setFormData(prev => ({
@@ -254,8 +254,8 @@ export default function EditQuestPairModal({ isOpen, onClose, group, onUpdated }
                       show_host: e.target.checked,
                       inv_monster_id: e.target.checked ? (prev.inv_monster_id || group[0].monster_id) : group[0].monster_id,
                     }))}
-                    labelOn="Different host monster"
-                    labelOff="Same as primary monster"
+                    labelOn="Different from recorded monsters"
+                    labelOff="Same as recorded monsters"
                   />
                   {formData.show_host && (
                     <div className={styles.animateIn} style={{ marginTop: '10px' }}>
@@ -263,7 +263,7 @@ export default function EditQuestPairModal({ isOpen, onClose, group, onUpdated }
                         options={monsterOptions}
                         value={formData.inv_monster_id}
                         onChange={(val) => setFormData(prev => ({ ...prev, inv_monster_id: val }))}
-                        placeholder="Select host monster"
+                        placeholder="Select primary quest monster"
                       />
                     </div>
                   )}
