@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import styles from './ContactButton.module.css';
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
+import { SOS_FEATURE_ENABLED } from '@/lib/sos';
 
 export default function ContactButton({ hostId, monsterId, monsterName, crownId, discordId }) {
   const { data: session } = useSession();
@@ -172,10 +173,10 @@ export default function ContactButton({ hostId, monsterId, monsterName, crownId,
       style={menuStyle}
     >
       <div className={styles.header}>
-        <span className="mh-title">{isOwnCrown ? 'Host Controls' : 'Contact Options'}</span>
+        <span className="mh-title">Contact Options</span>
       </div>
 
-      {isOwnCrown && (
+      {SOS_FEATURE_ENABLED && isOwnCrown && (
         <button className={styles.option + ' ' + styles.sos} onClick={handleBroadcastSOS}>
           <div className={styles.optionIcon}>
             <Image src="/icons/MHWilds-Link_Party_Icon.png" width={18} height={18} alt="" className="pixel-art" />
@@ -234,17 +235,19 @@ export default function ContactButton({ hostId, monsterId, monsterName, crownId,
             </div>
           </button>
 
-          <button className={styles.option + ' ' + styles.sos} onClick={handleRequestSOS}>
-            <div className={styles.optionIcon}>
-              <Image src="/icons/MHWilds-Quest_Menu_Icon.png" width={18} height={18} alt="" className="pixel-art" />
-            </div>
-            <div className={styles.optionText}>
-              <span className={styles.label}>
-                {status === 'success' ? 'Beacon Fired!' : 'Request SOS Assist'}
-              </span>
-              <span className={styles.desc}>Notify host via Bot</span>
-            </div>
-          </button>
+          {SOS_FEATURE_ENABLED && (
+            <button className={styles.option + ' ' + styles.sos} onClick={handleRequestSOS}>
+              <div className={styles.optionIcon}>
+                <Image src="/icons/MHWilds-Quest_Menu_Icon.png" width={18} height={18} alt="" className="pixel-art" />
+              </div>
+              <div className={styles.optionText}>
+                <span className={styles.label}>
+                  {status === 'success' ? 'Beacon Fired!' : 'Request SOS Assist'}
+                </span>
+                <span className={styles.desc}>Notify host via Bot</span>
+              </div>
+            </button>
+          )}
         </>
       )}
 
@@ -257,6 +260,10 @@ export default function ContactButton({ hostId, monsterId, monsterName, crownId,
     document.body
   ) : null;
 
+  if (!SOS_FEATURE_ENABLED && isOwnCrown) {
+    return null;
+  }
+
   return (
     <>
     <div className={`${styles.wrapper} ${isOpen ? styles.active : ''}`} ref={wrapperRef}>
@@ -267,7 +274,7 @@ export default function ContactButton({ hostId, monsterId, monsterName, crownId,
         disabled={status === 'loading'}
       >
         <Image src="/icons/MHWilds-Squad_Information_Counter_Icon.png" width={16} height={16} alt="" className="pixel-art" />
-        {status === 'loading' ? 'Signaling...' : isOwnCrown ? 'Host Options' : 'Join Hunt'}
+        {status === 'loading' ? 'Working...' : 'Contact Hunter'}
       </button>
     </div>
     {menu}

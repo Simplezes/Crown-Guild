@@ -5,6 +5,7 @@ import Image from "next/image";
 import LiveRadarWrapper from "@/components/beacon/LiveRadarWrapper";
 import InfoTrigger from "@/components/ui/InfoTrigger";
 import { getAllMonsters, getWeeklyBounties } from "@/lib/monsters";
+import { QUEST_SYSTEM_ENABLED } from "@/lib/sos";
 
 export const dynamic = "force-dynamic";
 
@@ -52,8 +53,8 @@ async function getHomeData() {
     `);
 
     const monsters = await getAllMonsters();
-    const bountyIds = getWeeklyBounties(monsters);
-    const bounties = monsters.filter(m => bountyIds.includes(m.id));
+    const bountyIds = QUEST_SYSTEM_ENABLED ? getWeeklyBounties(monsters) : [];
+    const bounties = QUEST_SYSTEM_ENABLED ? monsters.filter(m => bountyIds.includes(m.id)) : [];
 
     const renownRes = await db.execute(`
       SELECT id, username, avatar_url, renown
@@ -129,27 +130,29 @@ export default async function Home() {
           </div>
         </div>
 
-        <section className={styles.bountySection + " animate-mh"}>
-          <div className={styles.bountyHeader}>
-            <Image src="/icons/MHWilds-Completed_Objective_Icon.png" width={24} height={24} alt="" className="pixel-art" />
-            <h2 className="mh-title">Weekly Bounties</h2>
-            <InfoTrigger 
-              title="Weekly Bounties" 
-              content="Specific monsters designated by the Guild. Securing crowns for these monsters grants double Mastery Points." 
-              position="bottom"
-              align="left"
-            />
-            <span className={styles.bountyMeta}>2x Mastery Points Rewards</span>
-          </div>
-          <div className={styles.bountyGrid}>
-            {bounties.map(m => (
-              <Link href={`/monster/${m.name}`} key={m.id} className={styles.bountyCard}>
-                <Image src={`/monsters/${m.image_name}`} width={48} height={48} alt={m.name} className="pixel-art" />
-                <span className={styles.bountyName}>{m.name}</span>
-              </Link>
-            ))}
-          </div>
-        </section>
+        {QUEST_SYSTEM_ENABLED && (
+          <section className={styles.bountySection + " animate-mh"}>
+            <div className={styles.bountyHeader}>
+              <Image src="/icons/MHWilds-Completed_Objective_Icon.png" width={24} height={24} alt="" className="pixel-art" />
+              <h2 className="mh-title">Weekly Bounties</h2>
+              <InfoTrigger 
+                title="Weekly Bounties" 
+                content="Specific monsters designated by the Guild. Securing crowns for these monsters grants double Mastery Points." 
+                position="bottom"
+                align="left"
+              />
+              <span className={styles.bountyMeta}>2x Mastery Points Rewards</span>
+            </div>
+            <div className={styles.bountyGrid}>
+              {bounties.map(m => (
+                <Link href={`/monster/${m.name}`} key={m.id} className={styles.bountyCard}>
+                  <Image src={`/monsters/${m.image_name}`} width={48} height={48} alt={m.name} className="pixel-art" />
+                  <span className={styles.bountyName}>{m.name}</span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className={styles.radarWrapper + " animate-mh"}>
           <LiveRadarWrapper />

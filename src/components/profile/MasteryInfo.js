@@ -37,14 +37,9 @@ export default function MasteryInfo({ points, rank, nextRank, progress }) {
           <li><span className={styles.mp}>+25 MP</span> Guild Archive (Discovery)</li>
           <li><span className={styles.mp}>+15 MP</span> Guild Commendation (Renown)</li>
           <li><span className={styles.mp}>+5 MP</span> Share Records (Host Crown)</li>
-          <li><span className={styles.mp}>+2 MP</span> Support Hunters (Join Hunt)</li>
+          <li><span className={styles.mp}>+2 MP</span> Support Hunters (Future co-op features)</li>
         </ul>
-        <div className={styles.feverPromo}>
-          <div className={styles.feverText}>
-            <strong>GUILD FEVER</strong>
-            <span>Active for 1hr after a hunt. 3x MP for everyone!</span>
-          </div>
-        </div>
+        {/* QUEST_SYSTEM_ENABLED: Guild Fever promo hidden while quest system is on hold */}
       </div>
     </div>
   );

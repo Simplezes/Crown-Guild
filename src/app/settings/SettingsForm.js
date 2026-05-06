@@ -125,8 +125,8 @@ export default function SettingsForm({ initialData }) {
       <div className={styles.field}>
         <div className={styles.toggleRow} onClick={handleToggle}>
           <div className={styles.toggleInfo}>
-            <label>Receive SOS Direct Messages</label>
-            <span className={styles.hint}>Allow the bot to DM you.</span>
+            <label>Receive Discord Direct Messages</label>
+            <span className={styles.hint}>Reserved for future contact features.</span>
           </div>
           <div className={styles.switchWrapper}>
             <input

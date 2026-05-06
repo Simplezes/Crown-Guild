@@ -2,8 +2,13 @@ import db from "@/lib/db";
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import { pusherServer } from "@/lib/pusher";
+import { SOS_DISABLED_MESSAGE, SOS_FEATURE_ENABLED } from '@/lib/sos';
 
 export async function POST(req) {
+  if (!SOS_FEATURE_ENABLED) {
+    return new NextResponse(SOS_DISABLED_MESSAGE, { status: 503 });
+  }
+
   try {
     const session = await auth();
     if (!session?.user) {

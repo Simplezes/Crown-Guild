@@ -5,11 +5,21 @@ import styles from './FireFlareButton.module.css';
 import Image from 'next/image';
 import { useToast } from '@/app/UIProvider';
 import Link from 'next/link';
+import { SOS_DISABLED_MESSAGE, SOS_FEATURE_ENABLED } from '@/lib/sos';
 
 export default function FireFlareButton({ monsterId, monsterName, userCrowns, hasLobbyId }) {
   const [loading, setLoading] = useState(false);
   const [fired, setFired] = useState(false);
   const toast = useToast();
+
+  if (!SOS_FEATURE_ENABLED) {
+    return (
+      <div className={styles.container}>
+        <h4 className={styles.title}>SOS Broadcast Offline</h4>
+        <p className={styles.settingsLink}>{SOS_DISABLED_MESSAGE}</p>
+      </div>
+    );
+  }
 
   if (!userCrowns || userCrowns.length === 0) return null;
 

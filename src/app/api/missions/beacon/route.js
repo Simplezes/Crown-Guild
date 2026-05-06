@@ -3,8 +3,13 @@ import db from "@/lib/db";
 import { auth } from "@/auth";
 import { pusherServer } from "@/lib/pusher";
 import { checkRateLimit } from "@/lib/ratelimit";
+import { SOS_DISABLED_MESSAGE, SOS_FEATURE_ENABLED } from '@/lib/sos';
 
 export async function POST(request) {
+  if (!SOS_FEATURE_ENABLED) {
+    return NextResponse.json({ error: SOS_DISABLED_MESSAGE }, { status: 503 });
+  }
+
   try {
     const session = await auth();
     if (!session || !session.user || !session.user.id) {
