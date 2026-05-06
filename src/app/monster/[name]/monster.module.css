@@ -71,6 +71,10 @@
   margin-top: 48px;
 }
 
+.records {
+  min-width: 0;
+}
+
 .tacticalCard {
   background: var(--mh-glass);
   backdrop-filter: var(--glass-blur);
@@ -530,17 +534,34 @@
     grid-template-columns: 1fr;
     gap: 48px;
   }
+
+  .tacticalCard,
+  .records {
+    width: 100%;
+  }
 }
 
 @media (max-width: 768px) {
   .main {
     padding-top: 100px;
+    padding-bottom: 56px;
+  }
+
+  .header {
+    margin-bottom: 32px;
+    text-align: center;
+  }
+
+  .backBtn {
+    margin: 0 auto 24px;
+    justify-content: center;
   }
 
   .hero {
     flex-direction: column;
     text-align: center;
     gap: 24px;
+    align-items: center;
   }
 
   .monsterIcon {
@@ -557,19 +578,161 @@
     font-size: 0.9rem;
   }
 
+  .infoGrid {
+    margin-top: 32px;
+    gap: 32px;
+  }
+
   .tacticalCard {
     padding: 24px;
+  }
+
+  .tacticalHeader,
+  .sectionTitle {
+    justify-content: center;
+    text-align: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .description,
+  .attributes,
+  .attrGroup {
+    text-align: center;
+  }
+
+  .tags {
+    justify-content: center;
+  }
+
+  .tabs {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .tab {
+    width: 100%;
+  }
+
+  .wishlistUser {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 18px;
+    text-align: center;
+  }
+
+  .userLeft {
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .userRight {
+    width: 100%;
+    text-align: center;
+  }
+
+  .needsIcons {
+    justify-content: center;
+  }
+
+  .pagination {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .pageBtn {
+    width: 100%;
+    max-width: 220px;
   }
 
   .hunterItem {
     padding: 12px;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     gap: 16px;
   }
 
-  .questMeta {
+  .hunterMain {
     width: 100%;
-    justify-content: flex-end;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .hunterDetail,
+  .hunterTop,
+  .statusBubble,
+  .questRow,
+  .linkedRow,
+  .hostLine,
+  .crownBadges {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    flex-wrap: wrap;
+  }
+
+  .hunterTop {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .name {
+    white-space: normal;
+  }
+
+  .statusBubble {
+    border-left: 0;
+    border-top: 2px solid rgba(181, 154, 93, 0.35);
+    padding: 8px 12px;
+  }
+
+  .sectionTitle h2,
+  .tacticalHeader h3 {
+    margin: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .main {
+    padding-top: 92px;
+  }
+
+  .titles h1 {
+    font-size: 2.2rem;
+  }
+
+  .meta {
+    font-size: 0.8rem;
+    letter-spacing: 0.18em;
+  }
+
+  .tacticalCard,
+  .wishlistUser,
+  .hunterItem,
+  .empty {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .tag,
+  .tagGold,
+  .tagRed,
+  .tab,
+  .pageInfo,
+  .pageBtn,
+  .questLabel,
+  .statusBubble span,
+  .needsLabel,
+  .hostLine,
+  .ratingChip,
+  .temperedChip,
+  .usesChip {
+    font-size: 0.72rem;
   }
 }
