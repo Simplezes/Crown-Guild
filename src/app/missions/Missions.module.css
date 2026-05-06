@@ -436,3 +436,35 @@
   color: var(--mh-tan-dark);
   font-family: 'Marcellus', serif;
 }
+
+.commendationZone {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.commendText {
+  font-size: 0.75rem;
+  color: var(--mh-tan-dark);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.commendBtn {
+  background: transparent;
+  border: 1px solid var(--mh-gold);
+  color: var(--mh-gold);
+  padding: 8px 24px;
+  font-family: 'Marcellus', serif;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.commended {
+  background: var(--mh-gold);
+  color: #000;
+}

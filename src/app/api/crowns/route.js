@@ -58,7 +58,7 @@ export async function POST(req) {
         });
         resolvedInvestigationId = Number(invRes.lastInsertRowid);
       }
-    } else if (quest === "Field Survey Quests" && investigation_monster_id && investigation_monster_id !== monster_id) {
+    } else if (investigation_monster_id && String(investigation_monster_id) !== String(monster_id)) {
       const invRes = await db.execute({
         sql: "INSERT INTO investigations (user_id, monster_id, remaining_uses) VALUES (?, ?, NULL)",
         args: [session.user.id, investigation_monster_id],
@@ -82,6 +82,11 @@ export async function POST(req) {
         resolvedInvestigationId,
         pair_id || null,
       ],
+    });
+
+    await db.execute({
+      sql: "INSERT OR IGNORE INTO guild_archive (user_id, monster_id, type) VALUES (?, ?, ?)",
+      args: [session.user.id, monster_id, type]
     });
 
     await pusherServer.trigger("public-channel", "crown_update", {});

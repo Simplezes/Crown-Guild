@@ -6,10 +6,11 @@ import { notFound } from "next/navigation";
 import { auth } from "@/auth";
 import ProfileCrowns from "@/components/crowns/ProfileCrowns";
 import ProfileSettings from "@/components/profile/ProfileSettings";
-import { getProfileData, getHunterRank } from "@/lib/profile";
+import { getProfileData, getHunterRank, getRankProgress } from "@/lib/profile";
 import DiscordShare from "@/components/ui/DiscordShare";
 import { getAllMonsters } from "@/lib/monsters";
 import CompletionTracker from "@/components/profile/CompletionTracker";
+import MasteryInfo from "@/components/profile/MasteryInfo";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -41,6 +42,7 @@ function buildProfileOgVersion(data) {
     Number(data.activity?.hosted || 0),
     Number(data.activity?.joined || 0),
     String(data.completion || 0),
+    Number(data.masteryPoints || 0),
     checksum.toString(36),
   ].join("-");
 }
@@ -85,8 +87,9 @@ export default async function Profile({ params }) {
 
   if (!data) notFound();
 
-  const { user, crowns, stats, activity, completion, topAssist } = data;
-  const userRank = getHunterRank(activity.hosted || 0, activity.joined || 0);
+  const { user, crowns, stats, activity, completion, topAssist, masteryPoints } = data;
+  const { currentRank, nextRank, progress } = getRankProgress(masteryPoints || 0);
+  const userRank = currentRank.title;
   const allMonsters = await getAllMonsters(true);
 
   return (
@@ -101,7 +104,7 @@ export default async function Profile({ params }) {
               <div className={styles.rankBadge}>{userRank}</div>
               <h1 className="gold-text">{user.username}</h1>
               <p className={styles.memberId}>ID: {user.id}</p>
-              
+
               {user.status_message && (
                 <div className={styles.statusBox}>
                   <p>"{user.status_message}"</p>
@@ -138,25 +141,36 @@ export default async function Profile({ params }) {
 
           <div className={styles.tile + " " + styles.progressTile}>
             <div className={styles.tileHeader}>
-              <Image src="/icons/MHWilds-Notes_Checkmark_Icon.png" width={16} height={16} alt="" className="pixel-art" />
-              <span>COLLECTION PROGRESS</span>
-            </div>
-            <div className={styles.progressBody}>
-              <div className={styles.completionVal}>{completion}%</div>
-              <div className={styles.miniStats}>
-                <div className={styles.miniStat}>
-                  <label>S</label><span>{stats.small || 0}</span>
-                </div>
-                <div className={styles.miniStat}>
-                  <label>L</label><span>{stats.large || 0}</span>
-                </div>
-                <div className={styles.miniStat}>
-                  <label>T</label><span>{stats.tempered || 0}</span>
+              <div className={styles.headerTitleArea}>
+                <Image src="/icons/MHWilds-Item_Pouch_Icon.png" width={16} height={16} alt="" className="pixel-art" />
+                <span>COLLECTION MASTERY</span>
+              </div>
+              <div className={styles.infoWrapper}>
+                <button className={styles.infoTrigger}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
+                  </svg>
+                </button>
+                <div className={styles.infoPopover}>
+                  <MasteryInfo
+                    points={masteryPoints}
+                    rank={userRank}
+                    nextRank={nextRank}
+                    progress={progress}
+                  />
                 </div>
               </div>
             </div>
+            <div className={styles.progressBody}>
+              <div className={styles.completionVal}>{masteryPoints} <span className={styles.mpLabel}>MP</span></div>
+              <div className={styles.rankBadgeSmall}>{userRank}</div>
+            </div>
+            <div className={styles.masteryMeta}>
+              <span>{completion}% Completion</span>
+              {nextRank && <span>{nextRank.minPoints - masteryPoints} to {nextRank.title}</span>}
+            </div>
             <div className={styles.progressBar}>
-              <div className={styles.progressFill} style={{ width: `${completion}%` }} />
+              <div className={styles.progressFill} style={{ width: `${progress}%` }} />
             </div>
           </div>
         </div>
@@ -173,7 +187,7 @@ export default async function Profile({ params }) {
           </header>
 
           <div className={styles.summarySection}>
-            <CompletionTracker 
+            <CompletionTracker
               initialCrowns={crowns}
               initialCollection={data.collection}
               initialWishlist={data.wishlist}

@@ -3,6 +3,7 @@ import Image from "next/image";
 import ContactButton from "../beacon/ContactButton";
 import { getQuestIcon } from "@/lib/monsters";
 import styles from "@/app/monster/[name]/monster.module.css";
+import InfoTrigger from "../ui/InfoTrigger";
 
 export default function HunterItem({ crown, linkedCrown = null, monsterName, isHighlighted }) {
   const {
@@ -44,8 +45,22 @@ export default function HunterItem({ crown, linkedCrown = null, monsterName, isH
             <span className={styles.name}>{username}</span>
             {!linkedCrown && (
               <div className={styles.crownBadges}>
-                <span className={styles.ratingChip}>{strength_rating}★</span>
-                {!!tempered && <span className={styles.temperedChip}>Tempered</span>}
+                <span className={styles.ratingChip}>
+                  {strength_rating}★
+                  <InfoTrigger 
+                    title="Strength Rating" 
+                    content="The difficulty level of the quest this crown was found in." 
+                  />
+                </span>
+                {!!tempered && (
+                  <span className={styles.temperedChip}>
+                    Tempered
+                    <InfoTrigger 
+                      title="Tempered" 
+                      content="A more powerful monster variant. Tempered hunts often have better odds for specific crowns." 
+                    />
+                  </span>
+                )}
               </div>
             )}
           </div>

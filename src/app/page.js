@@ -3,6 +3,8 @@ import styles from "./page.module.css";
 import Link from "next/link";
 import Image from "next/image";
 import LiveRadarWrapper from "@/components/beacon/LiveRadarWrapper";
+import InfoTrigger from "@/components/ui/InfoTrigger";
+import { getAllMonsters, getWeeklyBounties } from "@/lib/monsters";
 
 export const dynamic = "force-dynamic";
 
@@ -49,6 +51,18 @@ async function getHomeData() {
       LIMIT 20
     `);
 
+    const monsters = await getAllMonsters();
+    const bountyIds = getWeeklyBounties(monsters);
+    const bounties = monsters.filter(m => bountyIds.includes(m.id));
+
+    const renownRes = await db.execute(`
+      SELECT id, username, avatar_url, renown
+      FROM users
+      WHERE renown > 0
+      ORDER BY renown DESC
+      LIMIT 4
+    `);
+
     return {
       stats: {
         hunters: huntersRes.rows[0]?.count || 0,
@@ -56,7 +70,9 @@ async function getHomeData() {
       },
       wanted: wantedRes.rows || [],
       recent: recentRes.rows || [],
-      activeMissions: activeMissionsRes.rows || []
+      activeMissions: activeMissionsRes.rows || [],
+      bounties,
+      topRenown: renownRes.rows || []
     };
   } catch (e) {
     console.error(e);
@@ -64,13 +80,15 @@ async function getHomeData() {
       stats: { hunters: 0, crowns: 0 },
       wanted: [],
       recent: [],
-      activeMissions: []
+      activeMissions: [],
+      bounties: [],
+      topRenown: []
     };
   }
 }
 
 export default async function Home() {
-  const { stats, wanted, recent, activeMissions } = await getHomeData();
+  const { stats, wanted, recent, activeMissions, bounties, topRenown } = await getHomeData();
 
   const displayMissions = [];
   const seenGroups = new Set();
@@ -111,6 +129,28 @@ export default async function Home() {
           </div>
         </div>
 
+        <section className={styles.bountySection + " animate-mh"}>
+          <div className={styles.bountyHeader}>
+            <Image src="/icons/MHWilds-Completed_Objective_Icon.png" width={24} height={24} alt="" className="pixel-art" />
+            <h2 className="mh-title">Weekly Bounties</h2>
+            <InfoTrigger 
+              title="Weekly Bounties" 
+              content="Specific monsters designated by the Guild. Securing crowns for these monsters grants double Mastery Points." 
+              position="bottom"
+              align="left"
+            />
+            <span className={styles.bountyMeta}>2x Mastery Points Rewards</span>
+          </div>
+          <div className={styles.bountyGrid}>
+            {bounties.map(m => (
+              <Link href={`/monster/${m.name}`} key={m.id} className={styles.bountyCard}>
+                <Image src={`/monsters/${m.image_name}`} width={48} height={48} alt={m.name} className="pixel-art" />
+                <span className={styles.bountyName}>{m.name}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+
         <section className={styles.radarWrapper + " animate-mh"}>
           <LiveRadarWrapper />
         </section>
@@ -120,6 +160,11 @@ export default async function Home() {
             <header className={styles.cardHeader}>
               <Image src="/icons/MHWilds-Wishlist_Pin_Icon.png" width={20} height={20} alt="" className="pixel-art" />
               <h2 className="mh-title">Community Demand</h2>
+              <InfoTrigger 
+                title="Community Demand" 
+                content="Monsters that are most requested by the community on their wishlists. Hunters are actively seeking these crowns." 
+                align="left"
+              />
             </header>
             <div className={styles.list}>
               {wanted.map((m, i) => (
@@ -158,6 +203,32 @@ export default async function Home() {
                       width={16} height={16} alt="" className="pixel-art"
                     />
                   </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          <section className={styles.intelCard}>
+            <header className={styles.cardHeader}>
+              <Image src="/icons/MHWilds-Quest_Members_Icon.png" width={20} height={20} alt="" className="pixel-art" />
+              <h2 className="mh-title">Guild Legends</h2>
+              <InfoTrigger 
+                title="Guild Legends" 
+                content="The top hunters in the community ranked by Commendations. Earn Commendations by contributing crown data and helping others." 
+                align="left"
+              />
+            </header>
+            <div className={styles.list}>
+              {topRenown.map((u, i) => (
+                <Link href={`/profile/${u.id}`} key={u.id} className={styles.listItem}>
+                  <div className={styles.itemIcon}>
+                    <img src={u.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"} width={40} height={40} alt="" className={styles.roundAvatar} />
+                  </div>
+                  <div className={styles.itemInfo}>
+                    <span className={styles.itemName}>{u.username}</span>
+                    <span className={styles.itemMeta}>{u.renown} Commendations</span>
+                  </div>
+                  <div className={styles.itemRank}>#{i + 1}</div>
                 </Link>
               ))}
             </div>

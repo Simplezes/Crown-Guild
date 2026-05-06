@@ -72,15 +72,14 @@ export async function POST(request) {
       const groupMissions = groupRes.rows;
 
       for (const m of groupMissions) {
-        await db.execute({ sql: "INSERT OR IGNORE INTO users(id) VALUES (?)", args: [m.host_id] });
         await db.execute({ sql: "INSERT OR IGNORE INTO users(id) VALUES (?)", args: [m.requester_id] });
         await db.execute({
-          sql: "UPDATE users SET shared_crowns = shared_crowns + 1 WHERE id = ?",
-          args: [m.host_id]
+          sql: "UPDATE users SET missions_completed = missions_completed + 1, fever_until = datetime('now', '+1 hour') WHERE id = ?",
+          args: [m.requester_id]
         });
         await db.execute({
-          sql: "UPDATE users SET missions_completed = missions_completed + 1 WHERE id = ?",
-          args: [m.requester_id]
+          sql: "UPDATE users SET shared_crowns = shared_crowns + 1, fever_until = datetime('now', '+1 hour') WHERE id = ?",
+          args: [m.host_id]
         });
         await db.execute({
           sql: "INSERT INTO completed_missions (host_id, requester_id, monster_id, type, tempered, strength_rating) VALUES (?, ?, ?, ?, ?, ?)",
@@ -126,13 +125,13 @@ export async function POST(request) {
     await db.execute({ sql: "INSERT OR IGNORE INTO users(id) VALUES (?)", args: [requesterId] });
 
     await db.execute({
-      sql: "UPDATE users SET shared_crowns = shared_crowns + 1 WHERE id = ?",
-      args: [hostId],
+      sql: "UPDATE users SET missions_completed = missions_completed + 1, fever_until = datetime('now', '+1 hour') WHERE id = ?",
+      args: [requesterId],
     });
 
     await db.execute({
-      sql: "UPDATE users SET missions_completed = missions_completed + 1 WHERE id = ?",
-      args: [requesterId],
+      sql: "UPDATE users SET shared_crowns = shared_crowns + 1, fever_until = datetime('now', '+1 hour') WHERE id = ?",
+      args: [hostId],
     });
 
     await db.execute({

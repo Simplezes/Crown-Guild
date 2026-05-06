@@ -17,6 +17,8 @@ export default function MissionsPage() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [completing, setCompleting] = useState(false);
+  const [commending, setCommending] = useState(false);
+  const [commendedId, setRecommendedId] = useState(null);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const limit = 6;
@@ -40,7 +42,11 @@ export default function MissionsPage() {
       const res = await fetch('/api/missions/complete', { method: 'POST' });
       const data = await res.json();
       if (data.success) {
-        setCompletedMission(missionData);
+        const historyRes = await fetch(`/api/user/missions?page=1&limit=1`);
+        const historyData = await historyRes.json();
+        const latest = historyData.missions[0];
+
+        setCompletedMission({ ...missionData, id: latest?.id });
         setCurrentMission(null);
         fetchHistory(1);
       } else {
@@ -50,6 +56,26 @@ export default function MissionsPage() {
       console.error('Failed to complete mission:', err);
     } finally {
       setCompleting(false);
+    }
+  };
+
+  const handleCommend = async (missionId) => {
+    if (commending || commendedId === missionId) return;
+    setCommending(true);
+    try {
+      const res = await fetch('/api/missions/commend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ missionId })
+      });
+      if (res.ok) {
+        setRecommendedId(missionId);
+        toast.success('Commendation sent! Guild Renown increased.');
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setCommending(false);
     }
   };
 
@@ -246,6 +272,19 @@ export default function MissionsPage() {
                     </div>
                   </div>
                 </div>
+
+                {session.user.id === completedMission.requester_id && (
+                  <div className={styles.commendationZone}>
+                    <p className={styles.commendText}>Support your fellow Hunter?</p>
+                    <button
+                      className={`${styles.commendBtn} ${commendedId === completedMission.id ? styles.commended : ''}`}
+                      onClick={() => handleCommend(completedMission.id)}
+                      disabled={commendedId === completedMission.id || commending}
+                    >
+                      {commendedId === completedMission.id ? 'Commended ✓' : 'Give Commendation (👍)'}
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <div className={styles.emptyState}>

@@ -7,6 +7,7 @@ import MonsterIcon from "../ui/MonsterIcon";
 import Image from "next/image";
 import { useToast } from "@/app/UIProvider";
 import Toggle from "../ui/Toggle";
+import InfoTrigger from "../ui/InfoTrigger";
 
 const QUEST_TYPES = [
   "Event Quests",
@@ -255,6 +256,11 @@ export default function AddCrownModal({ isOpen, onClose }) {
               <div className={styles.field}>
                 <div className={styles.crownLabelRow}>
                   <label>Crown</label>
+                  <InfoTrigger 
+                    title="Crown Types" 
+                    content="Gold Crowns indicate exceptionally small or large monsters. Silver crowns are not tracked as they don't count towards completion." 
+                    position="right"
+                  />
                   {!formData.show_multi_monster && (
                     <span className={styles.crownHint}>Select both sizes to add multi-crown.</span>
                   )}
@@ -286,6 +292,17 @@ export default function AddCrownModal({ isOpen, onClose }) {
                         labelOn="Tempered"
                         labelOff="Normal"
                       />
+                    <InfoTrigger 
+                      title="Tempered" 
+                      content="Tempered monsters are significantly more powerful variants with a distinct purple outline. They often have different crown chances." 
+                    />
+                  </div>
+                  <div className={styles.typeHeader} style={{ marginTop: '10px' }}>
+                    <label>Strength Rating</label>
+                    <InfoTrigger 
+                      title="Strength Rating" 
+                      content="The 'Strength' or difficulty of the quest. Usually represented by stars or specific quest modifiers." 
+                    />
                   </div>
                   <div className={styles.pickerGrid}>
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
@@ -326,6 +343,10 @@ export default function AddCrownModal({ isOpen, onClose }) {
                   }))}
                   labelOn="Different host monster"
                   labelOff="Same as crown monster"
+                />
+                <InfoTrigger 
+                  title="Quest Host" 
+                  content="The primary monster of the quest. In some games, the RNG for crowns is tied to the host monster even if you are hunting a different target." 
                 />
                 {formData.show_host && (
                   <div className={styles.animateIn} style={{ marginTop: '10px' }}>
@@ -388,7 +409,14 @@ export default function AddCrownModal({ isOpen, onClose }) {
                             labelOff="Normal"
                           />
                         </div>
-                        <div className={styles.pickerGrid}>
+                        <div className={styles.typeHeader} style={{ marginTop: '10px' }}>
+                    <label>Strength Rating</label>
+                    <InfoTrigger 
+                      title="Strength Rating" 
+                      content="The 'Strength' or difficulty of the quest. Usually represented by stars or specific quest modifiers." 
+                    />
+                  </div>
+                  <div className={styles.pickerGrid}>
                           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
                             <div
                               key={num}

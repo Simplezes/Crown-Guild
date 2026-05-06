@@ -73,13 +73,13 @@ export default function CrownSummary({ items, allMonsters, isOwner, mode, onTogg
                   className={`${styles.dot} ${status?.small ? styles.active : ""} ${isOwner && mode !== 'host' ? styles.interactiveDot : ""}`}
                   onClick={(e) => handleDotClick(e, monster.id, 'small')}
                 >
-                  <Image src="/icons/smallcrown.png" width={8} height={8} alt="S" className="pixel-art" />
+                  <Image src="/icons/smallcrown.png" width={14} height={14} alt="S" className="pixel-art" />
                 </div>
                 <div 
                   className={`${styles.dot} ${status?.large ? styles.active : ""} ${isOwner && mode !== 'host' ? styles.interactiveDot : ""}`}
                   onClick={(e) => handleDotClick(e, monster.id, 'large')}
                 >
-                  <Image src="/icons/largecrown.png" width={8} height={8} alt="L" className="pixel-art" />
+                  <Image src="/icons/largecrown.png" width={14} height={14} alt="L" className="pixel-art" />
                 </div>
               </div>
 
