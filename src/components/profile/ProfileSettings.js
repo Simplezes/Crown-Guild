@@ -204,7 +204,6 @@ function SettingsContent({ user, isOwner }) {
                         )}
                         <div className={styles.serverMeta}>
                           <span className={styles.serverName}>{guild.name}</span>
-                          <span className={styles.serverId}>{guild.id}</span>
                         </div>
                       </button>
                     );

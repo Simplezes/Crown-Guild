@@ -5,7 +5,7 @@ import { getMonsterCount } from "@/lib/monsters";
 export async function getProfileData(userId) {
   try {
     const userRes = await db.execute({
-      sql: "SELECT id, username, avatar_url, lobby_id, quest_password, status_message, receive_dms FROM users WHERE id = ?",
+      sql: "SELECT id, username, avatar_url, lobby_id, quest_password, status_message, receive_dms, renown, fever_until FROM users WHERE id = ?",
       args: [userId]
     });
 
@@ -57,8 +57,9 @@ export async function getProfileData(userId) {
     const activityRes = await db.execute({
       sql: `SELECT 
               (SELECT COUNT(*) FROM completed_missions WHERE host_id = ?) as hosted,
-              (SELECT COUNT(*) FROM completed_missions WHERE requester_id = ?) as joined`,
-      args: [userId, userId]
+              (SELECT COUNT(*) FROM completed_missions WHERE requester_id = ?) as joined,
+              (SELECT COUNT(*) FROM guild_archive WHERE user_id = ?) as archive_count`,
+      args: [userId, userId, userId]
     });
 
     const monsterCount = getMonsterCount() || 1;
@@ -134,14 +135,29 @@ export async function getProfileData(userId) {
       }
     });
 
+    const collection = Object.values(collectionMap);
+
+    let masteryPoints = 0;
+    collection.forEach(item => {
+      if (item.type === 'small' || item.type === 'large') masteryPoints += 10;
+      else if (item.type === 'both') masteryPoints += 30;
+    });
+    masteryPoints += (activityRes.rows[0].hosted || 0) * 5;
+    masteryPoints += (activityRes.rows[0].joined || 0) * 2;
+    masteryPoints += (user.renown || 0) * 15;
+    masteryPoints += (activityRes.rows[0].archive_count || 0) * 25;
+
+    const isFever = user.fever_until && new Date(user.fever_until) > new Date();
+
     return {
-      user: { ...user },
+      user: { ...user, isFever },
       crowns: crownsRes.rows.map(row => ({ ...row })),
       wishlist: Object.values(wishlistMap),
-      collection: Object.values(collectionMap),
+      collection,
       stats: statsRes.rows[0],
       activity: activityRes.rows[0],
       completion,
+      masteryPoints,
       topAssist: topAssistRes.rows[0] ? { ...topAssistRes.rows[0] } : null
     };
   } catch (e) {
@@ -180,24 +196,35 @@ export async function getCrownById(crownId) {
   }
 }
 
-export function getHunterRank(hosted, joined) {
-  const total = (hosted || 0) + (joined || 0);
-  if (total === 0) return "Fledgling";
+export const MASTERY_RANKS = [
+  { rank: 1, title: "Fledgling", minPoints: 0 },
+  { rank: 2, title: "Scout", minPoints: 100 },
+  { rank: 3, title: "Tracker", minPoints: 300 },
+  { rank: 4, title: "Hunter", minPoints: 750 },
+  { rank: 5, title: "Veteran", minPoints: 1500 },
+  { rank: 6, title: "Expert", minPoints: 3000 },
+  { rank: 7, title: "Master", minPoints: 5000 },
+  { rank: 8, title: "Legend", minPoints: 8000 },
+];
 
-  if (hosted >= joined * 2) {
-    if (hosted >= 50) return "Guild Patron";
-    if (hosted >= 20) return "Crown Broker";
-    if (hosted >= 5) return "Expedition Leader";
-    return "Host";
-  } else if (joined >= hosted * 2) {
-    if (joined >= 50) return "Crown Assassin";
-    if (joined >= 20) return "Elite Mercenary";
-    if (joined >= 5) return "Crown Seeker";
-    return "Hunter";
-  } else {
-    if (total >= 100) return "Guild Legend";
-    if (total >= 40) return "Veteran Hunter";
-    if (total >= 10) return "Seasoned Hunter";
-    return "Hunter";
-  }
+export function getHunterRank(points) {
+  const rank = [...MASTERY_RANKS].reverse().find(r => points >= r.minPoints);
+  return rank ? rank.title : "Fledgling";
+}
+
+export function getRankProgress(points) {
+  const currentRankIndex = [...MASTERY_RANKS].reverse().findIndex(r => points >= r.minPoints);
+  const currentRank = MASTERY_RANKS[MASTERY_RANKS.length - 1 - currentRankIndex];
+  const nextRank = MASTERY_RANKS[MASTERY_RANKS.length - currentRankIndex];
+
+  if (!nextRank) return { currentRank, nextRank: null, progress: 100 };
+
+  const range = nextRank.minPoints - currentRank.minPoints;
+  const progress = ((points - currentRank.minPoints) / range) * 100;
+
+  return {
+    currentRank,
+    nextRank,
+    progress: Math.min(100, Math.max(0, progress))
+  };
 }

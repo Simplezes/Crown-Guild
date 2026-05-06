@@ -59,14 +59,14 @@ export async function PATCH(req, { params }) {
       } else {
         resolvedInvestigationId = oldInvestigationId;
       }
-    } else if (quest === "Field Survey Quests") {
-      if (investigation_monster_id && investigation_monster_id !== monster_id) {
-        const invRes = await db.execute({
-          sql: "INSERT INTO investigations (user_id, monster_id, remaining_uses) VALUES (?, ?, NULL)",
-          args: [session.user.id, investigation_monster_id],
-        });
-        resolvedInvestigationId = Number(invRes.lastInsertRowid);
-      }
+    } else if (investigation_monster_id && String(investigation_monster_id) !== String(monster_id)) {
+      const invRes = await db.execute({
+        sql: "INSERT INTO investigations (user_id, monster_id, remaining_uses) VALUES (?, ?, NULL)",
+        args: [session.user.id, investigation_monster_id],
+      });
+      resolvedInvestigationId = Number(invRes.lastInsertRowid);
+    } else {
+      resolvedInvestigationId = null;
     }
 
     const resolvedPairId = pair_id !== undefined ? (pair_id || null) : checkRes.rows[0].old_pair_id ?? null;

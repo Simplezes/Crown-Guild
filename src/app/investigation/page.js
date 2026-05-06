@@ -5,6 +5,7 @@ import { getAllMonsters } from "@/lib/monsters";
 import { auth } from "@/auth";
 import db from "@/lib/db";
 import WishlistToggle from "@/components/wishlist/WishlistToggle";
+import InfoTrigger from "@/components/ui/InfoTrigger";
 
 export default async function FieldGuide() {
   const session = await auth();
@@ -102,7 +103,13 @@ export default async function FieldGuide() {
                   </Link>
 
                   <div className={styles.wishlistControl}>
-                    <div className={styles.controlLabel}>Track Target</div>
+                    <div className={styles.controlLabel}>
+                      Track Target
+                      <InfoTrigger 
+                        title="Wishlist Tracking" 
+                        content="Adding a monster to your wishlist will notify you when someone finds a crown for it. You can track small, large, or both crowns." 
+                      />
+                    </div>
                     <WishlistToggle
                       monsterId={monster.id}
                       initialType={monster.wishlistType}

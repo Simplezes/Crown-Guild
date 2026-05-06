@@ -47,7 +47,7 @@
 
 .searchInner {
   flex: 1;
-  max-width: 700px;
+  min-width: 500px;
   display: flex;
   align-items: center;
   gap: 16px;

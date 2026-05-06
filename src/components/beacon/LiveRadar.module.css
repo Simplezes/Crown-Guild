@@ -110,6 +110,10 @@
   font-family: 'Marcellus', serif;
   font-size: 0.9rem;
   color: var(--mh-tan);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .timeTag {
@@ -287,4 +291,37 @@
 .startBtn:hover {
   background: #2ecc71;
   color: #000;
+}
+
+@media (max-width: 640px) {
+  .flareList {
+    grid-template-columns: 1fr;
+  }
+
+  .radarContainer {
+    padding: 16px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .flareCard {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .flareInfo {
+    min-width: 0;
+  }
+
+  .actions {
+    width: 100%;
+    justify-content: flex-end;
+    padding-top: 8px;
+    margin-top: 4px;
+    border-top: 1px dashed rgba(255, 69, 0, 0.2);
+  }
 }

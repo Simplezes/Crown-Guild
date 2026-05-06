@@ -61,10 +61,10 @@
 
 .crownIndicators {
   display: flex;
-  gap: 6px;
+  gap: 2px;
   background: rgba(0, 0, 0, 0.4);
-  padding: 2px 4px;
-  border-radius: 4px;
+  padding: 2px;
+  border-radius: 6px;
 }
 
 .dot {
@@ -73,6 +73,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
 }
 
 .active {
@@ -114,7 +117,7 @@
 }
 
 .interactiveDot:hover {
-  transform: scale(1.4);
+  transform: scale(1.1);
   background: rgba(181, 154, 93, 0.2);
   box-shadow: 0 0 10px var(--mh-gold-glow);
 }
