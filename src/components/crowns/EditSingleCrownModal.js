@@ -45,7 +45,7 @@ export default function EditSingleCrownModal({ isOpen, onClose, crown, onUpdated
         strength_rating: crown.strength_rating || 1,
         inv_monster_id: crown.inv_monster_id || crown.monster_id,
         remaining_uses: crown.remaining_uses || 3,
-        show_host: !!(crown.inv_monster_id && String(crown.inv_monster_id) !== String(crown.monster_id)),
+        show_host: !!crown.investigation_id,
         linkedStrength_rating: 1,
       });
       setSuccess(false);
@@ -70,7 +70,7 @@ export default function EditSingleCrownModal({ isOpen, onClose, crown, onUpdated
       formData.quest !== (crown.quest || "Optional Quests") ||
       formData.strength_rating !== (crown.strength_rating || 1) ||
       (formData.quest === "Investigation Quests" && formData.remaining_uses !== (crown.remaining_uses || 3)) ||
-      String(formData.show_host ? (formData.inv_monster_id || formData.monster_id) : formData.monster_id) !== String(crown.inv_monster_id || crown.monster_id)
+      String(formData.show_host ? (formData.inv_monster_id || formData.monster_id) : "") !== String(crown.investigation_id ? (crown.inv_monster_id || crown.monster_id) : "")
     );
   })();
 
@@ -93,16 +93,15 @@ export default function EditSingleCrownModal({ isOpen, onClose, crown, onUpdated
       const basePayload = {
         monster_id: parseInt(formData.monster_id),
         quest: formData.quest,
+        mission_host_enabled: formData.show_host,
       };
 
-      if (formData.quest === "Investigation Quests") {
+      if (formData.show_host && formData.quest === "Investigation Quests") {
         basePayload.investigation_monster_id = parseInt(formData.show_host ? (formData.inv_monster_id || formData.monster_id) : formData.monster_id);
         basePayload.remaining_uses = parseInt(formData.remaining_uses);
       } else if (formData.show_host) {
         const hostId = parseInt(formData.inv_monster_id || formData.monster_id);
-        if (hostId !== parseInt(formData.monster_id)) {
-          basePayload.investigation_monster_id = hostId;
-        }
+        basePayload.investigation_monster_id = hostId;
       }
 
       const patchType = formData.types.includes(crown.type) ? crown.type : formData.types[0];

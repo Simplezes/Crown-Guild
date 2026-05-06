@@ -140,9 +140,7 @@ export default function AddCrownModal({ isOpen, onClose }) {
         }
       } else if (formData.show_host) {
         const hostId = parseInt(formData.inv_monster_id || formData.monster_id);
-        if (hostId !== parseInt(formData.monster_id)) {
-          basePayload.investigation_monster_id = hostId;
-        }
+        basePayload.investigation_monster_id = hostId;
       }
 
       const hasPair = formData.types.length > 1 || formData.show_multi_monster;
@@ -331,25 +329,29 @@ export default function AddCrownModal({ isOpen, onClose }) {
               </div>
 
               <div className={styles.field}>
-                <label>Quest Host Monster</label>
-                <Toggle
-                  checked={formData.show_host}
-                  onChange={e => setFormData(prev => ({
-                    ...prev,
-                    show_host: e.target.checked,
-                    inv_monster_id: e.target.checked ? (prev.inv_monster_id || prev.monster_id) : prev.monster_id,
-                    inv_mode: "new",
-                    investigation_id: "",
-                  }))}
-                  labelOn="Different host monster"
-                  labelOff="Same as crown monster"
-                />
-                <InfoTrigger 
-                  title="Quest Host" 
-                  content="The primary monster of the quest. In some games, the RNG for crowns is tied to the host monster even if you are hunting a different target." 
-                />
+                <div className={styles.hostHeader}>
+                  <label>Quest Host Monster</label>
+                  <InfoTrigger 
+                    title="Quest Host" 
+                    content="The primary monster of the quest. In some games, the RNG for crowns is tied to the host monster even if you are hunting a different target." 
+                  />
+                </div>
+                <div className={styles.hostToggleRow}>
+                  <Toggle
+                    checked={formData.show_host}
+                    onChange={e => setFormData(prev => ({
+                      ...prev,
+                      show_host: e.target.checked,
+                      inv_monster_id: e.target.checked ? (prev.inv_monster_id || prev.monster_id) : prev.monster_id,
+                      inv_mode: "new",
+                      investigation_id: "",
+                    }))}
+                    labelOn="Different host"
+                    labelOff="Same host"
+                  />
+                </div>
                 {formData.show_host && (
-                  <div className={styles.animateIn} style={{ marginTop: '10px' }}>
+                  <div className={`${styles.animateIn} ${styles.hostDropdown}`}>
                     <CustomSelect
                       options={monsterOptions}
                       value={formData.inv_monster_id || formData.monster_id}
@@ -372,8 +374,8 @@ export default function AddCrownModal({ isOpen, onClose }) {
                     monster2_id: e.target.checked ? (prev.monster2_id || prev.monster_id) : "",
                     monster2_types: [{ value: "small", tempered: false, strength_rating: 1 }],
                   }))}
-                  labelOn="Different monster in same quest"
-                  labelOff="Single monster quest"
+                  labelOn="Multi-monster"
+                  labelOff="Single-monster"
                 />
                 {formData.show_multi_monster && (
                   <div className={`${styles.animateIn}`} style={{ marginTop: '14px', display: 'flex', flexDirection: 'column', gap: '12px' }}>

@@ -15,6 +15,7 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
   const [page, setPage] = useState(1);
   const [editingCrown, setEditingCrown] = useState(null);
   const [editingGroup, setEditingGroup] = useState(null);
+  const [activeCardId, setActiveCardId] = useState(null);
   const router = useRouter();
   const toast = useToast();
   const confirm = useConfirm();
@@ -29,7 +30,6 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
   const handleDelete = async (id) => {
     const ok = await confirm("Remove this crown from your collection?", { title: "Remove Crown", danger: true, confirmLabel: "Remove" });
     if (!ok) return;
-
     try {
       const res = await fetch(`/api/crowns/${id}`, { method: "DELETE" });
       if (res.ok) {
@@ -91,26 +91,24 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
       investigationLabel = `${titleCase(crown.inv_monster_name)} Field Survey`;
     }
 
+    const cardId = crown.id;
     return (
       <div className={styles.crownCard}>
+        {crown.inv_monster_image && (
+          <div className={styles.ghostHost}>
+            <Image src={`/monsters/${crown.inv_monster_image}`} alt="" fill className={styles.ghostImage} />
+          </div>
+        )}
         {(hasInvestigation || hasFieldSurvey) && (
           <div className={styles.crownCornerLeft}>
             <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={12} height={12} alt="" className="pixel-art" />
           </div>
         )}
         <div className={styles.crownCornerRight}>
-          <Image
-            src={crown.type === 'small' ? "/icons/smallcrown.png" : "/icons/largecrown.png"}
-            width={16} height={16} alt={crown.type} className="pixel-art"
-          />
+          <Image src={crown.type === 'small' ? "/icons/smallcrown.png" : "/icons/largecrown.png"} width={16} height={16} alt={crown.type} className="pixel-art" />
         </div>
         <Link href={`/monster/${crown.name}?crownId=${crown.id}&user=${userId}`} className={styles.monsterLink}>
-          <MonsterIcon
-            imageName={crown.image_name}
-            name={crown.name}
-            tempered={crown.tempered}
-            size={64}
-          />
+          <MonsterIcon imageName={crown.image_name} name={crown.name} tempered={crown.tempered} size={64} />
         </Link>
         <div className={styles.crownOverlay}>
           <Link href={`/monster/${crown.name}?crownId=${crown.id}&user=${userId}`} className={styles.nameLink}>
@@ -127,41 +125,35 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
           )}
         </div>
         {isOwner && !hideActions && (
-          <div className={styles.cardActions}>
+          <>
             <button
-              onClick={() => {
-                const url = `${window.location.origin}/monster/${encodeURIComponent(crown.name)}?crownId=${crown.id}&user=${userId}&share=${buildShareNonce()}`;
-                navigator.clipboard.writeText(url);
-                toast.info("Link copied to clipboard!");
-              }}
-              className={styles.actionBtn}
-              title="Share Crown"
+              className={`${styles.actionsTrigger} ${activeCardId === cardId ? styles.actionsTriggerActive : ''}`}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveCardId(prev => prev === cardId ? null : cardId); }}
+              title="Options"
+            >⋮</button>
+            <div
+              className={`${styles.cardActions} ${activeCardId === cardId ? styles.cardActionsActive : ''}`}
+              onClick={(e) => { e.stopPropagation(); setActiveCardId(null); }}
             >
-              <Image src="/icons/MHWilds-Link_Party_Icon.png" width={14} height={14} alt="Share" className="pixel-art" />
-            </button>
-            <button
-              onClick={() => setEditingCrown(crown)}
-              className={styles.actionBtn}
-              title="Edit Crown"
-            >
-              <Image src="/icons/MHWilds-Settings_Icon.png" width={14} height={14} alt="Edit" className="pixel-art" />
-            </button>
-            <button
-              onClick={() => handleDelete(crown.id)}
-              className={`${styles.actionBtn} ${styles.deleteBtn}`}
-              title="Delete Crown"
-            >
-              <Image src="/icons/MHWilds-Notes_X_Icon.png" width={14} height={14} alt="Delete" className="pixel-art" />
-            </button>
-          </div>
+              <button onClick={(e) => { e.stopPropagation(); const url = `${window.location.origin}/monster/${encodeURIComponent(crown.name)}?crownId=${crown.id}&user=${userId}&share=${buildShareNonce()}`; navigator.clipboard.writeText(url); toast.info("Link copied to clipboard!"); setActiveCardId(null); }} className={styles.actionBtn} title="Share Crown">
+                <Image src="/icons/MHWilds-Link_Party_Icon.png" width={14} height={14} alt="Share" className="pixel-art" />
+              </button>
+              <button onClick={(e) => { e.stopPropagation(); setEditingCrown(crown); setActiveCardId(null); }} className={styles.actionBtn} title="Edit Crown">
+                <Image src="/icons/MHWilds-Settings_Icon.png" width={14} height={14} alt="Edit" className="pixel-art" />
+              </button>
+              <button onClick={(e) => { e.stopPropagation(); handleDelete(crown.id); setActiveCardId(null); }} className={`${styles.actionBtn} ${styles.deleteBtn}`} title="Delete Crown">
+                <Image src="/icons/MHWilds-Notes_X_Icon.png" width={14} height={14} alt="Delete" className="pixel-art" />
+              </button>
+            </div>
+          </>
         )}
       </div>
     );
   };
 
   const renderGroupCard = (group) => {
-    const uniqueMonsterIds = [...new Set(group.map(c => c.monster_id))];
-    if (uniqueMonsterIds.length > 1) {
+    // Any linked group with multiple entries should render as separate side blocks.
+    if (group.length > 1) {
       return renderMultiMonsterGroupCard(group);
     }
 
@@ -181,20 +173,20 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
       investigationLabel = `${titleCase(first.inv_monster_name)} Field Survey`;
     }
 
+    const cardId = first.pair_id || first.investigation_id || first.id;
     return (
       <div className={`${styles.crownCard} ${styles.crownCardDual}`}>
+        {first.inv_monster_image && (
+          <div className={styles.ghostHost}>
+            <Image src={`/monsters/${first.inv_monster_image}`} alt="" fill className={styles.ghostImage} />
+          </div>
+        )}
         <div className={styles.crownCornerLeft}>
           <Image src="/icons/MHWilds-Link_Party_Icon.png" width={12} height={12} alt="linked" className="pixel-art" />
         </div>
         <div className={`${styles.crownCornerRight} ${styles.linkedCrownTypes}`}>
           {group.map(c => (
-            <Image
-              key={c.id}
-              src={c.type === 'small' ? "/icons/smallcrown.png" : "/icons/largecrown.png"}
-              width={14} height={14}
-              alt={c.type}
-              className="pixel-art"
-            />
+            <Image key={c.id} src={c.type === 'small' ? "/icons/smallcrown.png" : "/icons/largecrown.png"} width={14} height={14} alt={c.type} className="pixel-art" />
           ))}
         </div>
         <Link href={`/monster/${first.name}?crownId=${first.id}&user=${userId}`} className={styles.monsterLink}>
@@ -221,76 +213,65 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
           )}
         </div>
         {isOwner && (
-          <div className={styles.cardActions}>
+          <>
             <button
-              onClick={() => {
-                const url = `${window.location.origin}/monster/${encodeURIComponent(first.name)}?crownId=${first.id}&user=${userId}&share=${buildShareNonce()}`;
-                navigator.clipboard.writeText(url);
-                toast.info("Link copied to clipboard!");
-              }}
-              className={styles.actionBtn}
-              title="Share Crown"
+              className={`${styles.actionsTrigger} ${activeCardId === cardId ? styles.actionsTriggerActive : ''}`}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveCardId(prev => prev === cardId ? null : cardId); }}
+              title="Options"
+            >⋮</button>
+            <div
+              className={`${styles.cardActions} ${activeCardId === cardId ? styles.cardActionsActive : ''}`}
+              onClick={(e) => { e.stopPropagation(); setActiveCardId(null); }}
             >
-              <Image src="/icons/MHWilds-Link_Party_Icon.png" width={14} height={14} alt="Share" className="pixel-art" />
-            </button>
-            <button
-              onClick={() => setEditingGroup(group)}
-              className={styles.actionBtn}
-              title="Edit Linked Crowns"
-            >
-              <Image src="/icons/MHWilds-Settings_Icon.png" width={14} height={14} alt="Edit" className="pixel-art" />
-            </button>
-            <button
-              onClick={() => handleDeleteGroup(group)}
-              className={`${styles.actionBtn} ${styles.deleteBtn}`}
-              title="Delete Linked Crowns"
-            >
-              <Image src="/icons/MHWilds-Notes_X_Icon.png" width={14} height={14} alt="Delete" className="pixel-art" />
-            </button>
-          </div>
+              <button onClick={(e) => { e.stopPropagation(); const url = `${window.location.origin}/monster/${encodeURIComponent(first.name)}?crownId=${first.id}&user=${userId}&share=${buildShareNonce()}`; navigator.clipboard.writeText(url); toast.info("Link copied to clipboard!"); setActiveCardId(null); }} className={styles.actionBtn} title="Share Crown">
+                <Image src="/icons/MHWilds-Link_Party_Icon.png" width={14} height={14} alt="Share" className="pixel-art" />
+              </button>
+              <button onClick={(e) => { e.stopPropagation(); setEditingGroup(group); setActiveCardId(null); }} className={styles.actionBtn} title="Edit Linked Crowns">
+                <Image src="/icons/MHWilds-Settings_Icon.png" width={14} height={14} alt="Edit" className="pixel-art" />
+              </button>
+              <button onClick={(e) => { e.stopPropagation(); handleDeleteGroup(group); setActiveCardId(null); }} className={`${styles.actionBtn} ${styles.deleteBtn}`} title="Delete Linked Crowns">
+                <Image src="/icons/MHWilds-Notes_X_Icon.png" width={14} height={14} alt="Delete" className="pixel-art" />
+              </button>
+            </div>
+          </>
         )}
       </div>
     );
   };
 
   const renderMultiMonsterGroupCard = (group) => {
+    const first = group[0];
     const titleCase = (str) => str ? str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : "??";
-    const byMonster = {};
-    for (const c of group) {
-      if (!byMonster[c.monster_id]) byMonster[c.monster_id] = { crowns: [], name: c.name, image_name: c.image_name };
-      byMonster[c.monster_id].crowns.push(c);
-    }
-    const sides = Object.values(byMonster);
+    const sides = group.map(c => ({ crowns: [c], name: c.name, image_name: c.image_name }));
     const quest = group[0]?.quest;
     const isQuad = sides.length > 2;
 
+    const cardId = first.pair_id || first.investigation_id || first.id;
+    const questLabel = quest === "Investigation Quests"
+      ? `Investigation${first.remaining_uses != null ? ` · ${first.remaining_uses}` : ''}`
+      : quest;
+
     return (
       <div className={`${styles.crownCard} ${styles.crownCardDual} ${isQuad ? styles.crownCardQuad : ""}`}>
+        {first.inv_monster_image && (
+          <div className={styles.ghostHost}>
+            <Image src={`/monsters/${first.inv_monster_image}`} alt="" fill className={styles.ghostImage} />
+          </div>
+        )}
         <div className={styles.crownCornerLeft}>
           <Image src="/icons/MHWilds-Link_Party_Icon.png" width={12} height={12} alt="linked" className="pixel-art" />
         </div>
         <div className={`${styles.crownCornerRight} ${styles.linkedCrownTypes}`}>
           {group.map(c => (
-            <Image
-              key={c.id}
-              src={c.type === 'small' ? "/icons/smallcrown.png" : "/icons/largecrown.png"}
-              width={14} height={14}
-              alt={c.type}
-              className="pixel-art"
-            />
+            <Image key={c.id} src={c.type === 'small' ? "/icons/smallcrown.png" : "/icons/largecrown.png"} width={14} height={14} alt={c.type} className="pixel-art" />
           ))}
         </div>
 
         <div className={styles.dualSides}>
           {sides.map((side, idx) => (
-            <React.Fragment key={side.name}>
+            <React.Fragment key={side.crowns[0].id}>
               <Link href={`/monster/${side.name}?user=${userId}`} className={`${styles.dualSide}`}>
-                <MonsterIcon
-                  imageName={side.image_name}
-                  name={side.name}
-                  tempered={side.crowns.some(c => c.tempered)}
-                  size={isQuad ? 48 : 56}
-                />
+                <MonsterIcon imageName={side.image_name} name={side.name} tempered={side.crowns.some(c => c.tempered)} size={isQuad ? 48 : 56} />
                 <div className={styles.dualOverlay}>
                   <span className={styles.dualMonsterName}>{titleCase(side.name)}</span>
                   <div className={styles.linkedCrownRows}>
@@ -314,38 +295,32 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
           ))}
         </div>
 
-        {quest && (
-          <div className={styles.dualQuestLabel}>{quest}</div>
+        {questLabel && (
+          <div className={styles.dualQuestLabel}>{questLabel}</div>
         )}
 
         {isOwner && (
-          <div className={styles.cardActions}>
+          <>
             <button
-              onClick={() => {
-                const url = `${window.location.origin}/monster/${encodeURIComponent(group[0].name)}?crownId=${group[0].id}&user=${userId}&share=${buildShareNonce()}`;
-                navigator.clipboard.writeText(url);
-                toast.info("Link copied to clipboard!");
-              }}
-              className={styles.actionBtn}
-              title="Share Pair"
+              className={`${styles.actionsTrigger} ${activeCardId === cardId ? styles.actionsTriggerActive : ''}`}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveCardId(prev => prev === cardId ? null : cardId); }}
+              title="Options"
+            >⋮</button>
+            <div
+              className={`${styles.cardActions} ${activeCardId === cardId ? styles.cardActionsActive : ''}`}
+              onClick={(e) => { e.stopPropagation(); setActiveCardId(null); }}
             >
-              <Image src="/icons/MHWilds-Link_Party_Icon.png" width={14} height={14} alt="Share" className="pixel-art" />
-            </button>
-            <button
-              onClick={() => setEditingGroup(group)}
-              className={styles.actionBtn}
-              title="Edit Quest Pair"
-            >
-              <Image src="/icons/MHWilds-Settings_Icon.png" width={14} height={14} alt="Edit" className="pixel-art" />
-            </button>
-            <button
-              onClick={() => handleDeleteGroup(group)}
-              className={`${styles.actionBtn} ${styles.deleteBtn}`}
-              title="Delete Quest Pair"
-            >
-              <Image src="/icons/MHWilds-Notes_X_Icon.png" width={14} height={14} alt="Delete" className="pixel-art" />
-            </button>
-          </div>
+              <button onClick={(e) => { e.stopPropagation(); const url = `${window.location.origin}/monster/${encodeURIComponent(group[0].name)}?crownId=${group[0].id}&user=${userId}&share=${buildShareNonce()}`; navigator.clipboard.writeText(url); toast.info("Link copied to clipboard!"); setActiveCardId(null); }} className={styles.actionBtn} title="Share Pair">
+                <Image src="/icons/MHWilds-Link_Party_Icon.png" width={14} height={14} alt="Share" className="pixel-art" />
+              </button>
+              <button onClick={(e) => { e.stopPropagation(); setEditingGroup(group); setActiveCardId(null); }} className={styles.actionBtn} title="Edit Quest Pair">
+                <Image src="/icons/MHWilds-Settings_Icon.png" width={14} height={14} alt="Edit" className="pixel-art" />
+              </button>
+              <button onClick={(e) => { e.stopPropagation(); handleDeleteGroup(group); setActiveCardId(null); }} className={`${styles.actionBtn} ${styles.deleteBtn}`} title="Delete Quest Pair">
+                <Image src="/icons/MHWilds-Notes_X_Icon.png" width={14} height={14} alt="Delete" className="pixel-art" />
+              </button>
+            </div>
+          </>
         )}
       </div>
     );
@@ -359,7 +334,6 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
       <div className={styles.scrollArea}>
         <div className={styles.crownGrid}>
           {crowns.length > 0 ? pagedGroups.map((group) => {
-            const isMultiMonster = group.length > 1 && group.some(c => c.monster_id !== group[0].monster_id);
             const key = group[0].pair_id ? `pair-${group[0].pair_id}` : (group[0].investigation_id ? `inv-${group[0].investigation_id}` : `single-${group[0].id}`);
 
             if (group.length === 1) {
@@ -367,7 +341,7 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
             }
             return (
               <React.Fragment key={key}>
-                {isMultiMonster ? renderMultiMonsterGroupCard(group) : renderGroupCard(group)}
+                {renderMultiMonsterGroupCard(group)}
               </React.Fragment>
             );
           }) : (
@@ -379,17 +353,9 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
         </div>
         {totalPages > 1 && (
           <div className={styles.pagination}>
-            <button
-              className={styles.pageBtn}
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
-            >←</button>
+            <button className={styles.pageBtn} onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>←</button>
             <span className={styles.pageInfo}>{page} / {totalPages}</span>
-            <button
-              className={styles.pageBtn}
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-            >→</button>
+            <button className={styles.pageBtn} onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>→</button>
           </div>
         )}
       </div>
@@ -410,4 +376,3 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
     </>
   );
 }
-

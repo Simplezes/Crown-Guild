@@ -58,7 +58,7 @@ export async function POST(req) {
         });
         resolvedInvestigationId = Number(invRes.lastInsertRowid);
       }
-    } else if (investigation_monster_id && String(investigation_monster_id) !== String(monster_id)) {
+    } else if (investigation_monster_id) {
       const invRes = await db.execute({
         sql: "INSERT INTO investigations (user_id, monster_id, remaining_uses) VALUES (?, ?, NULL)",
         args: [session.user.id, investigation_monster_id],

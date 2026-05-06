@@ -22,6 +22,7 @@ export async function PATCH(req, { params }) {
       investigation_id,
       investigation_monster_id,
       remaining_uses,
+      mission_host_enabled,
     } = await req.json();
 
     const checkRes = await db.execute({
@@ -39,7 +40,14 @@ export async function PATCH(req, { params }) {
     const oldInvestigationId = checkRes.rows[0].old_investigation_id ?? null;
     let resolvedInvestigationId = null;
 
-    if (quest === "Investigation Quests") {
+    const hostEnabled =
+      typeof mission_host_enabled === "boolean"
+        ? mission_host_enabled
+        : (investigation_monster_id !== undefined ? investigation_monster_id !== null && investigation_monster_id !== "" : oldInvestigationId !== null);
+
+    if (!hostEnabled) {
+      resolvedInvestigationId = null;
+    } else if (quest === "Investigation Quests") {
       if (investigation_id) {
         const check = await db.execute({
           sql: "SELECT id FROM investigations WHERE id = ? AND user_id = ?",
@@ -49,24 +57,22 @@ export async function PATCH(req, { params }) {
           return NextResponse.json({ error: "Investigation not found" }, { status: 404 });
         }
         resolvedInvestigationId = investigation_id;
-      } else if (investigation_monster_id) {
+      } else {
+        const invMonsterId = investigation_monster_id || monster_id;
         const uses = remaining_uses || 3;
         const invRes = await db.execute({
           sql: "INSERT INTO investigations (user_id, monster_id, remaining_uses) VALUES (?, ?, ?)",
-          args: [session.user.id, investigation_monster_id, uses],
+          args: [session.user.id, invMonsterId, uses],
         });
         resolvedInvestigationId = Number(invRes.lastInsertRowid);
-      } else {
-        resolvedInvestigationId = oldInvestigationId;
       }
-    } else if (investigation_monster_id && String(investigation_monster_id) !== String(monster_id)) {
+    } else {
+      const invMonsterId = investigation_monster_id || monster_id;
       const invRes = await db.execute({
         sql: "INSERT INTO investigations (user_id, monster_id, remaining_uses) VALUES (?, ?, NULL)",
-        args: [session.user.id, investigation_monster_id],
+        args: [session.user.id, invMonsterId],
       });
       resolvedInvestigationId = Number(invRes.lastInsertRowid);
-    } else {
-      resolvedInvestigationId = null;
     }
 
     const resolvedPairId = pair_id !== undefined ? (pair_id || null) : checkRes.rows[0].old_pair_id ?? null;
