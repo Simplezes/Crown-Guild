@@ -267,6 +267,52 @@
   gap: 12px;
 }
 
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 26px;
+}
+
+.pageBtn {
+  min-width: 96px;
+  height: 40px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--mh-glass);
+  border: 1px solid var(--mh-border);
+  color: var(--mh-tan);
+  text-decoration: none;
+  font-family: 'Marcellus', serif;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: var(--transition-mh);
+}
+
+.pageBtn:hover {
+  border-color: var(--mh-gold);
+  color: var(--mh-gold);
+  background: rgba(181, 154, 93, 0.08);
+}
+
+.pageBtnDisabled {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.pageInfo {
+  color: var(--mh-tan-dark);
+  font-family: 'Marcellus', serif;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
 .hunterItem {
   display: flex;
   align-items: center;
