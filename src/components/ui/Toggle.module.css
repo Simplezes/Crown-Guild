@@ -9,6 +9,14 @@
   max-width: 100%;
 }
 
+.toggleTextSlot {
+  display: inline-grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  max-width: min(100%, 18ch);
+  flex: 0 1 18ch;
+}
+
 .switch {
   position: relative;
   flex-shrink: 0;
@@ -62,6 +70,7 @@
 }
 
 .toggleText {
+  grid-area: 1 / 1;
   display: inline-block;
   font-family: 'Marcellus', serif;
   font-size: 0.72rem;
@@ -70,8 +79,7 @@
   white-space: normal;
   overflow-wrap: anywhere;
   line-height: 1.25;
-  width: 11ch;
-  flex-shrink: 0;
+  width: 100%;
 }
 
 .textOn {
@@ -81,6 +89,14 @@
 
 .textOff {
   color: #83776b;
+}
+
+.textVisible {
+  visibility: visible;
+}
+
+.textHidden {
+  visibility: hidden;
 }
 
 @media (max-width: 380px) {
@@ -106,6 +122,10 @@
   .toggleText {
     font-size: 0.64rem;
     letter-spacing: 0.03em;
-    width: 9ch;
+  }
+
+  .toggleTextSlot {
+    max-width: min(100%, 14ch);
+    flex-basis: 14ch;
   }
 }

@@ -8,6 +8,7 @@ import Image from "next/image";
 import CustomSelect from "../ui/CustomSelect";
 import { useToast } from "@/app/UIProvider";
 import Toggle from "../ui/Toggle";
+import InfoTrigger from "../ui/InfoTrigger";
 
 const QUEST_TYPES = [
   { label: "Event Quests", value: "Event Quests" },
@@ -163,7 +164,13 @@ export default function EditQuestPairModal({ isOpen, onClose, group, onUpdated }
           <div className={styles.editorContent}>
             <div className={styles.formGrid}>
               <div className={styles.editRow}>
-                <label>Pair Classification & Ratings</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <label>Pair Classification & Ratings</label>
+                  <InfoTrigger
+                    title="Pair Classification & Ratings"
+                    content="Each monster in this multi-monster record keeps its own crown size, tempered state, and strength rating."
+                  />
+                </div>
                 <div className={styles.groupTemperedList}>
                   {formData.perCrown.map((pc, i) => (
                     <div key={pc.id} className={styles.groupTemperedRow}>
@@ -205,7 +212,13 @@ export default function EditQuestPairModal({ isOpen, onClose, group, onUpdated }
               </div>
 
               <div className={styles.editRow}>
-                <label>Quest Linkage</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <label>Quest Linkage</label>
+                  <InfoTrigger
+                    title="Quest Linkage"
+                    content="Keep this on only when both monsters came from the same multi-monster quest. Turn it off if they should become separate records."
+                  />
+                </div>
                 <Toggle
                   checked={!formData.unlink}
                   onChange={() => setFormData(prev => ({ ...prev, unlink: !prev.unlink }))}
@@ -215,7 +228,13 @@ export default function EditQuestPairModal({ isOpen, onClose, group, onUpdated }
               </div>
 
               <div className={styles.editRow}>
-                <label>Common Mission Source</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <label>Common Mission Source</label>
+                  <InfoTrigger
+                    title="Common Mission Source"
+                    content="Choose the quest type shared by both monsters in this record. Investigation records can also store remaining uses."
+                  />
+                </div>
                 <div className={styles.questSelect}>
                   {QUEST_TYPES.map(q => (
                     <div
@@ -230,7 +249,13 @@ export default function EditQuestPairModal({ isOpen, onClose, group, onUpdated }
 
                 {formData.quest === "Investigation Quests" && (
                   <div className={styles.investigationBlock}>
-                    <label>Remaining Uses</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                      <label>Remaining Uses</label>
+                      <InfoTrigger
+                        title="Remaining Uses"
+                        content="Record how many investigation runs were left when this multi-monster record was found."
+                      />
+                    </div>
                     <div className={styles.permitChips}>
                       {[1, 2, 3].map(num => (
                         <div
@@ -246,7 +271,13 @@ export default function EditQuestPairModal({ isOpen, onClose, group, onUpdated }
                 )}
 
                 <div className={styles.editRow} style={{ marginTop: '12px' }}>
-                  <label>Primary Quest Monster</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <label>Primary Quest Monster</label>
+                    <InfoTrigger
+                      title="Primary Quest Monster"
+                      content="Use this only if the quest's main listed monster was different from both recorded monsters in this multi-monster entry."
+                    />
+                  </div>
                   <Toggle
                     checked={formData.show_host}
                     onChange={e => setFormData(prev => ({

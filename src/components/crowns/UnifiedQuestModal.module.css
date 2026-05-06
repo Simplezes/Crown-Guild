@@ -100,6 +100,34 @@
   flex: 1.8;
 }
 
+.questSection .dashContent {
+  flex-direction: column;
+  align-items: stretch;
+  min-height: 70px;
+  justify-content: flex-end;
+}
+
+.hostSection .dashContent {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  justify-content: flex-start;
+}
+
+.hostSection :global(.toggleLabel) {
+  align-self: flex-start;
+}
+
+.hostSelectSlot {
+  min-height: 30px;
+  width: 100%;
+}
+
+.hostSelectSlotHidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .usesSection {
   flex: 0 0 155px;
 }

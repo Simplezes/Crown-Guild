@@ -8,6 +8,7 @@ import Image from "next/image";
 import CustomSelect from "../ui/CustomSelect";
 import { useToast } from "@/app/UIProvider";
 import Toggle from "../ui/Toggle";
+import InfoTrigger from "../ui/InfoTrigger";
 
 const QUEST_TYPES = [
   { label: "Event Quest", value: "Event Quests" },
@@ -183,10 +184,14 @@ export default function UnifiedQuestModal({ isOpen, onClose, initialGroup, onUpd
 
         <div className={styles.modalBody}>
           <section className={styles.dashboardBar}>
-            <div className={styles.dashSection}>
+            <div className={`${styles.dashSection} ${styles.questSection}`}>
               <div className={styles.dashLabel}>
                 <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={14} height={14} alt="" className="pixel-art" />
                 <span>Quest Category</span>
+                <InfoTrigger
+                  title="Quest Category"
+                  content="Choose the quest type shared by the records you are editing here."
+                />
               </div>
               <div className={styles.dashContent}>
                 <CustomSelect
@@ -201,6 +206,10 @@ export default function UnifiedQuestModal({ isOpen, onClose, initialGroup, onUpd
               <div className={styles.dashLabel}>
                 <Image src="/icons/MHWilds-Quest_Members_Icon.png" width={16} height={16} alt="" className="pixel-art" />
                 <span>Primary Quest Monster</span>
+                <InfoTrigger
+                  title="Primary Quest Monster"
+                  content="Use this only if the quest's main listed monster was different from the monster tied to the records you are editing."
+                />
               </div>
               <div className={styles.dashContent}>
                 <Toggle
@@ -209,14 +218,14 @@ export default function UnifiedQuestModal({ isOpen, onClose, initialGroup, onUpd
                   labelOn="Different from recorded monster"
                   labelOff="Same as recorded monster"
                 />
-                {questData.show_host && (
+                <div className={`${styles.hostSelectSlot} ${!questData.show_host ? styles.hostSelectSlotHidden : ''}`}>
                   <CustomSelect
                     options={monsterOptions}
                     value={questData.inv_monster_id}
                     onChange={val => setQuestData({ ...questData, inv_monster_id: val })}
                     placeholder="Select primary quest monster"
                   />
-                )}
+                </div>
               </div>
             </div>
 
@@ -225,6 +234,10 @@ export default function UnifiedQuestModal({ isOpen, onClose, initialGroup, onUpd
                 <div className={styles.dashLabel}>
                   <Image src="/icons/MHWilds-Investigation_Icon.png" width={14} height={14} alt="" className="pixel-art" />
                   <span>Investigation Uses</span>
+                  <InfoTrigger
+                    title="Investigation Uses"
+                    content="Record how many investigation runs were left when these records were found."
+                  />
                 </div>
                 <div className={styles.dashContent}>
                   <div className={styles.usesRow}>

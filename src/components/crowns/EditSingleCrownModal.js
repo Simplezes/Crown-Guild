@@ -8,6 +8,7 @@ import Image from "next/image";
 import CustomSelect from "../ui/CustomSelect";
 import { useToast } from "@/app/UIProvider";
 import Toggle from "../ui/Toggle";
+import InfoTrigger from "../ui/InfoTrigger";
 
 const QUEST_TYPES = [
   { label: "Event Quests", value: "Event Quests" },
@@ -175,7 +176,13 @@ export default function EditSingleCrownModal({ isOpen, onClose, crown, onUpdated
           <div className={styles.editorContent}>
             <div className={styles.formGrid}>
               <div className={styles.editRow}>
-                <label>Classification</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <label>Classification</label>
+                  <InfoTrigger
+                    title="Classification"
+                    content="Choose whether this record should be saved as a small crown, a large crown, or both if this entry needs to be split into a linked pair."
+                  />
+                </div>
                 <div className={styles.typeToggle}>
                   {[
                     { value: 'small', label: 'Small Gold', icon: '/icons/smallcrown.png' },
@@ -194,7 +201,13 @@ export default function EditSingleCrownModal({ isOpen, onClose, crown, onUpdated
               </div>
 
               <div className={styles.editRow}>
-                <label>Rating ({formData.strength_rating}★)</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <label>Rating ({formData.strength_rating}★)</label>
+                  <InfoTrigger
+                    title="Strength Rating"
+                    content="Record the quest difficulty or strength value shown in-game for this crown record."
+                  />
+                </div>
                 <div className={styles.starGrid}>
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
                     <div
@@ -231,6 +244,13 @@ export default function EditSingleCrownModal({ isOpen, onClose, crown, onUpdated
               </div>
 
               <div className={styles.editRow}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <label>Tempered State</label>
+                  <InfoTrigger
+                    title="Tempered State"
+                    content="Turn this on only if the monster tied to this crown record was a tempered monster."
+                  />
+                </div>
                 <Toggle
                   checked={formData.tempered}
                   onChange={e => setFormData({ ...formData, tempered: e.target.checked })}
@@ -240,7 +260,13 @@ export default function EditSingleCrownModal({ isOpen, onClose, crown, onUpdated
               </div>
 
               <div className={styles.editRow}>
-                <label>Mission Source</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <label>Mission Source</label>
+                  <InfoTrigger
+                    title="Mission Source"
+                    content="Choose the type of quest this record came from. Investigation records can also store remaining uses."
+                  />
+                </div>
                 <div className={styles.questSelect}>
                   {QUEST_TYPES.map(q => (
                     <div
@@ -255,7 +281,13 @@ export default function EditSingleCrownModal({ isOpen, onClose, crown, onUpdated
 
                 {formData.quest === "Investigation Quests" && (
                   <div className={styles.investigationBlock}>
-                    <label>Remaining Uses</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                      <label>Remaining Uses</label>
+                      <InfoTrigger
+                        title="Remaining Uses"
+                        content="Record how many investigation runs were left when this crown was recorded."
+                      />
+                    </div>
                     <div className={styles.permitChips}>
                       {[1, 2, 3].map(num => (
                         <div
@@ -271,7 +303,13 @@ export default function EditSingleCrownModal({ isOpen, onClose, crown, onUpdated
                 )}
 
                 <div className={styles.editRow} style={{ marginTop: '12px' }}>
-                  <label>Primary Quest Monster</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <label>Primary Quest Monster</label>
+                    <InfoTrigger
+                      title="Primary Quest Monster"
+                      content="Use this only if the quest's main listed monster was different from the monster this crown record belongs to."
+                    />
+                  </div>
                   <Toggle
                     checked={formData.show_host}
                     onChange={e => setFormData(prev => ({
