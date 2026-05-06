@@ -34,6 +34,31 @@ function appendCategoryLine(label, values) {
   return `**${label}** ${values.join(' ')}`;
 }
 
+function formatCompactWishlist(wishlist, serverEmojis, serverEmojiLookup) {
+  if (!Array.isArray(wishlist) || wishlist.length === 0) return null;
+
+  const grouped = {
+    S: [],
+    L: [],
+    'S+L': [],
+  };
+
+  for (const item of wishlist) {
+    const typeRaw = String(item?.type || '').toLowerCase();
+    const group = typeRaw === 'large' ? 'L' : typeRaw === 'small' ? 'S' : 'S+L';
+    const fakeMonster = { name: item?.monster_name, variant: item?.tempered ? 'Tempered' : null };
+    grouped[group].push(getMonsterEmojiOrFallback(fakeMonster, serverEmojis, serverEmojiLookup));
+  }
+
+  const parts = [];
+  if (grouped.S.length) parts.push(`S ${grouped.S.join(' ')}`);
+  if (grouped.L.length) parts.push(`L ${grouped.L.join(' ')}`);
+  if (grouped['S+L'].length) parts.push(`S+L ${grouped['S+L'].join(' ')}`);
+
+  if (parts.length === 0) return null;
+  return `Wishlist: ${parts.join('  •  ')}`;
+}
+
 export function formatEmojiGrid(data, useEmojis = true) {
   const shouldUseEmojis = typeof data?.useEmojis === 'boolean' ? data.useEmojis : useEmojis;
   const emojiServerId = String(data?.emojiServerId || '');
@@ -83,13 +108,7 @@ export function formatEmojiGrid(data, useEmojis = true) {
     grouped[category].push(getMonsterEmojiOrFallback(monster, serverEmojis, serverEmojiLookup));
   }
 
-  const wishlistParts = wishlist.map((item) => {
-    const typeRaw = String(item?.type || '').toLowerCase();
-    const label = typeRaw === 'large' ? '[L]' : typeRaw === 'small' ? '[S]' : '[S&L]';
-    const fakeMonster = { name: item?.monster_name, variant: item?.tempered ? 'Tempered' : null };
-    const emoji = getMonsterEmojiOrFallback(fakeMonster, serverEmojis, serverEmojiLookup);
-    return `${label} ${emoji}`;
-  });
+  const compactWishlistLine = formatCompactWishlist(wishlist, serverEmojis, serverEmojiLookup);
 
   const lines = [`**.${username} — Crown Collection**`, ''];
 
@@ -102,8 +121,8 @@ export function formatEmojiGrid(data, useEmojis = true) {
   const largeLine = appendCategoryLine('Large', grouped.Large);
   if (largeLine) lines.push(largeLine, '');
 
-  if (wishlistParts.length > 0) {
-    lines.push(`Wishlist: ${wishlistParts.join(', ')}`, '');
+  if (compactWishlistLine) {
+    lines.push(compactWishlistLine, '');
   }
 
   lines.push(profileUrl);
