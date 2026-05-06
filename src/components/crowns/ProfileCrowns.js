@@ -20,6 +20,11 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
   const toast = useToast();
   const confirm = useConfirm();
 
+  const hasDifferentHostMonster = (crown) => {
+    if (!crown?.inv_monster_image || !crown?.inv_monster_id || !crown?.monster_id) return false;
+    return String(crown.inv_monster_id) !== String(crown.monster_id);
+  };
+
   const buildShareNonce = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
   useEffect(() => {
@@ -79,8 +84,8 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
   const renderCard = (crown, hideActions = false) => {
     const titleCase = (str) => str ? str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : "??";
     const hasInvestigation = crown.quest === "Investigation Quests";
-    const hasFieldSurvey = crown.quest === "Field Survey Quests" && crown.inv_monster_id && crown.inv_monster_id !== crown.monster_id;
-    const hostDiffers = crown.inv_monster_id && crown.inv_monster_id !== crown.monster_id;
+    const hostDiffers = hasDifferentHostMonster(crown);
+    const hasFieldSurvey = crown.quest === "Field Survey Quests" && hostDiffers;
 
     let investigationLabel = null;
     if (hasInvestigation) {
@@ -94,9 +99,9 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
     const cardId = crown.id;
     return (
       <div className={styles.crownCard}>
-        {crown.inv_monster_image && (
+        {hostDiffers && (
           <div className={styles.ghostHost}>
-            <Image src={`/monsters/${crown.inv_monster_image}`} alt="" fill className={styles.ghostImage} />
+            <Image src={`/monsters/${crown.inv_monster_image}`} alt="" fill sizes="180px" className={styles.ghostImage} />
           </div>
         )}
         {(hasInvestigation || hasFieldSurvey) && (
@@ -152,7 +157,6 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
   };
 
   const renderGroupCard = (group) => {
-    // Any linked group with multiple entries should render as separate side blocks.
     if (group.length > 1) {
       return renderMultiMonsterGroupCard(group);
     }
@@ -160,8 +164,8 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
     const first = group[0];
     const titleCase = (str) => str ? str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : "??";
     const hasInvestigation = first.quest === "Investigation Quests";
-    const hasFieldSurvey = first.quest === "Field Survey Quests" && first.inv_monster_id && first.inv_monster_id !== first.monster_id;
-    const hostDiffers = first.inv_monster_id && first.inv_monster_id !== first.monster_id;
+    const hostDiffers = hasDifferentHostMonster(first);
+    const hasFieldSurvey = first.quest === "Field Survey Quests" && hostDiffers;
     const anyTempered = group.some(c => c.tempered);
 
     let investigationLabel = null;
@@ -176,9 +180,9 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
     const cardId = first.pair_id || first.investigation_id || first.id;
     return (
       <div className={`${styles.crownCard} ${styles.crownCardDual}`}>
-        {first.inv_monster_image && (
+        {hostDiffers && (
           <div className={styles.ghostHost}>
-            <Image src={`/monsters/${first.inv_monster_image}`} alt="" fill className={styles.ghostImage} />
+            <Image src={`/monsters/${first.inv_monster_image}`} alt="" fill sizes="180px" className={styles.ghostImage} />
           </div>
         )}
         <div className={styles.crownCornerLeft}>
@@ -242,6 +246,7 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
   const renderMultiMonsterGroupCard = (group) => {
     const first = group[0];
     const titleCase = (str) => str ? str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : "??";
+    const hostDiffers = hasDifferentHostMonster(first);
     const sides = group.map(c => ({ crowns: [c], name: c.name, image_name: c.image_name }));
     const quest = group[0]?.quest;
     const isQuad = sides.length > 2;
@@ -253,9 +258,9 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
 
     return (
       <div className={`${styles.crownCard} ${styles.crownCardDual} ${isQuad ? styles.crownCardQuad : ""}`}>
-        {first.inv_monster_image && (
+        {hostDiffers && (
           <div className={styles.ghostHost}>
-            <Image src={`/monsters/${first.inv_monster_image}`} alt="" fill className={styles.ghostImage} />
+            <Image src={`/monsters/${first.inv_monster_image}`} alt="" fill sizes="180px" className={styles.ghostImage} />
           </div>
         )}
         <div className={styles.crownCornerLeft}>
