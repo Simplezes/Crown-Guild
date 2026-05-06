@@ -200,21 +200,21 @@ export default function UnifiedQuestModal({ isOpen, onClose, initialGroup, onUpd
             <div className={`${styles.dashSection} ${styles.hostSection}`}>
               <div className={styles.dashLabel}>
                 <Image src="/icons/MHWilds-Quest_Members_Icon.png" width={16} height={16} alt="" className="pixel-art" />
-                <span>Mission Host</span>
+                <span>Primary Quest Monster</span>
               </div>
               <div className={styles.dashContent}>
                 <Toggle
                   checked={questData.show_host}
                   onChange={e => setQuestData({ ...questData, show_host: e.target.checked })}
-                  labelOn="Different"
-                  labelOff="Default"
+                  labelOn="Different from recorded monster"
+                  labelOff="Same as recorded monster"
                 />
                 {questData.show_host && (
                   <CustomSelect
                     options={monsterOptions}
                     value={questData.inv_monster_id}
                     onChange={val => setQuestData({ ...questData, inv_monster_id: val })}
-                    placeholder="Host..."
+                    placeholder="Select primary quest monster"
                   />
                 )}
               </div>

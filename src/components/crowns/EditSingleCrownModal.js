@@ -271,7 +271,7 @@ export default function EditSingleCrownModal({ isOpen, onClose, crown, onUpdated
                 )}
 
                 <div className={styles.editRow} style={{ marginTop: '12px' }}>
-                  <label>Quest Host Monster</label>
+                  <label>Primary Quest Monster</label>
                   <Toggle
                     checked={formData.show_host}
                     onChange={e => setFormData(prev => ({
@@ -279,8 +279,8 @@ export default function EditSingleCrownModal({ isOpen, onClose, crown, onUpdated
                       show_host: e.target.checked,
                       inv_monster_id: e.target.checked ? (prev.inv_monster_id || prev.monster_id) : prev.monster_id,
                     }))}
-                    labelOn="Different host monster"
-                    labelOff="Same as crown monster"
+                    labelOn="Different from recorded monster"
+                    labelOff="Same as recorded monster"
                   />
                   {formData.show_host && (
                     <div className={styles.animateIn} style={{ marginTop: '10px' }}>
@@ -288,7 +288,7 @@ export default function EditSingleCrownModal({ isOpen, onClose, crown, onUpdated
                         options={monsterOptions}
                         value={formData.inv_monster_id}
                         onChange={(val) => setFormData(prev => ({ ...prev, inv_monster_id: val }))}
-                        placeholder="Select host monster"
+                        placeholder="Select primary quest monster"
                       />
                     </div>
                   )}
