@@ -4,10 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 import styles from './DiscordShare.module.css';
 import Image from 'next/image';
 import { buildShareMonstersFromCrowns, formatEmojiGrid } from '@/lib/discordShareFormatter';
-import { useSession } from 'next-auth/react';
 
-export default function DiscordShare({ id, username, crowns, wishlist }) {
-  const { data: session } = useSession();
+export default function DiscordShare({ id, username, crowns, wishlist, sessionData }) {
+  const session = sessionData;
   const [isOpen, setIsOpen] = useState(false);
   const [copiedMode, setCopiedMode] = useState('');
   const wrapperRef = useRef(null);

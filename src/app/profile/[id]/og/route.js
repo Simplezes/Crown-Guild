@@ -1,5 +1,5 @@
 import { ImageResponse } from 'next/og';
-import { getProfileData, getHunterRank } from "@/lib/profile";
+import { getProfileData, getRankProgress } from "@/lib/profile";
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
@@ -48,9 +48,11 @@ export async function GET(request, { params }) {
     );
   }
 
-  const { user, crowns, stats, activity, completion, topAssist, wishlist } = data;
+  const { user, crowns, stats, activity, topAssist, wishlist, masteryPoints } = data;
   const wishlistItems = Array.isArray(wishlist) ? wishlist : [];
-  const userRank = getHunterRank(activity.hosted || 0, activity.joined || 0);
+  const safeMasteryPoints = Number(masteryPoints || 0);
+  const { currentRank, nextRank, progress } = getRankProgress(safeMasteryPoints);
+  const userRank = currentRank?.title || 'Fledgling';
   const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
   const linkedNames = new Set();
   const pairMap = {};
@@ -151,6 +153,8 @@ export async function GET(request, { params }) {
   };
 
   const wishlistPreview = filterValid(wishlistItems).slice(0, 8);
+  const statusMessage = String(user.status_message || '').trim();
+  const statusPreview = statusMessage.length > 80 ? `${statusMessage.slice(0, 77)}...` : statusMessage;
 
   return new ImageResponse(
     (
@@ -161,7 +165,7 @@ export async function GET(request, { params }) {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          padding: '28px',
+          padding: '22px',
           color: colors.tan,
           fontFamily: 'serif',
           position: 'relative',
@@ -186,9 +190,9 @@ export async function GET(request, { params }) {
             display: 'flex',
             flexDirection: 'column',
             flex: 1,
-            padding: '22px 16px 22px 28px',
+            padding: '18px 12px 18px 22px',
             borderRight: `1px solid ${colors.border}`,
-            gap: '10px',
+            gap: '8px',
             overflow: 'hidden',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '2px' }}>
@@ -209,9 +213,9 @@ export async function GET(request, { params }) {
           <div style={{
             display: 'flex',
             flexDirection: 'column',
-            width: '300px',
-            padding: '22px 20px',
-            gap: '11px',
+            width: '286px',
+            padding: '16px 14px',
+            gap: '8px',
           }}>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -226,9 +230,9 @@ export async function GET(request, { params }) {
               </div>
             </div>
 
-            {user.status_message && (
+            {statusPreview && (
               <div style={{ display: 'flex', padding: '8px 10px', background: 'rgba(181,154,93,0.05)', borderLeft: `2px solid ${colors.gold}` }}>
-                <span style={{ fontSize: 12, color: colors.tan, fontStyle: 'italic', display: 'flex' }}>"{user.status_message}"</span>
+                <span style={{ fontSize: 12, color: colors.tan, fontStyle: 'italic', display: 'flex' }}>"{statusPreview}"</span>
               </div>
             )}
 
@@ -249,14 +253,25 @@ export async function GET(request, { params }) {
                   </div>
                 ))}
               </div>
+            </div>
+
+            <div style={{ display: 'flex', height: '1px', background: colors.border }} />
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <span style={{ fontSize: 10, color: colors.gold, letterSpacing: '3px', display: 'flex' }}>MASTERY</span>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 9, color: colors.tanDark, letterSpacing: '2px', display: 'flex' }}>COMPLETION</span>
-                  <span style={{ fontSize: 13, color: colors.goldBright, fontWeight: 'bold', display: 'flex' }}>{completion}%</span>
+                  <span style={{ fontSize: 9, color: colors.tanDark, letterSpacing: '2px', display: 'flex' }}>RANK PROGRESS</span>
+                  <span style={{ fontSize: 12, color: colors.goldBright, fontWeight: 'bold', display: 'flex' }}>{Math.round(progress)}%</span>
                 </div>
                 <div style={{ display: 'flex', height: '6px', background: 'rgba(255,255,255,0.06)', border: `1px solid ${colors.border}` }}>
-                  <div style={{ display: 'flex', height: '100%', width: `${parseFloat(completion)}%`, background: `linear-gradient(to right, ${colors.gold}, ${colors.goldBright})` }} />
+                  <div style={{ display: 'flex', height: '100%', width: `${Math.max(0, Math.min(100, progress))}%`, background: `linear-gradient(to right, ${colors.gold}, ${colors.goldBright})` }} />
                 </div>
+                {nextRank && (
+                  <span style={{ fontSize: 9, color: colors.tanDark, display: 'flex' }}>
+                    {Math.max(0, Number(nextRank.minPoints || 0) - safeMasteryPoints)} to {nextRank.title}
+                  </span>
+                )}
               </div>
             </div>
 
