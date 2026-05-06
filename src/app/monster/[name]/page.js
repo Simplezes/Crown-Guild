@@ -11,6 +11,8 @@ import { getMonsterByName, getQuestIcon } from "@/lib/monsters";
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+const MONSTER_LIST_PAGE_SIZE = 12;
+
 function buildFeaturedCrownVersion(crown) {
   if (!crown) return '0';
 
@@ -85,6 +87,79 @@ async function getMonsterData(name) {
     console.error("Monster fetch error", e);
     return null;
   }
+}
+
+function parsePageParam(value) {
+  const parsed = Number.parseInt(String(value || '1'), 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+}
+
+function paginateItems(items, page, pageSize = MONSTER_LIST_PAGE_SIZE) {
+  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const start = (safePage - 1) * pageSize;
+
+  return {
+    items: items.slice(start, start + pageSize),
+    page: safePage,
+    totalPages,
+  };
+}
+
+function buildMonsterPageHref(search, updates) {
+  const params = new URLSearchParams();
+
+  Object.entries(search || {}).forEach(([key, value]) => {
+    if (value == null) return;
+    if (Array.isArray(value)) {
+      value.forEach((entry) => {
+        if (entry != null && entry !== '') params.append(key, String(entry));
+      });
+      return;
+    }
+
+    if (value !== '') params.set(key, String(value));
+  });
+
+  Object.entries(updates || {}).forEach(([key, value]) => {
+    if (value == null || value === '' || value === false) {
+      params.delete(key);
+      return;
+    }
+
+    params.set(key, String(value));
+  });
+
+  const query = params.toString();
+  return query ? `?${query}` : '?';
+}
+
+function renderPagination({ page, totalPages, search, pageKey, activeTab, sectionLabel }) {
+  if (totalPages <= 1) return null;
+
+  return (
+    <div className={styles.pagination}>
+      <Link
+        href={buildMonsterPageHref(search, { tab: activeTab, [pageKey]: page > 1 ? page - 1 : 1 })}
+        className={`${styles.pageBtn} ${page === 1 ? styles.pageBtnDisabled : ''}`}
+        aria-disabled={page === 1}
+        tabIndex={page === 1 ? -1 : undefined}
+        scroll={false}
+      >
+        Previous
+      </Link>
+      <span className={styles.pageInfo}>{sectionLabel} Page {page} of {totalPages}</span>
+      <Link
+        href={buildMonsterPageHref(search, { tab: activeTab, [pageKey]: page < totalPages ? page + 1 : totalPages })}
+        className={`${styles.pageBtn} ${page === totalPages ? styles.pageBtnDisabled : ''}`}
+        aria-disabled={page === totalPages}
+        tabIndex={page === totalPages ? -1 : undefined}
+        scroll={false}
+      >
+        Next
+      </Link>
+    </div>
+  );
 }
 
 export async function generateMetadata({ params, searchParams }) {
@@ -177,6 +252,10 @@ export default async function MonsterDetail({ params, searchParams }) {
   let highlightCrownId = search?.crownId;
   const userId = search?.user;
   const activeTab = search?.tab || 'hosts';
+  const pairsPage = parsePageParam(search?.pairsPage);
+  const largePage = parsePageParam(search?.largePage);
+  const smallPage = parsePageParam(search?.smallPage);
+  const seekingPage = parsePageParam(search?.seekingPage);
 
   const data = await getMonsterData(name);
   if (!data) notFound();
@@ -200,6 +279,10 @@ export default async function MonsterDetail({ params, searchParams }) {
 
   const smallCrowns = crowns.filter(c => c.type === 'small' && !pairedCrownIds.has(c.id));
   const largeCrowns = crowns.filter(c => c.type === 'large' && !pairedCrownIds.has(c.id));
+  const pagedPairs = paginateItems(pairedGroups, pairsPage);
+  const pagedLarge = paginateItems(largeCrowns, largePage);
+  const pagedSmall = paginateItems(smallCrowns, smallPage);
+  const pagedSeeking = paginateItems(wishlist, seekingPage);
   const gameInfo = extraInfo?.games?.find(g => g.game === "Monster Hunter Wilds");
 
   return (
@@ -280,7 +363,7 @@ export default async function MonsterDetail({ params, searchParams }) {
                         <h2 className="mh-title">Crown Pairs</h2>
                       </div>
                       <div className={styles.hunterList}>
-                        {pairedGroups.map((group) => {
+                        {pagedPairs.items.map((group) => {
                           const smallC = group.find(c => c.type === 'small');
                           const largeC = group.find(c => c.type === 'large');
                           const isHl = group.some(c => String(c.id) === String(highlightCrownId));
@@ -295,6 +378,14 @@ export default async function MonsterDetail({ params, searchParams }) {
                           );
                         })}
                       </div>
+                      {renderPagination({
+                        page: pagedPairs.page,
+                        totalPages: pagedPairs.totalPages,
+                        search,
+                        pageKey: 'pairsPage',
+                        activeTab: 'hosts',
+                        sectionLabel: 'Pairs',
+                      })}
                     </section>
                   )}
 
@@ -304,12 +395,20 @@ export default async function MonsterDetail({ params, searchParams }) {
                       <h2 className="mh-title">Large Crowns</h2>
                     </div>
                     <div className={styles.hunterList}>
-                      {largeCrowns.length > 0 ? largeCrowns.map((c, i) => (
+                      {largeCrowns.length > 0 ? pagedLarge.items.map((c, i) => (
                         <HunterItem key={i} crown={c} monsterName={monster.name} isHighlighted={String(c.id) === String(highlightCrownId)} />
                       )) : (
                         <p className={styles.empty}>No large crowns recorded yet.</p>
                       )}
                     </div>
+                    {renderPagination({
+                      page: pagedLarge.page,
+                      totalPages: pagedLarge.totalPages,
+                      search,
+                      pageKey: 'largePage',
+                      activeTab: 'hosts',
+                      sectionLabel: 'Large',
+                    })}
                   </section>
 
                   <section className={styles.crownSection}>
@@ -318,12 +417,20 @@ export default async function MonsterDetail({ params, searchParams }) {
                       <h2 className="mh-title">Small Crowns</h2>
                     </div>
                     <div className={styles.hunterList}>
-                      {smallCrowns.length > 0 ? smallCrowns.map((c, i) => (
+                      {smallCrowns.length > 0 ? pagedSmall.items.map((c, i) => (
                         <HunterItem key={i} crown={c} monsterName={monster.name} isHighlighted={String(c.id) === String(highlightCrownId)} />
                       )) : (
                         <p className={styles.empty}>No small crowns recorded yet.</p>
                       )}
                     </div>
+                    {renderPagination({
+                      page: pagedSmall.page,
+                      totalPages: pagedSmall.totalPages,
+                      search,
+                      pageKey: 'smallPage',
+                      activeTab: 'hosts',
+                      sectionLabel: 'Small',
+                    })}
                   </section>
                 </>
               ) : (
@@ -333,7 +440,7 @@ export default async function MonsterDetail({ params, searchParams }) {
                     <h2 className="mh-title">Hunters Seeking This Monster</h2>
                   </div>
                   <div className={styles.hunterList}>
-                    {wishlist.length > 0 ? wishlist.map((w, i) => (
+                    {wishlist.length > 0 ? pagedSeeking.items.map((w, i) => (
                       <Link href={`/profile/${w.user_id}`} key={i} className={styles.wishlistUser}>
                         <div className={styles.userLeft}>
                           {w.avatar_url && <img src={w.avatar_url} alt="" className={styles.userAvatar} />}
@@ -354,6 +461,14 @@ export default async function MonsterDetail({ params, searchParams }) {
                       <p className={styles.empty}>No hunters are currently tracking this monster.</p>
                     )}
                   </div>
+                  {renderPagination({
+                    page: pagedSeeking.page,
+                    totalPages: pagedSeeking.totalPages,
+                    search,
+                    pageKey: 'seekingPage',
+                    activeTab: 'seeking',
+                    sectionLabel: 'Seeking',
+                  })}
                 </section>
               )}
             </div>
