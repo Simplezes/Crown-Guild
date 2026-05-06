@@ -25,12 +25,20 @@ async function updateSettings(req) {
 
     const { lobby_id, quest_password, status_message, receive_dms, main_crown_server_id } = await req.json();
     const userId = session.user.id;
+    let normalizedPassword;
+
+    if (quest_password !== undefined) {
+      normalizedPassword = String(quest_password || "").trim();
+      if (normalizedPassword !== "" && !/^\d{4}$/.test(normalizedPassword)) {
+        return NextResponse.json({ error: "Quest password must be exactly 4 digits." }, { status: 400 });
+      }
+    }
 
     const updates = [];
     const args = [];
 
     if (lobby_id !== undefined) { updates.push("lobby_id = ?"); args.push(lobby_id); }
-    if (quest_password !== undefined) { updates.push("quest_password = ?"); args.push(quest_password); }
+    if (quest_password !== undefined) { updates.push("quest_password = ?"); args.push(normalizedPassword); }
     if (status_message !== undefined) { updates.push("status_message = ?"); args.push(status_message); }
     if (receive_dms !== undefined) { updates.push("receive_dms = ?"); args.push(receive_dms ? 1 : 0); }
     if (main_crown_server_id !== undefined) {

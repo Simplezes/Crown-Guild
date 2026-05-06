@@ -11,6 +11,7 @@ export default function SettingsForm({ initialData }) {
   const confirm = useConfirm();
   const [formData, setFormData] = useState(initialData);
   const [status, setStatus] = useState("idle");
+  const [validationError, setValidationError] = useState("");
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -29,6 +30,14 @@ export default function SettingsForm({ initialData }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const normalizedPassword = String(formData.quest_password || "").trim();
+    if (normalizedPassword !== "" && !/^\d{4}$/.test(normalizedPassword)) {
+      setValidationError("Quest Password must be exactly 4 digits (numbers only).");
+      setStatus("error");
+      return;
+    }
+
+    setValidationError("");
     setStatus("loading");
     try {
       const res = await fetch("/api/user/settings", {
@@ -40,6 +49,8 @@ export default function SettingsForm({ initialData }) {
         setStatus("success");
         setTimeout(() => setStatus("idle"), 3000);
       } else {
+        const data = await res.json().catch(() => null);
+        setValidationError(data?.error || "");
         setStatus("error");
       }
     } catch (err) {
@@ -98,9 +109,12 @@ export default function SettingsForm({ initialData }) {
           value={formData.quest_password || ''}
           onChange={handleChange}
           className={styles.input}
-          placeholder="Leave blank if public"
+          placeholder="4-digit password (leave blank if public)"
+          inputMode="numeric"
+          pattern="\d{4}"
+          maxLength={4}
         />
-        <span className={styles.hint}>If your quest has a passcode, provide it here.</span>
+        <span className={styles.hint}>If set, this must be exactly 4 digits.</span>
       </div>
 
       <div className={styles.sectionTitle} style={{ marginTop: '40px' }}>
@@ -133,7 +147,7 @@ export default function SettingsForm({ initialData }) {
         <button type="submit" disabled={status === "loading"} className="mh-button">
           {status === "loading" ? "Saving..." : status === "success" ? "Saved!" : "Save Settings"}
         </button>
-        {status === "error" && <span className={styles.errorText}>Failed to save settings.</span>}
+        {status === "error" && <span className={styles.errorText}>{validationError || "Failed to save settings."}</span>}
       </div>
 
       <div className={styles.dangerZone}>
