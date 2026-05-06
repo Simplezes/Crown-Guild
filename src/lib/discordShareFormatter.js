@@ -1,6 +1,6 @@
 import { emojiservers } from '@/lib/emojiservers';
 
-const DISCORD_PROFILE_BASE_URL = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+const DISCORD_PROFILE_BASE_URL = process.env.NEXT_PUBLIC_WEB_URL || 'http://localhost:3000';
 const CATEGORY_ORDER = ['S+L', 'Small', 'Large'];
 
 function stripNamePrefixes(name) {
