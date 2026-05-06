@@ -22,6 +22,7 @@ function SettingsContent({ user, isOwner }) {
   const searchParams = useSearchParams();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [validationError, setValidationError] = useState('');
   const [serverMenuOpen, setServerMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -61,6 +62,14 @@ function SettingsContent({ user, isOwner }) {
   if (!isOwner) return null;
 
   const handleSave = async () => {
+    const normalizedPassword = String(formData.quest_password || '').trim();
+    if (normalizedPassword !== '' && !/^\d{4}$/.test(normalizedPassword)) {
+      setValidationError('Quest Password must be exactly 4 digits (numbers only).');
+      toast.error('Quest Password must be exactly 4 digits (numbers only).');
+      return;
+    }
+
+    setValidationError('');
     setLoading(true);
     try {
       const res = await fetch('/api/user/settings', {
@@ -75,7 +84,9 @@ function SettingsContent({ user, isOwner }) {
         setIsEditing(false);
         router.refresh();
       } else {
-        toast.error('Failed to update settings');
+        const data = await res.json().catch(() => null);
+        setValidationError(data?.error || '');
+        toast.error(data?.error || 'Failed to update settings');
       }
     } catch (err) {
       console.error(err);
@@ -139,9 +150,13 @@ function SettingsContent({ user, isOwner }) {
                 type="text"
                 value={formData.quest_password}
                 onChange={e => setFormData({ ...formData, quest_password: e.target.value })}
-                placeholder="e.g. 1234"
+                placeholder="4-digit password (e.g. 1234)"
+                inputMode="numeric"
+                pattern="\d{4}"
+                maxLength={4}
               />
             </div>
+            {validationError && <p className={styles.dangerHint}>{validationError}</p>}
           </div>
 
           <div className={styles.field}>
