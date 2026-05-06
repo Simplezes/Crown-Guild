@@ -1,5 +1,5 @@
 import { ImageResponse } from 'next/og';
-import { getProfileData, getHunterRank } from "@/lib/profile";
+import { getProfileData, getRankProgress } from "@/lib/profile";
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
@@ -37,8 +37,11 @@ export default async function Image({ params }) {
     );
   }
 
-  const { user, stats, activity, completion, topAssist } = data;
-  const userRank = getHunterRank(activity.hosted || 0, activity.joined || 0);
+  const { user, stats, activity, topAssist, wishlist, masteryPoints } = data;
+  const safeMasteryPoints = Number(masteryPoints || 0);
+  const { currentRank, nextRank, progress } = getRankProgress(safeMasteryPoints);
+  const userRank = currentRank?.title || 'Fledgling';
+  const wishlistCount = Array.isArray(wishlist) ? wishlist.length : 0;
   const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
 
   let avatarUrl = user.avatar_url || `${baseUrl}/icons/MHWilds-Quest_Members_Icon.png`;
@@ -198,34 +201,6 @@ export default async function Image({ params }) {
                 paddingLeft: '50px',
               }}
             >
-              <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '35px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <img src={`${baseUrl}/icons/MHWilds-Notes_Checkmark_Icon.png`} width={24} height={24} style={{ marginRight: '10px' }} />
-                    <span style={{ fontSize: 18, color: colors.tanDark, display: 'flex' }}>FIELD GUIDE COMPLETION</span>
-                  </div>
-                  <span style={{ fontSize: 24, color: colors.gold, fontWeight: 'bold', display: 'flex' }}>{completion}%</span>
-                </div>
-                <div
-                  style={{
-                    height: '14px',
-                    width: '100%',
-                    background: colors.umber,
-                    border: `1px solid ${colors.border}`,
-                    display: 'flex',
-                    position: 'relative',
-                  }}
-                >
-                  <div
-                    style={{
-                      height: '100%',
-                      width: `${completion}%`,
-                      background: colors.gold,
-                    }}
-                  />
-                </div>
-              </div>
-
               <div style={{ display: 'flex', flexDirection: 'row', gap: '30px', marginBottom: '35px' }}>
                 <div
                   style={{
@@ -253,6 +228,64 @@ export default async function Image({ params }) {
                   <span style={{ fontSize: 14, color: colors.tanDark, marginBottom: '5px', display: 'flex' }}>GUILD MISSIONS</span>
                   <span style={{ fontSize: 36, fontWeight: 'bold', color: '#fff', display: 'flex' }}>{Number(activity.hosted || 0) + Number(activity.joined || 0)}</span>
                 </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'row', gap: '30px', marginBottom: '24px' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    flex: 1,
+                    background: 'rgba(255,255,255,0.03)',
+                    padding: '15px',
+                    border: `1px solid ${colors.border}`,
+                  }}
+                >
+                  <span style={{ fontSize: 14, color: colors.tanDark, marginBottom: '5px', display: 'flex' }}>MASTERY POINTS</span>
+                  <span style={{ fontSize: 30, fontWeight: 'bold', color: colors.goldBright, display: 'flex' }}>{safeMasteryPoints}</span>
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    flex: 1,
+                    background: 'rgba(255,255,255,0.03)',
+                    padding: '15px',
+                    border: `1px solid ${colors.border}`,
+                  }}
+                >
+                  <span style={{ fontSize: 14, color: colors.tanDark, marginBottom: '5px', display: 'flex' }}>WISHLIST TARGETS</span>
+                  <span style={{ fontSize: 30, fontWeight: 'bold', color: colors.goldBright, display: 'flex' }}>{wishlistCount}</span>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ fontSize: 14, color: colors.tanDark, display: 'flex' }}>MASTERY PROGRESS</span>
+                  <span style={{ fontSize: 18, color: colors.gold, fontWeight: 'bold', display: 'flex' }}>{Math.round(progress)}%</span>
+                </div>
+                <div
+                  style={{
+                    height: '10px',
+                    width: '100%',
+                    background: colors.umber,
+                    border: `1px solid ${colors.border}`,
+                    display: 'flex',
+                  }}
+                >
+                  <div
+                    style={{
+                      height: '100%',
+                      width: `${Math.max(0, Math.min(100, progress))}%`,
+                      background: colors.gold,
+                    }}
+                  />
+                </div>
+                {nextRank && (
+                  <span style={{ fontSize: 12, color: colors.tanDark, marginTop: '6px', display: 'flex' }}>
+                    {Math.max(0, Number(nextRank.minPoints || 0) - safeMasteryPoints)} to {nextRank.title}
+                  </span>
+                )}
               </div>
 
               {topAssist && (

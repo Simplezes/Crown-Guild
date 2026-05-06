@@ -114,7 +114,7 @@ export default function CompletionTracker({
             <span>{hostCount}</span>
           </div>
           <div className={styles.statItem}>
-            <label>Completed</label>
+            <label>Collected</label>
             <span>{hunterCount}</span>
           </div>
           <div className={styles.statItem}>
@@ -142,7 +142,7 @@ export default function CompletionTracker({
             className={`${styles.tab} ${activeTab === 'hunter' ? styles.tabActive : ''}`}
             onClick={() => setActiveTab('hunter')}
           >
-            Crowns Completed
+            Crowns Collected
           </button>
           <button
             className={`${styles.tab} ${activeTab === 'wishlist' ? styles.tabActive : ''}`}
@@ -156,7 +156,7 @@ export default function CompletionTracker({
           <p>{getTabInfo()}</p>
           {isOwner && activeTab !== 'host' && (
             <span className={styles.interactiveHint}>
-              Click the S/L icons to toggle completion/tracking status.
+              Click the S/L icons to toggle collection/tracking status.
             </span>
           )}
           {activeTab === 'hunter' && (

@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import { auth } from "@/auth";
 import ProfileCrowns from "@/components/crowns/ProfileCrowns";
 import ProfileSettings from "@/components/profile/ProfileSettings";
-import { getProfileData, getHunterRank, getRankProgress } from "@/lib/profile";
+import { getProfileData, getRankProgress } from "@/lib/profile";
 import DiscordShare from "@/components/ui/DiscordShare";
 import { getAllMonsters } from "@/lib/monsters";
 import CompletionTracker from "@/components/profile/CompletionTracker";
@@ -41,7 +41,6 @@ function buildProfileOgVersion(data) {
     Number(data.stats?.large || 0),
     Number(data.activity?.hosted || 0),
     Number(data.activity?.joined || 0),
-    String(data.completion || 0),
     Number(data.masteryPoints || 0),
     checksum.toString(36),
   ].join("-");
@@ -60,11 +59,13 @@ export async function generateMetadata({ params, searchParams }) {
   const ogVersion = buildProfileOgVersion(data);
   const nonceParam = shareNonce ? `&share=${encodeURIComponent(String(shareNonce))}` : "";
   const imageUrl = `/profile/${encodeURIComponent(id)}/og?v=${encodeURIComponent(ogVersion)}${nonceParam}`;
+  const { currentRank } = getRankProgress(Number(data.masteryPoints || 0));
+  const rankTitle = currentRank?.title || "Fledgling";
 
   return {
     openGraph: {
       title: `${data.user.username}'s Guild Card`,
-      description: `MR ${data.stats.total || 0} Hunter • Guide Progress: ${data.completion}%`,
+      description: `${rankTitle} Hunter • ${data.masteryPoints || 0} MP`,
       images: [
         {
           url: imageUrl,
@@ -87,7 +88,7 @@ export default async function Profile({ params }) {
 
   if (!data) notFound();
 
-  const { user, crowns, stats, activity, completion, topAssist, masteryPoints } = data;
+  const { user, crowns, stats, activity, topAssist, masteryPoints } = data;
   const { currentRank, nextRank, progress } = getRankProgress(masteryPoints || 0);
   const userRank = currentRank.title;
   const allMonsters = await getAllMonsters(true);
@@ -135,7 +136,7 @@ export default async function Profile({ params }) {
               <div className={styles.noOp}>Standby - No Active Operation</div>
             )}
             <div className={styles.opActions}>
-              <ProfileSettings user={user} isOwner={isOwner} />
+              <ProfileSettings user={user} isOwner={isOwner} sessionData={session} />
             </div>
           </div>
 
@@ -162,11 +163,11 @@ export default async function Profile({ params }) {
               </div>
             </div>
             <div className={styles.progressBody}>
-              <div className={styles.completionVal}>{masteryPoints} <span className={styles.mpLabel}>MP</span></div>
+              <div className={styles.masteryVal}>{masteryPoints} <span className={styles.mpLabel}>MP</span></div>
               <div className={styles.rankBadgeSmall}>{userRank}</div>
             </div>
             <div className={styles.masteryMeta}>
-              <span>{completion}% Completion</span>
+              <span>{Math.round(progress)}% Rank Progress</span>
               {nextRank && <span>{nextRank.minPoints - masteryPoints} to {nextRank.title}</span>}
             </div>
             <div className={styles.progressBar}>
@@ -182,7 +183,7 @@ export default async function Profile({ params }) {
               <h2 className="mh-title">Crown Collection</h2>
             </div>
             <div className={styles.ledgerMeta}>
-              <DiscordShare id={user.id} username={user.username} crowns={crowns} wishlist={data.wishlist} />
+              <DiscordShare id={user.id} username={user.username} crowns={crowns} wishlist={data.wishlist} sessionData={session} />
             </div>
           </header>
 
