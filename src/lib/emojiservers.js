@@ -28,5 +28,6 @@ export const emojiservers = {
     YianKutKu: '<:YianKutKu:1344853186812579960>',
     Rompopolo: '<:Rompopolo:1344853182425075782>',
     GoreMagala: '<:GoreMagala:1344853204009222214>',
+    LalaBarina: '<:LalaBarina:1344853567386685510> ',
   },
 };
