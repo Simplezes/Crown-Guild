@@ -1,4 +1,5 @@
 import { getAllMonsters, getWeeklyBounties } from "@/lib/monsters";
+import { QUEST_SYSTEM_ENABLED } from "@/lib/sos";
 import styles from "./registry.module.css";
 import Image from "next/image";
 import db from "@/lib/db";
@@ -16,7 +17,7 @@ async function getRegistryData() {
       JOIN users u ON c.user_id = u.id
     `);
     const allCrowns = JSON.parse(JSON.stringify(crownsRes.rows));
-    const bounties = getWeeklyBounties(monsters);
+    const bounties = QUEST_SYSTEM_ENABLED ? getWeeklyBounties(monsters) : [];
 
     const wishlistRes = await db.execute(`
       SELECT monster_id, COUNT(*) as count FROM wishlist GROUP BY monster_id
@@ -39,8 +40,8 @@ async function getRegistryData() {
 
       const processedCrowns = monsterCrowns.map(c => ({
         ...c,
-        resonance: Math.min(5, Math.floor((c.share_count || 0) / 3) + 1),
-        isFever: c.fever_until && new Date(c.fever_until) > new Date()
+        resonance: QUEST_SYSTEM_ENABLED ? Math.min(5, Math.floor((c.share_count || 0) / 3) + 1) : 0,
+        isFever: QUEST_SYSTEM_ENABLED && c.fever_until && new Date(c.fever_until) > new Date()
       }));
 
       return {
@@ -75,24 +76,26 @@ export default async function Registry() {
             <h1 className="gold-text">The Great Ledger</h1>
           </div>
 
-          <div className={styles.bountyHeader}>
-            <div className={styles.bountyLabel}>
-              Weekly Bounties (2x MP)
-              <InfoTrigger 
-                title="Bounties" 
-                content="Targeting these monsters provides double Mastery Points. The guild selects these monsters weekly based on community needs." 
-                position="bottom"
-                align="left"
-              />
+          {QUEST_SYSTEM_ENABLED && (
+            <div className={styles.bountyHeader}>
+              <div className={styles.bountyLabel}>
+                Weekly Bounties (2x MP)
+                <InfoTrigger 
+                  title="Bounties" 
+                  content="Targeting these monsters provides double Mastery Points. The guild selects these monsters weekly based on community needs." 
+                  position="bottom"
+                  align="left"
+                />
+              </div>
+              <div className={styles.bountyIcons}>
+                {registry.filter(m => m.isBounty).map(m => (
+                  <div key={m.id} className={styles.bountyIcon} title={`${m.name} Bounty`}>
+                    <Image src={`/monsters/${m.image_name}`} width={32} height={32} alt={m.name} className="pixel-art" />
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className={styles.bountyIcons}>
-              {registry.filter(m => m.isBounty).map(m => (
-                <div key={m.id} className={styles.bountyIcon} title={`${m.name} Bounty`}>
-                  <Image src={`/monsters/${m.image_name}`} width={32} height={32} alt={m.name} className="pixel-art" />
-                </div>
-              ))}
-            </div>
-          </div>
+          )}
         </header>
 
         <div className={styles.scrollArea + " animate-mh"}>

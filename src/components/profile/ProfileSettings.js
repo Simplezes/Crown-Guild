@@ -234,7 +234,7 @@ function SettingsContent({ user, isOwner, sessionData }) {
                 checked={formData.receive_dms}
                 onChange={e => setFormData({ ...formData, receive_dms: e.target.checked })}
               />
-              <span>Receive Discord DMs for Beacon Requests</span>
+              <span>Receive Discord DMs for future contact features</span>
             </label>
           </div>
 
