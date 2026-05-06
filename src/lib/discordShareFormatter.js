@@ -133,6 +133,40 @@ export function formatEmojiGrid(data, useEmojis = true) {
 export function buildShareMonstersFromCrowns(crowns) {
   const list = Array.isArray(crowns) ? crowns : [];
   const groupedByMonster = new Map();
+  const linkedMonsters = new Set();
+  const pairMap = new Map();
+
+  list.forEach((crown) => {
+    if (!crown?.pair_id) return;
+
+    const pairId = String(crown.pair_id);
+    if (!pairMap.has(pairId)) pairMap.set(pairId, []);
+    pairMap.get(pairId).push(crown);
+  });
+
+  for (const pair of pairMap.values()) {
+    const pairMonsters = new Map();
+
+    pair.forEach((crown) => {
+      const name = String(crown?.name || crown?.monster_name || '').trim();
+      if (!name) return;
+
+      const variant = crown?.variant || (crown?.tempered ? 'Tempered' : null);
+      const key = `${name}||${variant || ''}`;
+
+      if (!pairMonsters.has(key)) {
+        pairMonsters.set(key, { hasSmall: false, hasLarge: false });
+      }
+
+      const current = pairMonsters.get(key);
+      if (crown?.type === 'small') current.hasSmall = true;
+      if (crown?.type === 'large') current.hasLarge = true;
+    });
+
+    for (const [key, entry] of pairMonsters.entries()) {
+      if (entry.hasSmall && entry.hasLarge) linkedMonsters.add(key);
+    }
+  }
 
   list.forEach((crown, index) => {
     const name = String(crown?.name || crown?.monster_name || '').trim();
@@ -147,20 +181,58 @@ export function buildShareMonstersFromCrowns(crowns) {
         variant,
         hasSmall: false,
         hasLarge: false,
+        firstSeenSmall: Number.POSITIVE_INFINITY,
+        firstSeenLarge: Number.POSITIVE_INFINITY,
         firstSeen: index,
       });
     }
 
     const current = groupedByMonster.get(key);
-    if (crown?.type === 'small') current.hasSmall = true;
-    if (crown?.type === 'large') current.hasLarge = true;
+    if (crown?.type === 'small') {
+      current.hasSmall = true;
+      current.firstSeenSmall = Math.min(current.firstSeenSmall, index);
+    }
+    if (crown?.type === 'large') {
+      current.hasLarge = true;
+      current.firstSeenLarge = Math.min(current.firstSeenLarge, index);
+    }
   });
 
   return Array.from(groupedByMonster.values())
-    .sort((a, b) => a.firstSeen - b.firstSeen)
-    .map((entry) => ({
-      name: entry.name,
-      variant: entry.variant,
-      category: entry.hasSmall && entry.hasLarge ? 'S+L' : (entry.hasLarge ? 'Large' : 'Small'),
-    }));
+    .flatMap((entry) => {
+      const key = `${entry.name}||${entry.variant || ''}`;
+
+      if (linkedMonsters.has(key)) {
+        return [{
+          name: entry.name,
+          variant: entry.variant,
+          category: 'S+L',
+          order: entry.firstSeen,
+        }];
+      }
+
+      const categories = [];
+
+      if (entry.hasSmall) {
+        categories.push({
+          name: entry.name,
+          variant: entry.variant,
+          category: 'Small',
+          order: entry.firstSeenSmall,
+        });
+      }
+
+      if (entry.hasLarge) {
+        categories.push({
+          name: entry.name,
+          variant: entry.variant,
+          category: 'Large',
+          order: entry.firstSeenLarge,
+        });
+      }
+
+      return categories;
+    })
+    .sort((a, b) => a.order - b.order)
+    .map(({ order, ...entry }) => entry);
 }
