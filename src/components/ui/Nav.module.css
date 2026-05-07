@@ -23,25 +23,67 @@
 }
 
 .logo {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
+  padding: 6px 14px 6px 8px;
+  border: 1px solid rgba(181, 154, 93, 0.14);
+  background: linear-gradient(135deg, rgba(181, 154, 93, 0.08), rgba(255, 255, 255, 0.02));
+  backdrop-filter: var(--glass-blur);
   transition: var(--transition-mh);
 }
 
 .logo:hover {
-  transform: scale(1.02);
+  transform: translateY(-1px);
+  border-color: rgba(181, 154, 93, 0.34);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+}
+
+.logo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(181, 154, 93, 0.14), transparent 38%);
+  pointer-events: none;
+}
+
+.logoMark {
+  position: relative;
+  z-index: 1;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(181, 154, 93, 0.28);
+  background: radial-gradient(circle, rgba(181, 154, 93, 0.16), rgba(12, 10, 9, 0.98));
+  box-shadow: inset 0 0 12px rgba(181, 154, 93, 0.08);
 }
 
 .logoImage {
-  border-radius: 50%;
-  border: 1px solid var(--mh-gold);
-  padding: 1px;
-  background: var(--mh-black);
+  filter: drop-shadow(0 0 10px rgba(181, 154, 93, 0.22));
 }
 
 .logoText {
-  font-size: 1.4rem;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.logoEyebrow {
+  color: var(--mh-tan-dark);
+  font-family: 'Marcellus', serif;
+  font-size: 0.55rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.logoTitle {
+  font-size: 1.28rem;
   color: var(--mh-gold);
   font-family: 'Marcellus', serif;
   letter-spacing: 0.08em;
@@ -203,16 +245,26 @@
     background: var(--mh-black);
     position: fixed;
     border-bottom: 1px solid var(--mh-border);
+    gap: 10px;
   }
 
   .logoText {
-    font-size: 1.2rem;
+    min-width: 0;
+  }
+
+  .logoTitle {
+    font-size: 1.02rem;
+  }
+
+  .logoEyebrow {
+    font-size: 0.48rem;
+    letter-spacing: 0.18em;
   }
 
   .navLinks {
     display: none;
     position: fixed;
-    top: 60px;
+    top: 68px;
     left: 0;
     width: 100%;
     max-width: 100vw;
@@ -238,10 +290,74 @@
   }
 
   .menuToggle {
-    display: block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    flex-shrink: 0;
   }
 
   .authSection {
-    gap: 12px;
+    margin-left: auto;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .createBtn {
+    padding: 8px 12px;
+    font-size: 0.64rem;
+    letter-spacing: 0.08em;
+  }
+
+  .userProfile {
+    gap: 8px;
+    padding: 4px 8px;
+    min-width: 0;
+  }
+
+  .userName {
+    display: none;
+  }
+
+  .dropdown {
+    right: 0;
+    min-width: 160px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav {
+    padding: 10px 14px;
+  }
+
+  .logo {
+    gap: 8px;
+    padding: 6px 10px 6px 6px;
+  }
+
+  .logoMark {
+    width: 36px;
+    height: 36px;
+  }
+
+  .logoTitle {
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+  }
+
+  .logoEyebrow {
+    font-size: 0.42rem;
+    letter-spacing: 0.14em;
+  }
+
+  .createBtn {
+    padding: 8px 10px;
+    font-size: 0.58rem;
+  }
+
+  .userProfile {
+    padding: 4px 6px;
   }
 }

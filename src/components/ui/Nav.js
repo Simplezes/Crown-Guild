@@ -43,14 +43,19 @@ export default function Nav() {
   return (
     <nav className={`${styles.nav} ${scrolled ? styles.scrolled : ""}`}>
       <Link href="/" className={styles.logo}>
-        <Image
-          src="/icon.png"
-          alt="Crown Guild"
-          width={40}
-          height={40}
-          className={"pixel-art " + styles.logoImage}
-        />
-        <span className={styles.logoText}>Crown Guild</span>
+        <span className={styles.logoMark}>
+          <Image
+            src="/icon.png"
+            alt="Crown Guild"
+            width={40}
+            height={40}
+            className={"pixel-art " + styles.logoImage}
+          />
+        </span>
+        <span className={styles.logoText}>
+          <span className={styles.logoEyebrow}>Hunter Ledger</span>
+          <span className={styles.logoTitle}>Crown Guild</span>
+        </span>
       </Link>
 
       <button
