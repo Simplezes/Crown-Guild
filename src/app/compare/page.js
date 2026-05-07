@@ -1,10 +1,11 @@
-import db from "@/lib/db";
 import styles from "./compare.module.css";
 import Image from "next/image";
 import CompareForm from "./CompareForm";
-import { getProfileData, getRankProgress } from "@/lib/profile";
+import { getRankProgress } from "@/lib/profile";
+import { getCompareData } from "./compareData";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 function toPlainUser(user, fallback) {
   if (!user) return fallback || null;
@@ -15,46 +16,32 @@ function toPlainUser(user, fallback) {
   };
 }
 
-async function getCompareData(a, b) {
-  if (!a || !b) return null;
-  try {
-    const [profileA, profileB] = await Promise.all([getProfileData(a), getProfileData(b)]);
-    if (!profileA || !profileB) return null;
+export async function generateMetadata({ searchParams }) {
+  const { a, b } = await searchParams;
 
-    const userA = profileA.user;
-    const userB = profileB.user;
-
-    const wishlistA = profileA.wishlist || [];
-    const wishlistB = profileB.wishlist || [];
-    const mapA = new Map(wishlistA.map((r) => [r.monster_id, r]));
-    const mapB = new Map(wishlistB.map((r) => [r.monster_id, r]));
-
-    const both = wishlistA.filter((r) => mapB.has(r.monster_id));
-    const onlyA = wishlistA.filter((r) => !mapB.has(r.monster_id));
-    const onlyB = wishlistB.filter((r) => !mapA.has(r.monster_id));
-
-    const ownedA = new Set((profileA.crowns || []).map((c) => c.monster_id));
-    const ownedB = new Set((profileB.crowns || []).map((c) => c.monster_id));
-    const sharedOwnedCount = [...ownedA].filter((id) => ownedB.has(id)).length;
-    const onlyOwnedA = [...ownedA].filter((id) => !ownedB.has(id)).length;
-    const onlyOwnedB = [...ownedB].filter((id) => !ownedA.has(id)).length;
-
+  if (!a || !b) {
     return {
-      userA,
-      userB,
-      profileA,
-      profileB,
-      both,
-      onlyA,
-      onlyB,
-      sharedOwnedCount,
-      onlyOwnedA,
-      onlyOwnedB,
+      title: "Compare Hunters",
+      description: "Compare two hunters across crowns, collection progress, and wishlist overlap.",
     };
-  } catch (e) {
-    console.error("Compare page error", e);
-    return null;
   }
+
+  const data = await getCompareData(a, b);
+  if (!data) {
+    return {
+      title: "Compare Hunters",
+      description: "Compare two hunters across crowns, collection progress, and wishlist overlap.",
+    };
+  }
+
+  const overlapCount = data.both?.length || 0;
+  const totalTracked = overlapCount + (data.onlyA?.length || 0) + (data.onlyB?.length || 0);
+  const overlapRate = totalTracked > 0 ? Math.round((overlapCount / totalTracked) * 100) : 0;
+
+  return {
+    title: `${data.userA.username} vs ${data.userB.username} | Hunter Compare`,
+    description: `${overlapCount} shared targets • ${data.sharedOwnedCount} shared crown species • ${overlapRate}% match`,
+  };
 }
 
 function CrownIcons({ type }) {
