@@ -4,13 +4,15 @@ import { fileURLToPath } from "url";
 /** @type {import('next').NextConfig} */
 const isDev = process.env.NODE_ENV !== "production";
 const webRoot = path.dirname(fileURLToPath(import.meta.url));
+const googleFontsStylesOrigin = "https://fonts.googleapis.com";
+const googleFontsAssetsOrigin = "https://fonts.gstatic.com";
 
 const contentSecurityPolicy = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
-  "style-src 'self' 'unsafe-inline'",
+  `style-src 'self' 'unsafe-inline' ${googleFontsStylesOrigin}`,
   "img-src 'self' data: blob: https://cdn.discordapp.com https://media.discordapp.net",
-  "font-src 'self' data:",
+  `font-src 'self' data: ${googleFontsAssetsOrigin}`,
   "connect-src 'self' https://discord.com https://api.pusherapp.com https://sockjs.pusher.com wss://*.pusher.com ws: wss:",
   "frame-ancestors 'none'",
   "base-uri 'self'",
