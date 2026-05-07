@@ -101,7 +101,7 @@ export default async function Profile({ params }) {
           <div className={styles.heroShell + " animate-mh"}>
             <div className={styles.heroPanel}>
               <div className={styles.titleGroup}>
-                <span className={styles.indicator}>👤 Hunter Profile</span>
+                <span className={styles.indicator}>Hunter Profile</span>
                 <div className={styles.identityRow}>
                   <img
                     src={user.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"}
@@ -127,7 +127,7 @@ export default async function Profile({ params }) {
 
             <div className={styles.snapshotCard}>
               <div className={styles.snapshotHeader}>
-                <span>📊 Collection Mastery</span>
+                <span>Collection Mastery</span>
                 <div className={styles.infoWrapper}>
                   <button className={styles.infoTrigger}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
