@@ -127,11 +127,11 @@ export default async function ComparePage({ searchParams }) {
                 <span className={styles.metricValue}>{overlapCount}</span>
               </div>
               <div className={styles.metricCard}>
-                <span className={styles.metricLabel}>Only {data.userA.username}</span>
+                <span className={styles.metricLabel}>{data.userA.username}'s Wishlist</span>
                 <span className={styles.metricValue}>{onlyACount}</span>
               </div>
               <div className={styles.metricCard}>
-                <span className={styles.metricLabel}>Only {data.userB.username}</span>
+                <span className={styles.metricLabel}>{data.userB.username}'s Wishlist</span>
                 <span className={styles.metricValue}>{onlyBCount}</span>
               </div>
               <div className={styles.metricCard + " " + styles.metricCardEmphasis}>
@@ -233,12 +233,12 @@ export default async function ComparePage({ searchParams }) {
 
             <div className={styles.columns}>
               <WishlistColumn
-                title={`Only ${data.userA.username}`}
+                title={`${data.userA.username}'s Wishlist`}
                 items={data.onlyA}
                 emptyText="Nothing exclusive to this hunter."
               />
               <WishlistColumn
-                title={`Only ${data.userB.username}`}
+                title={`${data.userB.username}'s Wishlist`}
                 items={data.onlyB}
                 emptyText="Nothing exclusive to this hunter."
               />
