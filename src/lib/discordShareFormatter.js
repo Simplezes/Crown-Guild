@@ -110,16 +110,16 @@ export function formatEmojiGrid(data, useEmojis = true) {
 
   const compactWishlistLine = formatCompactWishlist(wishlist, serverEmojis, serverEmojiLookup);
 
-  const lines = [`**.${username} — Crown Collection**`, ''];
+  const lines = [];
 
   const slLine = appendCategoryLine('S+L', grouped['S+L']);
-  if (slLine) lines.push(slLine, '');
+  if (slLine) lines.push(slLine);
 
   const smallLine = appendCategoryLine('Small', grouped.Small);
-  if (smallLine) lines.push(smallLine, '');
+  if (smallLine) lines.push(smallLine);
 
   const largeLine = appendCategoryLine('Large', grouped.Large);
-  if (largeLine) lines.push(largeLine, '');
+  if (largeLine) lines.push(largeLine);
 
   if (compactWishlistLine) {
     lines.push(compactWishlistLine, '');
