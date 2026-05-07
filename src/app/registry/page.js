@@ -65,39 +65,83 @@ async function getRegistryData() {
 
 export default async function Registry() {
   const { registry } = await getRegistryData();
+  const trackedSpecimens = registry.length;
+  const activeHosts = registry.reduce((sum, monster) => sum + monster.smallFinders.length + monster.largeFinders.length, 0);
+  const openDemand = registry.reduce((sum, monster) => sum + Number(monster.demand || 0), 0);
+  const bountyCount = registry.filter((monster) => monster.isBounty).length;
 
   return (
     <main className={styles.main}>
       <div className="premium-container">
         <header className={styles.pageHeader + " animate-mh"}>
-          <div className={styles.titleGroup}>
-            <div className={styles.indicator}>
-              <Image src="/icons/MHWilds-Notes_Checkmark_Icon.png" width={18} height={18} alt="" className="pixel-art" />
-              <span>Guild Field Guide</span>
-            </div>
-            <h1 className="gold-text">The Great Ledger</h1>
-          </div>
+          <div className={styles.heroShell}>
+            <div className={styles.heroPanel}>
+              <div className={styles.titleGroup}>
+                <div className={styles.indicator}>
+                  <Image src="/icons/MHWilds-Notes_Checkmark_Icon.png" width={18} height={18} alt="" className="pixel-art" />
+                  <span>Guild Field Guide</span>
+                </div>
+                <h1 className="gold-text">The Great Ledger</h1>
+                <p className={styles.subtitle}>
+                  Track crown coverage, open demand, and active hosts from one modernized registry while preserving the guild archive aesthetic.
+                </p>
+              </div>
 
-          {QUEST_SYSTEM_ENABLED && (
-            <div className={styles.bountyHeader}>
-              <div className={styles.bountyLabel}>
-                Weekly Bounties (2x MP)
-                <InfoTrigger 
-                  title="Bounties" 
-                  content="Targeting these monsters provides double Mastery Points. The guild selects these monsters weekly based on community needs." 
-                  position="bottom"
-                  align="left"
-                />
-              </div>
-              <div className={styles.bountyIcons}>
-                {registry.filter(m => m.isBounty).map(m => (
-                  <div key={m.id} className={styles.bountyIcon} title={`${m.name} Bounty`}>
-                    <Image src={`/monsters/${m.image_name}`} width={32} height={32} alt={m.name} className="pixel-art" />
-                  </div>
-                ))}
+              <div className={styles.heroChips}>
+                <span className={styles.heroChip}>{trackedSpecimens} Tracked Specimens</span>
+                <span className={styles.heroChip}>{activeHosts} Active Hosts</span>
+                {openDemand > 0 && <span className={styles.heroChipAlert}>{openDemand} Open Wishlist</span>}
+                {QUEST_SYSTEM_ENABLED && bountyCount > 0 && <span className={styles.heroChip}>{bountyCount} Weekly Bounties</span>}
               </div>
             </div>
-          )}
+
+            <aside className={`${styles.snapshotCard} mh-card`}>
+              <div className={styles.snapshotHeader}>
+                <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={18} height={18} alt="" className="pixel-art" />
+                <span>Registry Snapshot</span>
+              </div>
+
+              <div className={styles.snapshotGrid}>
+                <div className={styles.snapshotStat}>
+                  <span>Specimens</span>
+                  <strong>{trackedSpecimens}</strong>
+                </div>
+                <div className={styles.snapshotStat}>
+                  <span>Hosts</span>
+                  <strong>{activeHosts}</strong>
+                </div>
+                <div className={styles.snapshotStat}>
+                  <span>Demand</span>
+                  <strong>{openDemand}</strong>
+                </div>
+                <div className={styles.snapshotStat}>
+                  <span>Bounties</span>
+                  <strong>{QUEST_SYSTEM_ENABLED ? bountyCount : 0}</strong>
+                </div>
+              </div>
+
+              {QUEST_SYSTEM_ENABLED && (
+                <div className={styles.bountyHeader}>
+                  <div className={styles.bountyLabel}>
+                    Weekly Bounties (2x MP)
+                    <InfoTrigger
+                      title="Bounties"
+                      content="Targeting these monsters provides double Mastery Points. The guild selects these monsters weekly based on community needs."
+                      position="bottom"
+                      align="left"
+                    />
+                  </div>
+                  <div className={styles.bountyIcons}>
+                    {registry.filter((monster) => monster.isBounty).slice(0, 6).map((monster) => (
+                      <div key={monster.id} className={styles.bountyIcon} title={`${monster.name} Bounty`}>
+                        <Image src={`/monsters/${monster.image_name}`} width={30} height={30} alt={monster.name} className="pixel-art" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </aside>
+          </div>
         </header>
 
         <div className={styles.scrollArea + " animate-mh"}>
