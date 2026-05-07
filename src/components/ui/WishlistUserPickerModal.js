@@ -163,6 +163,7 @@ export default function WishlistUserPickerModal({
             </button>
           </div>
         </footer>
+
       </div>
     </div>
   );

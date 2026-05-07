@@ -1,5 +1,9 @@
+import path from "path";
+import { fileURLToPath } from "url";
+
 /** @type {import('next').NextConfig} */
 const isDev = process.env.NODE_ENV !== "production";
+const webRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const contentSecurityPolicy = [
   "default-src 'self'",
@@ -24,6 +28,9 @@ const securityHeaders = [
 
 const nextConfig = {
   poweredByHeader: false,
+  turbopack: {
+    root: webRoot,
+  },
   async headers() {
     return [
       {
