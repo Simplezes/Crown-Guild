@@ -161,26 +161,6 @@
   min-width: 240px;
 }
 
-.vsBadge {
-  align-self: flex-end;
-  height: 46px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 14px;
-  border: 1px solid rgba(181, 154, 93, 0.28);
-  background: rgba(181, 154, 93, 0.08);
-  min-width: 64px;
-}
-
-.vsBadge span {
-  font-family: 'Marcellus', serif;
-  color: var(--mh-gold);
-  font-size: 0.82rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-}
-
 .pickerField {
   display: flex;
   flex-direction: column;
@@ -553,13 +533,6 @@
     min-width: 0;
   }
 
-  .vsBadge {
-    width: 100%;
-    min-width: 0;
-    height: 40px;
-    order: 2;
-  }
-
   .pickerBtn {
     width: 100%;
     min-height: 44px;
@@ -673,7 +646,6 @@
     width: 100%;
   }
 
-  .vsBadge,
   .compareAction {
     width: 100%;
   }

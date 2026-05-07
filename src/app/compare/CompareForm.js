@@ -36,10 +36,6 @@ export default function CompareForm({ initialA, initialB }) {
           </button>
         </div>
 
-        <div className={styles.vsBadge}>
-          <span>VS</span>
-        </div>
-
         <div className={styles.pickerField + " " + styles.primaryPickerField}>
           <label>Hunter B</label>
           <button type="button" className={styles.pickerBtn} onClick={() => setPickBOpen(true)}>
