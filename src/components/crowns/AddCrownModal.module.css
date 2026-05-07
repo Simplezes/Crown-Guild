@@ -5,9 +5,10 @@
   right: 0;
   bottom: 0;
   background:
-    radial-gradient(circle at top left, rgba(181, 154, 93, 0.16), transparent 32%),
-    linear-gradient(180deg, rgba(7, 6, 6, 0.78), rgba(7, 6, 6, 0.92));
-  backdrop-filter: blur(10px);
+    radial-gradient(circle at top left, rgba(181, 154, 93, 0.22), transparent 30%),
+    radial-gradient(circle at right, rgba(181, 154, 93, 0.08), transparent 24%),
+    linear-gradient(180deg, rgba(7, 6, 6, 0.74), rgba(7, 6, 6, 0.93));
+  backdrop-filter: blur(14px);
   z-index: 1000;
   opacity: 0;
   pointer-events: none;
@@ -27,15 +28,18 @@
   max-width: 560px;
   height: 100dvh;
   background:
-    linear-gradient(180deg, rgba(28, 24, 22, 0.96) 0%, rgba(12, 11, 10, 0.985) 100%),
+    linear-gradient(145deg, rgba(181, 154, 93, 0.09), transparent 34%),
+    linear-gradient(180deg, rgba(28, 24, 22, 0.97) 0%, rgba(12, 11, 10, 0.988) 100%),
     #080706;
-  border-left: 1px solid rgba(181, 154, 93, 0.42);
+  border-left: 1px solid rgba(181, 154, 93, 0.38);
   z-index: 1001;
-  box-shadow: -24px 0 80px rgba(0, 0, 0, 0.72);
+  box-shadow: -32px 0 90px rgba(0, 0, 0, 0.76);
   transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  border-top-left-radius: 32px;
+  border-bottom-left-radius: 32px;
 }
 
 .drawerOpen {
@@ -55,9 +59,19 @@
   box-shadow: -6px 0 12px rgba(181, 154, 93, 0.28);
 }
 
+.drawer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top right, rgba(181, 154, 93, 0.14), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 16%);
+  pointer-events: none;
+}
+
 .drawerContent {
   flex: 1;
-  padding: 22px;
+  padding: 24px;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--mh-gold) transparent;
@@ -66,16 +80,16 @@
 
 .header {
   margin-bottom: 18px;
-  border-bottom: 1px solid rgba(181, 154, 93, 0.16);
-  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(181, 154, 93, 0.12);
+  padding: 6px 0 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: sticky;
   top: 0;
   z-index: 4;
-  background: linear-gradient(180deg, rgba(16, 14, 12, 0.96) 0%, rgba(16, 14, 12, 0.84) 80%, transparent 100%);
-  backdrop-filter: blur(10px);
+  background: linear-gradient(180deg, rgba(16, 14, 12, 0.94) 0%, rgba(16, 14, 12, 0.82) 82%, transparent 100%);
+  backdrop-filter: blur(14px);
 }
 
 .header h2 {
@@ -88,18 +102,23 @@
 }
 
 .closeBtn {
-  background: none;
-  border: none;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(181, 154, 93, 0.14);
+  border-radius: 12px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
 
 .closeBtn:hover {
-  transform: scale(1.1);
+  transform: translateY(-1px);
+  border-color: rgba(181, 154, 93, 0.38);
+  background: rgba(181, 154, 93, 0.08);
 }
 
 .monsterPreview {
@@ -647,25 +666,29 @@
   display: grid;
   grid-template-columns: 1fr 1.5fr;
   gap: 15px;
-  margin-top: 20px;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(181, 154, 93, 0.12);
 }
 
 .cancelBtn {
-  background: none;
-  border: 1px solid #333;
-  color: #666;
+  min-height: 52px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(181, 154, 93, 0.14);
+  color: #918575;
   padding: 16px;
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   cursor: pointer;
   transition: all 0.3s ease;
+  border-radius: 16px;
 }
 
 .cancelBtn:hover {
-  border-color: #555;
-  color: #999;
-  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(181, 154, 93, 0.34);
+  color: var(--mh-tan);
+  background: rgba(181, 154, 93, 0.06);
 }
 
 @keyframes slideDownFade {

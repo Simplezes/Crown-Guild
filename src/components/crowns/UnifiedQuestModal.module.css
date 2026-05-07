@@ -3,9 +3,10 @@
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(circle at top, rgba(181, 154, 93, 0.12), transparent 32%),
-    rgba(7, 6, 6, 0.82);
-  backdrop-filter: blur(16px);
+    radial-gradient(circle at top, rgba(181, 154, 93, 0.18), transparent 30%),
+    radial-gradient(circle at right, rgba(181, 154, 93, 0.08), transparent 24%),
+    rgba(7, 6, 6, 0.84);
+  backdrop-filter: blur(18px);
   z-index: 5000;
   display: flex;
   align-items: center;
@@ -25,16 +26,17 @@
   width: min(1180px, 100%);
   max-height: min(92vh, 1100px);
   background:
-    linear-gradient(135deg, rgba(181, 154, 93, 0.1), transparent 30%),
+    linear-gradient(135deg, rgba(181, 154, 93, 0.12), transparent 30%),
     linear-gradient(180deg, rgba(23, 19, 16, 0.98), rgba(10, 9, 8, 0.98));
-  border: 1px solid rgba(181, 154, 93, 0.24);
-  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.72);
+  border: 1px solid rgba(181, 154, 93, 0.26);
+  box-shadow: 0 44px 110px rgba(0, 0, 0, 0.74);
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
   transform: translateY(24px) scale(0.985);
   transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 28px;
 }
 
 .modal::before {
@@ -145,6 +147,7 @@
   height: 42px;
   border: 1px solid rgba(181, 154, 93, 0.18);
   background: rgba(255, 255, 255, 0.02);
+  border-radius: 14px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -669,13 +672,14 @@
 .modalFooter {
   position: relative;
   z-index: 1;
-  padding: 20px 32px 24px;
-  border-top: 1px solid rgba(181, 154, 93, 0.14);
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.3));
+  padding: 22px 32px 24px;
+  border-top: 1px solid rgba(181, 154, 93, 0.12);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.34));
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 18px;
+  backdrop-filter: blur(14px);
 }
 
 .footerStatus {
@@ -705,13 +709,14 @@
 .discardBtn {
   min-height: 42px;
   padding: 0 14px;
-  border: 1px solid rgba(181, 154, 93, 0.14);
+  border: 1px solid rgba(181, 154, 93, 0.16);
   background: rgba(255, 255, 255, 0.02);
   color: rgba(214, 194, 158, 0.72);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.74rem;
   cursor: pointer;
+  border-radius: 14px;
   transition: border-color 0.16s ease, color 0.16s ease, background 0.16s ease, transform 0.16s ease;
 }
 
@@ -738,6 +743,7 @@
   letter-spacing: 0.08em;
   font-size: 0.82rem;
   cursor: pointer;
+  border-radius: 14px;
   transition: transform 0.16s ease, filter 0.16s ease, opacity 0.16s ease, box-shadow 0.16s ease;
 }
 
