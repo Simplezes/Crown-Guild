@@ -77,7 +77,7 @@ export default function Nav() {
         </li>
         <li>
           <Link href="/registry" className="nav-link" onClick={handleNavClick}>
-            Global List
+            Crowns
           </Link>
         </li>
         <li>

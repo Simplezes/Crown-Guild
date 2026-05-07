@@ -25,33 +25,42 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
+  background:
+    radial-gradient(circle at top, rgba(181, 154, 93, 0.18), transparent 28%),
+    linear-gradient(180deg, rgba(6, 5, 5, 0.74), rgba(6, 5, 5, 0.9));
+  backdrop-filter: blur(14px);
 }
 
 .modal {
-  background: var(--mh-black);
-  border: 1px solid var(--mh-gold);
+  background:
+    linear-gradient(145deg, rgba(181, 154, 93, 0.08), transparent 34%),
+    linear-gradient(180deg, rgba(18, 15, 13, 0.98), rgba(10, 9, 8, 0.99));
+  border: 1px solid rgba(181, 154, 93, 0.28);
   width: 100%;
   max-width: 500px;
   position: relative;
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 34px 90px rgba(0, 0, 0, 0.72);
+  border-radius: 24px;
+  overflow: hidden;
 }
 
 .modal::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 3px;
-  background: var(--mh-red);
+  inset: 0;
+  background:
+    radial-gradient(circle at top right, rgba(181, 154, 93, 0.14), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 18%);
+  pointer-events: none;
 }
 
 .header {
   padding: 24px;
-  border-bottom: 1px solid var(--mh-border);
+  border-bottom: 1px solid rgba(181, 154, 93, 0.12);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent);
 }
 
 .titleGroup {
@@ -61,8 +70,11 @@
 }
 
 .closeBtn {
-  background: none;
-  border: none;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(181, 154, 93, 0.14);
+  border-radius: 12px;
   color: var(--mh-tan-dark);
   font-size: 2rem;
   cursor: pointer;
@@ -247,20 +259,25 @@
 
 .footer {
   padding: 24px;
-  border-top: 1px solid var(--mh-border);
+  border-top: 1px solid rgba(181, 154, 93, 0.12);
   display: flex;
   justify-content: flex-end;
   gap: 16px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.24));
+  backdrop-filter: blur(12px);
 }
 
 .cancelBtn {
-  background: none;
-  border: none;
+  min-height: 42px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(181, 154, 93, 0.14);
+  border-radius: 14px;
   color: var(--mh-tan-dark);
   font-family: 'Marcellus', serif;
   text-transform: uppercase;
   font-size: 0.8rem;
   cursor: pointer;
+  padding: 0 16px;
 }
 
 .cancelBtn:hover {
