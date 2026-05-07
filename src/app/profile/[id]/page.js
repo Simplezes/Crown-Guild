@@ -11,6 +11,7 @@ import DiscordShare from "@/components/ui/DiscordShare";
 import { getAllMonsters } from "@/lib/monsters";
 import CompletionTracker from "@/components/profile/CompletionTracker";
 import MasteryInfo from "@/components/profile/MasteryInfo";
+import CompareWithButton from "@/components/profile/CompareWithButton";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -136,6 +137,7 @@ export default async function Profile({ params }) {
               <div className={styles.noOp}>Standby - No Active Operation</div>
             )}
             <div className={styles.opActions}>
+              <CompareWithButton baseUserId={user.id} baseUsername={user.username} />
               <ProfileSettings user={user} isOwner={isOwner} />
             </div>
           </div>
