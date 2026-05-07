@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import UnifiedQuestModal from "../crowns/UnifiedQuestModal";
 import BeaconCenter from "../beacon/BeaconCenter";
 import styles from "./Nav.module.css";
+import { SOS_FEATURE_ENABLED } from "@/lib/sos";
 
 export default function Nav() {
   const { data: session } = useSession();
@@ -64,7 +65,9 @@ export default function Nav() {
         <Link href="/" className="nav-link" onClick={() => setIsMenuOpen(false)}>Hub</Link>
         <Link href="/registry" className="nav-link" onClick={() => setIsMenuOpen(false)}>Global List</Link>
         <Link href="/investigation" className="nav-link" onClick={() => setIsMenuOpen(false)}>Monsters</Link>
-        <Link href="/missions" className="nav-link" onClick={() => setIsMenuOpen(false)}>Missions</Link>
+        {SOS_FEATURE_ENABLED && (
+          <Link href="/missions" className="nav-link" onClick={() => setIsMenuOpen(false)}>Missions</Link>
+        )}
 
         {session && (
           <button

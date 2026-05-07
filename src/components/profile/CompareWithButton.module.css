@@ -1,6 +1,14 @@
 .container {
   margin-top: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.containerIdentity {
+  margin-top: 18px;
   width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .compareBtn {
@@ -16,8 +24,34 @@
   color: var(--mh-gold) !important;
 }
 
+.compareBtnIdentity {
+  width: 100%;
+  max-width: 260px;
+  gap: 10px;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.16) !important;
+  border-color: rgba(181, 154, 93, 0.35) !important;
+  color: var(--mh-tan) !important;
+  backdrop-filter: blur(2px);
+}
+
+.compareBtnIdentity:hover {
+  border-color: var(--mh-gold) !important;
+  color: var(--mh-gold-bright) !important;
+  background: rgba(0, 0, 0, 0.24) !important;
+  transform: translateY(-1px);
+}
+
 @media (max-width: 768px) {
   .container {
     margin-top: 0;
+  }
+
+  .containerIdentity {
+    margin-top: 14px;
+  }
+
+  .compareBtnIdentity {
+    max-width: none;
   }
 }

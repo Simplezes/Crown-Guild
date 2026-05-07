@@ -6,6 +6,7 @@ import Image from 'next/image';
 import styles from './Missions.module.css';
 import { useNotifications } from '@/app/NotificationProvider';
 import { useToast } from '@/app/UIProvider';
+import { SOS_DISABLED_MESSAGE, SOS_FEATURE_ENABLED } from '@/lib/sos';
 
 export default function MissionsPage() {
   const { data: session } = useSession();
@@ -80,6 +81,11 @@ export default function MissionsPage() {
   };
 
   useEffect(() => {
+    if (!SOS_FEATURE_ENABLED) {
+      setLoading(false);
+      return;
+    }
+
     if (!session?.user?.id) return;
 
     const fetchData = async () => {
@@ -137,6 +143,22 @@ export default function MissionsPage() {
             </div>
             <h1 className="mh-title">Identity Required</h1>
             <p>Please enlist in the Guild to view your classified mission logs.</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (!SOS_FEATURE_ENABLED) {
+    return (
+      <main className={styles.pageWrapper}>
+        <div className="premium-container">
+          <div className={styles.emptyState}>
+            <div className={styles.emptyIcon}>
+              <Image src="/icons/MHWilds-Notes_Asterisk_Icon.png" width={64} height={64} alt="" className="pixel-art" />
+            </div>
+            <h1 className="mh-title">Missions Offline</h1>
+            <p>{SOS_DISABLED_MESSAGE}</p>
           </div>
         </div>
       </main>
