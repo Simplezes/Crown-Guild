@@ -25,7 +25,27 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
     return String(crown.inv_monster_id) !== String(crown.monster_id);
   };
 
+  const hasPrimaryQuestMonster = (crown) => {
+    return Boolean(crown?.inv_monster_image && (crown?.inv_monster_name || crown?.name));
+  };
+
   const buildShareNonce = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+
+  const renderPrimaryQuestGhost = (crown) => {
+    if (!hasPrimaryQuestMonster(crown)) return null;
+
+    return (
+      <div className={styles.primaryQuestGhost} aria-hidden="true">
+        <Image
+          src={`/monsters/${crown.inv_monster_image}`}
+          alt=""
+          fill
+          sizes="220px"
+          className={styles.primaryQuestGhostImage}
+        />
+      </div>
+    );
+  };
 
   useEffect(() => {
     setCrowns(initialCrowns);
@@ -99,53 +119,54 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
     const cardId = crown.id;
     return (
       <div className={styles.crownCard}>
-        {hostDiffers && (
-          <div className={styles.ghostHost}>
-            <Image src={`/monsters/${crown.inv_monster_image}`} alt="" fill sizes="180px" className={styles.ghostImage} />
-          </div>
-        )}
-        <div className={styles.crownCornerRight}>
-          <Image src={crown.type === 'small' ? "/icons/smallcrown.png" : "/icons/largecrown.png"} width={16} height={16} alt={crown.type} className="pixel-art" />
-        </div>
-        <Link href={`/monster/${crown.name}?crownId=${crown.id}&user=${userId}`} className={styles.monsterLink}>
-          <MonsterIcon imageName={crown.image_name} name={crown.name} tempered={crown.tempered} size={64} />
-        </Link>
-        <div className={styles.crownOverlay}>
-          <Link href={`/monster/${crown.name}?crownId=${crown.id}&user=${userId}`} className={styles.nameLink}>
-            <h3>{crown.name}</h3>
-          </Link>
-          <div className={styles.crownDetail}>
+        {renderPrimaryQuestGhost(crown)}
+
+        <div className={styles.cardTop}>
+          <div className={styles.cardBadges}>
             <span className={crown.type === 'small' ? styles.crownChipSmall : styles.crownChipLarge}>
-              {crown.type === 'small' ? 'S' : 'L'} {crown.strength_rating}★
+              <Image src={crown.type === 'small' ? "/icons/smallcrown.png" : "/icons/largecrown.png"} width={10} height={10} alt="" className="pixel-art" />
+              {crown.type === 'small' ? 'Small' : 'Large'}
             </span>
             {!!crown.tempered && <span className={styles.crownChipTempered}>Tempered</span>}
           </div>
-          {investigationLabel && (
-            <div className={styles.crownInvestigation}>{investigationLabel}</div>
-          )}
-        </div>
-        {isOwner && !hideActions && (
-          <>
+          {isOwner && !hideActions && (
             <button
               className={`${styles.actionsTrigger} ${activeCardId === cardId ? styles.actionsTriggerActive : ''}`}
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveCardId(prev => prev === cardId ? null : cardId); }}
               title="Options"
             >⋮</button>
-            <div
-              className={`${styles.cardActions} ${activeCardId === cardId ? styles.cardActionsActive : ''}`}
-              onClick={(e) => { e.stopPropagation(); setActiveCardId(null); }}
-            >
-              <button onClick={(e) => { e.stopPropagation(); const url = `${window.location.origin}/monster/${encodeURIComponent(crown.name)}?crownId=${crown.id}&user=${userId}&share=${buildShareNonce()}`; navigator.clipboard.writeText(url); toast.info("Link copied to clipboard!"); setActiveCardId(null); }} className={styles.actionBtn} title="Share Crown">
-                <Image src="/icons/MHWilds-Link_Party_Icon.png" width={14} height={14} alt="Share" className="pixel-art" />
-              </button>
-              <button onClick={(e) => { e.stopPropagation(); setEditingCrown(crown); setActiveCardId(null); }} className={styles.actionBtn} title="Edit Crown">
-                <Image src="/icons/MHWilds-Settings_Icon.png" width={14} height={14} alt="Edit" className="pixel-art" />
-              </button>
-              <button onClick={(e) => { e.stopPropagation(); handleDelete(crown.id); setActiveCardId(null); }} className={`${styles.actionBtn} ${styles.deleteBtn}`} title="Delete Crown">
-                <Image src="/icons/MHWilds-Notes_X_Icon.png" width={14} height={14} alt="Delete" className="pixel-art" />
-              </button>
-            </div>
-          </>
+          )}
+        </div>
+
+        <Link href={`/monster/${crown.name}?crownId=${crown.id}&user=${userId}`} className={styles.cardMedia}>
+          <MonsterIcon imageName={crown.image_name} name={crown.name} tempered={crown.tempered} size={72} />
+        </Link>
+
+        <div className={styles.cardBody}>
+          <Link href={`/monster/${crown.name}?crownId=${crown.id}&user=${userId}`} className={styles.cardNameLink}>
+            <h3 className={styles.crownName}>{crown.name}</h3>
+          </Link>
+          <div className={styles.crownMeta}>
+            <span className={styles.crownRating}>{crown.strength_rating}★</span>
+            {investigationLabel && <span className={styles.crownInvestigation}>{investigationLabel}</span>}
+          </div>
+        </div>
+
+        {isOwner && !hideActions && (
+          <div
+            className={`${styles.cardActions} ${activeCardId === cardId ? styles.cardActionsActive : ''}`}
+            onClick={(e) => { e.stopPropagation(); setActiveCardId(null); }}
+          >
+            <button onClick={(e) => { e.stopPropagation(); const url = `${window.location.origin}/monster/${encodeURIComponent(crown.name)}?crownId=${crown.id}&user=${userId}&share=${buildShareNonce()}`; navigator.clipboard.writeText(url); toast.info("Link copied to clipboard!"); setActiveCardId(null); }} className={styles.actionBtn} title="Share Crown">
+              <Image src="/icons/MHWilds-Link_Party_Icon.png" width={14} height={14} alt="Share" className="pixel-art" />
+            </button>
+            <button onClick={(e) => { e.stopPropagation(); setEditingCrown(crown); setActiveCardId(null); }} className={styles.actionBtn} title="Edit Crown">
+              <Image src="/icons/MHWilds-Settings_Icon.png" width={14} height={14} alt="Edit" className="pixel-art" />
+            </button>
+            <button onClick={(e) => { e.stopPropagation(); handleDelete(crown.id); setActiveCardId(null); }} className={`${styles.actionBtn} ${styles.deleteBtn}`} title="Delete Crown">
+              <Image src="/icons/MHWilds-Notes_X_Icon.png" width={14} height={14} alt="Delete" className="pixel-art" />
+            </button>
+          </div>
         )}
       </div>
     );
@@ -174,65 +195,59 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
 
     const cardId = first.pair_id || first.investigation_id || first.id;
     return (
-      <div className={`${styles.crownCard} ${styles.crownCardDual}`}>
-        {hostDiffers && (
-          <div className={styles.ghostHost}>
-            <Image src={`/monsters/${first.inv_monster_image}`} alt="" fill sizes="180px" className={styles.ghostImage} />
-          </div>
-        )}
-        <div className={styles.crownCornerLeft}>
-          <Image src="/icons/MHWilds-Link_Party_Icon.png" width={12} height={12} alt="linked" className="pixel-art" />
-        </div>
-        <div className={`${styles.crownCornerRight} ${styles.linkedCrownTypes}`}>
-          {group.map(c => (
-            <Image key={c.id} src={c.type === 'small' ? "/icons/smallcrown.png" : "/icons/largecrown.png"} width={14} height={14} alt={c.type} className="pixel-art" />
-          ))}
-        </div>
-        <Link href={`/monster/${first.name}?crownId=${first.id}&user=${userId}`} className={styles.monsterLink}>
-          <MonsterIcon imageName={first.image_name} name={first.name} tempered={anyTempered} size={64} />
-        </Link>
-        <div className={styles.crownOverlay}>
-          <Link href={`/monster/${first.name}?crownId=${first.id}&user=${userId}`} className={styles.nameLink}>
-            <h3>{first.name}</h3>
-          </Link>
-          <div className={styles.linkedCrownRows}>
+      <div className={styles.crownCard}>
+        {renderPrimaryQuestGhost(first)}
+
+        <div className={styles.cardTop}>
+          <div className={styles.cardBadges}>
+            <Image src="/icons/MHWilds-Link_Party_Icon.png" width={10} height={10} alt="" className="pixel-art" style={{opacity:0.5}} />
             {group.map(c => (
-              <div key={c.id} className={styles.linkedCrownRow}>
-                <div className={styles.crownDetail}>
-                  <span className={c.type === 'small' ? styles.crownChipSmall : styles.crownChipLarge}>
-                    {c.type === 'small' ? 'S' : 'L'} {c.strength_rating}★
-                  </span>
-                  {!!c.tempered && <span className={styles.crownChipTempered}>T</span>}
-                </div>
-              </div>
+              <span key={c.id} className={c.type === 'small' ? styles.crownChipSmall : styles.crownChipLarge}>
+                <Image src={c.type === 'small' ? "/icons/smallcrown.png" : "/icons/largecrown.png"} width={10} height={10} alt="" className="pixel-art" />
+                {c.type === 'small' ? 'S' : 'L'} {c.strength_rating}★
+                {!!c.tempered && <span className={styles.crownChipTempered} style={{marginLeft:3}}>T</span>}
+              </span>
             ))}
           </div>
-          {investigationLabel && (
-            <div className={styles.crownInvestigation}>{investigationLabel}</div>
-          )}
-        </div>
-        {isOwner && (
-          <>
+          {isOwner && (
             <button
               className={`${styles.actionsTrigger} ${activeCardId === cardId ? styles.actionsTriggerActive : ''}`}
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveCardId(prev => prev === cardId ? null : cardId); }}
               title="Options"
             >⋮</button>
-            <div
-              className={`${styles.cardActions} ${activeCardId === cardId ? styles.cardActionsActive : ''}`}
-              onClick={(e) => { e.stopPropagation(); setActiveCardId(null); }}
-            >
-              <button onClick={(e) => { e.stopPropagation(); const url = `${window.location.origin}/monster/${encodeURIComponent(first.name)}?crownId=${first.id}&user=${userId}&share=${buildShareNonce()}`; navigator.clipboard.writeText(url); toast.info("Link copied to clipboard!"); setActiveCardId(null); }} className={styles.actionBtn} title="Share Crown">
-                <Image src="/icons/MHWilds-Link_Party_Icon.png" width={14} height={14} alt="Share" className="pixel-art" />
-              </button>
-              <button onClick={(e) => { e.stopPropagation(); setEditingGroup(group); setActiveCardId(null); }} className={styles.actionBtn} title="Edit Linked Crowns">
-                <Image src="/icons/MHWilds-Settings_Icon.png" width={14} height={14} alt="Edit" className="pixel-art" />
-              </button>
-              <button onClick={(e) => { e.stopPropagation(); handleDeleteGroup(group); setActiveCardId(null); }} className={`${styles.actionBtn} ${styles.deleteBtn}`} title="Delete Linked Crowns">
-                <Image src="/icons/MHWilds-Notes_X_Icon.png" width={14} height={14} alt="Delete" className="pixel-art" />
-              </button>
+          )}
+        </div>
+
+        <Link href={`/monster/${first.name}?crownId=${first.id}&user=${userId}`} className={styles.cardMedia}>
+          <MonsterIcon imageName={first.image_name} name={first.name} tempered={anyTempered} size={72} />
+        </Link>
+
+        <div className={styles.cardBody}>
+          <Link href={`/monster/${first.name}?crownId=${first.id}&user=${userId}`} className={styles.cardNameLink}>
+            <h3 className={styles.crownName}>{first.name}</h3>
+          </Link>
+          {investigationLabel && (
+            <div className={styles.crownMeta}>
+              <span className={styles.crownInvestigation}>{investigationLabel}</span>
             </div>
-          </>
+          )}
+        </div>
+
+        {isOwner && (
+          <div
+            className={`${styles.cardActions} ${activeCardId === cardId ? styles.cardActionsActive : ''}`}
+            onClick={(e) => { e.stopPropagation(); setActiveCardId(null); }}
+          >
+            <button onClick={(e) => { e.stopPropagation(); const url = `${window.location.origin}/monster/${encodeURIComponent(first.name)}?crownId=${first.id}&user=${userId}&share=${buildShareNonce()}`; navigator.clipboard.writeText(url); toast.info("Link copied to clipboard!"); setActiveCardId(null); }} className={styles.actionBtn} title="Share Crown">
+              <Image src="/icons/MHWilds-Link_Party_Icon.png" width={14} height={14} alt="Share" className="pixel-art" />
+            </button>
+            <button onClick={(e) => { e.stopPropagation(); setEditingGroup(group); setActiveCardId(null); }} className={styles.actionBtn} title="Edit Linked Crowns">
+              <Image src="/icons/MHWilds-Settings_Icon.png" width={14} height={14} alt="Edit" className="pixel-art" />
+            </button>
+            <button onClick={(e) => { e.stopPropagation(); handleDeleteGroup(group); setActiveCardId(null); }} className={`${styles.actionBtn} ${styles.deleteBtn}`} title="Delete Linked Crowns">
+              <Image src="/icons/MHWilds-Notes_X_Icon.png" width={14} height={14} alt="Delete" className="pixel-art" />
+            </button>
+          </div>
         )}
       </div>
     );
@@ -253,18 +268,24 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
 
     return (
       <div className={`${styles.crownCard} ${styles.crownCardDual} ${isQuad ? styles.crownCardQuad : ""}`}>
-        {hostDiffers && (
-          <div className={styles.ghostHost}>
-            <Image src={`/monsters/${first.inv_monster_image}`} alt="" fill sizes="180px" className={styles.ghostImage} />
+        {renderPrimaryQuestGhost(first, hostDiffers && first.inv_monster_name ? `${titleCase(first.inv_monster_name)} quest` : null)}
+
+        <div className={styles.cardTop}>
+          <div className={styles.cardBadges}>
+            {group.map(c => (
+              <span key={c.id} className={c.type === 'small' ? styles.crownChipSmall : styles.crownChipLarge}>
+                <Image src={c.type === 'small' ? "/icons/smallcrown.png" : "/icons/largecrown.png"} width={10} height={10} alt="" className="pixel-art" />
+                {c.type === 'small' ? 'S' : 'L'} {c.strength_rating}★
+              </span>
+            ))}
           </div>
-        )}
-        <div className={styles.crownCornerLeft}>
-          <Image src="/icons/MHWilds-Link_Party_Icon.png" width={12} height={12} alt="linked" className="pixel-art" />
-        </div>
-        <div className={`${styles.crownCornerRight} ${styles.linkedCrownTypes}`}>
-          {group.map(c => (
-            <Image key={c.id} src={c.type === 'small' ? "/icons/smallcrown.png" : "/icons/largecrown.png"} width={14} height={14} alt={c.type} className="pixel-art" />
-          ))}
+          {isOwner && (
+            <button
+              className={`${styles.actionsTrigger} ${activeCardId === cardId ? styles.actionsTriggerActive : ''}`}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveCardId(prev => prev === cardId ? null : cardId); }}
+              title="Options"
+            >⋮</button>
+          )}
         </div>
 
         <div className={styles.dualSides}>
@@ -274,18 +295,6 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
                 <MonsterIcon imageName={side.image_name} name={side.name} tempered={side.crowns.some(c => c.tempered)} size={isQuad ? 48 : 56} />
                 <div className={styles.dualOverlay}>
                   <span className={styles.dualMonsterName}>{titleCase(side.name)}</span>
-                  <div className={styles.linkedCrownRows}>
-                    {side.crowns.map(c => (
-                      <div key={c.id} className={styles.linkedCrownRow}>
-                        <div className={styles.crownDetail}>
-                          <span className={c.type === 'small' ? styles.crownChipSmall : styles.crownChipLarge}>
-                            {c.type === 'small' ? 'S' : 'L'} {c.strength_rating}★
-                          </span>
-                          {!!c.tempered && <span className={styles.crownChipTempered}>T</span>}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
                 </div>
               </Link>
               {idx < sides.length - 1 && (
@@ -295,17 +304,11 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
           ))}
         </div>
 
-        {questLabel && (
-          <div className={styles.dualQuestLabel}>{questLabel}</div>
-        )}
+          {questLabel && (
+            <div className={styles.cardFooter}>{questLabel}</div>
+          )}
 
-        {isOwner && (
-          <>
-            <button
-              className={`${styles.actionsTrigger} ${activeCardId === cardId ? styles.actionsTriggerActive : ''}`}
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveCardId(prev => prev === cardId ? null : cardId); }}
-              title="Options"
-            >⋮</button>
+          {isOwner && (
             <div
               className={`${styles.cardActions} ${activeCardId === cardId ? styles.cardActionsActive : ''}`}
               onClick={(e) => { e.stopPropagation(); setActiveCardId(null); }}
@@ -320,8 +323,7 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
                 <Image src="/icons/MHWilds-Notes_X_Icon.png" width={14} height={14} alt="Delete" className="pixel-art" />
               </button>
             </div>
-          </>
-        )}
+          )}
       </div>
     );
   };
