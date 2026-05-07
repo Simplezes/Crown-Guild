@@ -6,12 +6,14 @@ const isDev = process.env.NODE_ENV !== "production";
 const webRoot = path.dirname(fileURLToPath(import.meta.url));
 const googleFontsStylesOrigin = "https://fonts.googleapis.com";
 const googleFontsAssetsOrigin = "https://fonts.gstatic.com";
+const grainTextureOrigin = "https://grainy-gradients.vercel.app";
 
 const contentSecurityPolicy = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   `style-src 'self' 'unsafe-inline' ${googleFontsStylesOrigin}`,
-  "img-src 'self' data: blob: https://cdn.discordapp.com https://media.discordapp.net",
+  `style-src-elem 'self' 'unsafe-inline' ${googleFontsStylesOrigin}`,
+  `img-src 'self' data: blob: https://cdn.discordapp.com https://media.discordapp.net ${grainTextureOrigin}`,
   `font-src 'self' data: ${googleFontsAssetsOrigin}`,
   "connect-src 'self' https://discord.com https://api.pusherapp.com https://sockjs.pusher.com wss://*.pusher.com ws: wss:",
   "frame-ancestors 'none'",
