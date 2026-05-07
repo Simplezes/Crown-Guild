@@ -5,7 +5,7 @@ import Image from "next/image";
 import LiveRadarWrapper from "@/components/beacon/LiveRadarWrapper";
 import InfoTrigger from "@/components/ui/InfoTrigger";
 import { getAllMonsters, getWeeklyBounties } from "@/lib/monsters";
-import { QUEST_SYSTEM_ENABLED } from "@/lib/sos";
+import { QUEST_SYSTEM_ENABLED, SOS_FEATURE_ENABLED } from "@/lib/sos";
 
 export const dynamic = "force-dynamic";
 
@@ -109,24 +109,36 @@ export default async function Home() {
   return (
     <main className={styles.main}>
       <div className="premium-container">
-        <div className={styles.hero + " animate-mh"}>
-          <div className={styles.heroContent}>
-            <h1 className="gold-text">Crown Guild</h1>
-            <p className={styles.subtitle}>Monster Hunter Wilds Community</p>
-            <div className={styles.heroActions}>
-              <Link href="/registry" className="mh-button">Open Ledger</Link>
-              <Link href="/investigation" className="mh-button-outline">Browse Monsters</Link>
+        <div className={styles.pageHeader}>
+          <div className={styles.heroShell}>
+            <div className={styles.heroPanel}>
+              <div className={styles.titleGroup}>
+                <h1>Crown Guild</h1>
+                <span className={styles.indicator}>📋 Monster Hunter Wilds Community</span>
+              </div>
+              <p className={styles.description}>
+                The central hub for coordinating crown hunts, tracking legendary catches, and connecting with fellow hunters in the Crown Guild.
+              </p>
+              <div className={styles.heroActions}>
+                <Link href="/registry" className="mh-button">Open Ledger</Link>
+                <Link href="/investigation" className="mh-button-outline">Browse Monsters</Link>
+                <a href="https://discord.gg/mhwilds" target="_blank" rel="noopener noreferrer" className="mh-button-outline">Join Discord</a>
+              </div>
             </div>
-          </div>
-          <div className={styles.heroStats}>
-            <div className={styles.stat}>
-              <span className={styles.statValue}>{stats.hunters}</span>
-              <span className={styles.statLabel}>Enlisted</span>
-            </div>
-            <div className={styles.statDivider}></div>
-            <div className={styles.stat}>
-              <span className={styles.statValue}>{stats.crowns}</span>
-              <span className={styles.statLabel}>Crowns Found</span>
+            <div className={styles.snapshotCard}>
+              <div className={styles.snapshotHeader}>
+                <span>🎯 Guild Stats</span>
+              </div>
+              <div className={styles.snapshotGrid}>
+                <div className={styles.snapshotStat}>
+                  <span>Hunters Enlisted</span>
+                  <strong>{stats.hunters}</strong>
+                </div>
+                <div className={styles.snapshotStat}>
+                  <span>Crowns Registered</span>
+                  <strong>{stats.crowns}</strong>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -239,6 +251,7 @@ export default async function Home() {
           </section>
         </div>
 
+        {SOS_FEATURE_ENABLED && (
         <section className={styles.opsSection + " animate-mh"}>
           <header className={styles.sectionHeader}>
             <div className={styles.liveIndicator}>
@@ -293,6 +306,7 @@ export default async function Home() {
             )}
           </div>
         </section>
+        )}
       </div>
     </main>
   );
