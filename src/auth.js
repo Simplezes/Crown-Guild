@@ -1,7 +1,6 @@
 import NextAuth from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
 import db from "@/lib/db";
-import { emojiservers } from "@/lib/emojiservers";
 import { logServerError } from "@/lib/logger";
 
 const SENSITIVE_TOKEN_FIELDS = [
@@ -45,8 +44,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       try {
         await db.execute({
           sql: `
-            INSERT INTO users (id, username, avatar_url, main_crown_server_id)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO users (id, username, avatar_url)
+            VALUES (?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
               username = excluded.username,
               avatar_url = excluded.avatar_url
@@ -55,7 +54,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             profile.id,
             profile.username || profile.global_name,
             profile.image_url || `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png`,
-            ''
           ]
         });
       } catch (e) {
@@ -72,22 +70,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async session({ session, token }) {
       session.user.id = token.discordId ?? token.sub;
-      session.user.guilds = [];
-
-      try {
-        const res = await db.execute({
-          sql: "SELECT main_crown_server_id FROM users WHERE id = ?",
-          args: [session.user.id],
-        });
-
-        const selectedServer = String(res.rows?.[0]?.main_crown_server_id || "");
-        session.user.mainCrownServerId = selectedServer || null;
-        session.user.canUseEmojiShare = !!selectedServer && !!emojiservers[selectedServer];
-      } catch {
-        session.user.mainCrownServerId = null;
-        session.user.canUseEmojiShare = false;
-      }
-
       return session;
     },
   },

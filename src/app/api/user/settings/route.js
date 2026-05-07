@@ -1,30 +1,14 @@
 import { auth } from "@/auth";
 import db from "@/lib/db";
 import { NextResponse } from "next/server";
-import { emojiservers } from "@/lib/emojiservers";
 import { logServerError } from "@/lib/logger";
-
-let mainCrownColumnChecked = false;
-
-async function ensureMainCrownServerColumn() {
-  if (mainCrownColumnChecked) return;
-
-  try {
-    await db.execute("ALTER TABLE users ADD COLUMN main_crown_server_id TEXT");
-  } catch {
-  }
-
-  mainCrownColumnChecked = true;
-}
 
 async function updateSettings(req) {
   const session = await auth();
   if (!session) return new NextResponse("Unauthorized", { status: 401 });
 
   try {
-    await ensureMainCrownServerColumn();
-
-    const { lobby_id, quest_password, status_message, receive_dms, main_crown_server_id } = await req.json();
+    const { lobby_id, quest_password, status_message, receive_dms } = await req.json();
     const userId = session.user.id;
     let normalizedPassword;
 
@@ -42,24 +26,6 @@ async function updateSettings(req) {
     if (quest_password !== undefined) { updates.push("quest_password = ?"); args.push(normalizedPassword); }
     if (status_message !== undefined) { updates.push("status_message = ?"); args.push(status_message); }
     if (receive_dms !== undefined) { updates.push("receive_dms = ?"); args.push(receive_dms ? 1 : 0); }
-    if (main_crown_server_id !== undefined) {
-      const selected = String(main_crown_server_id || "").trim();
-
-      if (!selected) {
-        updates.push("main_crown_server_id = NULL");
-      } else {
-        const guilds = Array.isArray(session?.user?.guilds) ? session.user.guilds : [];
-        const isMember = guilds.some((guild) => String(guild?.id) === selected);
-        const isAllowed = !!emojiservers[selected];
-
-        if (!isMember || !isAllowed) {
-          return NextResponse.json({ error: "Invalid crown server selection" }, { status: 400 });
-        }
-
-        updates.push("main_crown_server_id = ?");
-        args.push(selected);
-      }
-    }
 
     if (updates.length === 0) return NextResponse.json({ success: true });
 

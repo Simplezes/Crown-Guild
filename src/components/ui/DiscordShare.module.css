@@ -59,6 +59,16 @@
   background: rgba(181, 154, 93, 0.14);
 }
 
+.serverPickerTitle {
+  font-family: 'Marcellus', serif;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--mh-gold);
+  padding: 8px 12px 4px;
+  opacity: 0.7;
+}
+
 @media (max-width: 768px) {
   .menu {
     width: 100%;

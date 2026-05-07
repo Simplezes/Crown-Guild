@@ -6,17 +6,9 @@ import styles from './ProfileSettings.module.css';
 import Image from 'next/image';
 import { useToast, useConfirm } from '@/app/UIProvider';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { signOut, useSession } from 'next-auth/react';
-import { emojiservers } from '@/lib/emojiservers';
+import { signOut } from 'next-auth/react';
 
-function getGuildIconUrl(guild) {
-  if (!guild?.id || !guild?.icon) return null;
-  return `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png?size=64`;
-}
-
-function SettingsContent({ user, isOwner, sessionData }) {
-  const session = sessionData;
-  const { update: updateSession } = useSession();
+function SettingsContent({ user, isOwner }) {
   const toast = useToast();
   const confirm = useConfirm();
   const router = useRouter();
@@ -24,7 +16,6 @@ function SettingsContent({ user, isOwner, sessionData }) {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [validationError, setValidationError] = useState('');
-  const [serverMenuOpen, setServerMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -36,30 +27,12 @@ function SettingsContent({ user, isOwner, sessionData }) {
     }
   }, [searchParams]);
 
-  useEffect(() => {
-    const sessionServerId = String(session?.user?.mainCrownServerId || '');
-    if (!sessionServerId) return;
-
-    setFormData((prev) => {
-      if (prev.main_crown_server_id) return prev;
-      return { ...prev, main_crown_server_id: sessionServerId };
-    });
-  }, [session?.user?.mainCrownServerId]);
-
   const [formData, setFormData] = useState({
     lobby_id: user.lobby_id || '',
     quest_password: user.quest_password || '',
     status_message: user.status_message || '',
     receive_dms: user.receive_dms !== 0,
-    main_crown_server_id: user.main_crown_server_id || ''
   });
-
-  const guilds = Array.isArray(session?.user?.guilds) ? session.user.guilds : [];
-  const emojiGuilds = guilds.filter((guild) => !!emojiservers[String(guild?.id || '')]);
-  const hasGuildContext = emojiGuilds.length > 0;
-  const selectedGuild = emojiGuilds.find((guild) => String(guild.id) === String(formData.main_crown_server_id || '')) || null;
-
-  const selectedLabel = selectedGuild ? selectedGuild.name : 'Text only (no emoji server)';
 
   if (!isOwner) return null;
 
@@ -75,9 +48,6 @@ function SettingsContent({ user, isOwner, sessionData }) {
     setLoading(true);
     try {
       const payload = { ...formData };
-      if (!hasGuildContext) {
-        delete payload.main_crown_server_id;
-      }
 
       const res = await fetch('/api/user/settings', {
         method: 'POST',
@@ -88,7 +58,6 @@ function SettingsContent({ user, isOwner, sessionData }) {
       if (res.ok) {
         toast.success('Settings updated successfully!');
         setIsEditing(false);
-        await updateSession();
         router.refresh();
       } else {
         const data = await res.json().catch(() => null);
@@ -175,63 +144,6 @@ function SettingsContent({ user, isOwner, sessionData }) {
                 placeholder="Share a status note with other hunters..."
                 maxLength={100}
               />
-            </div>
-          </div>
-
-          <div className={styles.field}>
-            <label>Main Crown Server</label>
-            <div className={styles.serverPicker}>
-              <button
-                type="button"
-                className={styles.serverTrigger}
-                onClick={() => setServerMenuOpen((prev) => !prev)}
-              >
-                <span>{selectedLabel}</span>
-                <span className={styles.serverChevron}>{serverMenuOpen ? '▴' : '▾'}</span>
-              </button>
-
-              {serverMenuOpen && (
-                <div className={styles.serverMenu}>
-                  <button
-                    type="button"
-                    className={`${styles.serverOption} ${!formData.main_crown_server_id ? styles.serverOptionActive : ''}`}
-                    onClick={() => {
-                      setFormData((prev) => ({ ...prev, main_crown_server_id: '' }));
-                      setServerMenuOpen(false);
-                    }}
-                  >
-                    <div className={styles.serverMeta}>
-                      <span className={styles.serverName}>Text only (no emoji server)</span>
-                    </div>
-                  </button>
-
-                  {emojiGuilds.map((guild) => {
-                    const iconUrl = getGuildIconUrl(guild);
-                    const active = String(formData.main_crown_server_id || '') === String(guild.id);
-
-                    return (
-                      <button
-                        key={guild.id}
-                        type="button"
-                        className={`${styles.serverOption} ${active ? styles.serverOptionActive : ''}`}
-                        onClick={() => {
-                          setFormData((prev) => ({ ...prev, main_crown_server_id: String(guild.id) }));
-                          setServerMenuOpen(false);
-                        }}
-                      >
-                        {iconUrl ? (
-                          <img src={iconUrl} alt="" className={styles.serverIcon} />
-                        ) : (
-                          <div className={styles.serverIconFallback}>{String(guild.name || '?').charAt(0).toUpperCase()}</div>
-                        )}
-                        <div className={styles.serverMeta}>
-                          <span className={styles.serverName}>{guild.name}</span>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
             </div>
           </div>
 
