@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { useToast, useConfirm } from "@/app/UIProvider";
 
 export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
-  const CROWNS_PER_PAGE = 12;
+  const CROWNS_PER_PAGE = 15;
   const [crowns, setCrowns] = useState(initialCrowns);
   const [page, setPage] = useState(1);
   const [editingCrown, setEditingCrown] = useState(null);
@@ -102,11 +102,6 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
         {hostDiffers && (
           <div className={styles.ghostHost}>
             <Image src={`/monsters/${crown.inv_monster_image}`} alt="" fill sizes="180px" className={styles.ghostImage} />
-          </div>
-        )}
-        {(hasInvestigation || hasFieldSurvey) && (
-          <div className={styles.crownCornerLeft}>
-            <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={12} height={12} alt="" className="pixel-art" />
           </div>
         )}
         <div className={styles.crownCornerRight}>
