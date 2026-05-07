@@ -7,6 +7,8 @@ import RegistrySearch from "@/components/registry/RegistrySearch";
 import { auth } from "@/auth";
 import InfoTrigger from "@/components/ui/InfoTrigger";
 
+export const dynamic = "force-dynamic";
+
 async function getRegistryData() {
   try {
     const monsters = await getAllMonsters(true);
