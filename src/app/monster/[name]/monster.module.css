@@ -31,11 +31,66 @@
   transform: translateX(-4px);
 }
 
+.heroShell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(320px, 0.95fr);
+  gap: 28px;
+  align-items: stretch;
+}
+
+.heroPanel {
+  position: relative;
+  overflow: hidden;
+  padding: 32px;
+  border: 1px solid rgba(181, 154, 93, 0.18);
+  background:
+    linear-gradient(135deg, rgba(181, 154, 93, 0.12), transparent 48%),
+    linear-gradient(180deg, rgba(23, 17, 13, 0.92), rgba(12, 10, 9, 0.86));
+  box-shadow: var(--premium-shadow);
+}
+
+.heroPanel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(181, 154, 93, 0.18), transparent 34%);
+  pointer-events: none;
+}
+
+.heroBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+  position: relative;
+  z-index: 1;
+}
+
+.heroEyebrow,
+.heroType,
+.sectionEyebrow {
+  font-family: 'Marcellus', serif;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.74rem;
+}
+
+.heroEyebrow,
+.sectionEyebrow {
+  color: var(--mh-tan-dark);
+}
+
+.heroType {
+  color: var(--mh-gold-bright);
+}
+
 .hero {
   display: flex;
   align-items: center;
   gap: 32px;
   position: relative;
+  z-index: 1;
 }
 
 .monsterIcon {
@@ -51,28 +106,186 @@
 .titles h1 {
   font-size: 4rem;
   line-height: 0.9;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   font-weight: 400;
 }
 
-.meta {
-  color: var(--mh-gold-bright);
+.heroSummary {
+  max-width: 620px;
+  color: var(--mh-tan);
+  font-size: 1.08rem;
+  line-height: 1.7;
+  opacity: 0.88;
+  margin-bottom: 20px;
+}
+
+.heroChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.heroChip,
+.heroChipAlert {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid var(--mh-border);
   font-family: 'Marcellus', serif;
   text-transform: uppercase;
-  letter-spacing: 0.25em;
-  font-size: 0.95rem;
-  opacity: 0.8;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  background: rgba(12, 10, 9, 0.55);
 }
 
-.infoGrid {
+.heroChip {
+  color: var(--mh-gold-bright);
+}
+
+.heroChipAlert {
+  color: var(--mh-red-bright);
+  border-color: rgba(196, 69, 69, 0.38);
+  background: rgba(139, 46, 46, 0.14);
+}
+
+.overviewCard {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-height: 100%;
+}
+
+.overviewHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--mh-tan-dark);
+  font-family: 'Marcellus', serif;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.74rem;
+}
+
+.overviewGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 60px;
-  margin-top: 48px;
+  gap: 14px;
 }
 
-.records {
+.overviewStat {
+  padding: 18px 16px;
+  border: 1px solid rgba(181, 154, 93, 0.12);
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.overviewLabel {
+  color: var(--mh-tan-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.overviewValue,
+.overviewValueAlert {
+  font-family: 'Marcellus', serif;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.overviewValue {
+  color: var(--mh-gold-bright);
+}
+
+.overviewValueAlert {
+  color: var(--mh-red-bright);
+}
+
+.overviewTabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.overviewTab {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 18px;
+  border: 1px solid var(--mh-border);
+  color: var(--mh-tan);
+  background: rgba(255, 255, 255, 0.02);
+  font-family: 'Marcellus', serif;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.76rem;
+  transition: var(--transition-mh);
+}
+
+.overviewTab:hover {
+  color: var(--mh-gold-bright);
+  border-color: var(--mh-gold);
+  background: rgba(181, 154, 93, 0.08);
+}
+
+.overviewTabActive {
+  border-color: var(--mh-gold);
+  color: #0c0a09;
+  background: linear-gradient(135deg, var(--mh-gold), var(--mh-gold-bright));
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(320px, 0.95fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.recordsColumn,
+.sidebarColumn {
   min-width: 0;
+}
+
+.recordShell {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.recordIntro {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(181, 154, 93, 0.16);
+}
+
+.recordSummary {
+  max-width: 420px;
+  color: var(--mh-tan-dark);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.recordSections {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.sidebarColumn {
+  position: sticky;
+  top: 104px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .tacticalCard {
@@ -97,12 +310,12 @@
 .tacticalHeader {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   margin-bottom: 24px;
 }
 
 .description {
-  font-size: 0.95rem;
+  font-size: 1rem;
   line-height: 1.7;
   color: var(--mh-tan);
   margin-bottom: 32px;
@@ -111,41 +324,7 @@
 
 .attributes {
   display: grid;
-  gap: 24px;
-}
-
-.tabs {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 24px;
-}
-
-.tab {
-  flex: 1;
-  text-align: center;
-  background: #1a1512;
-  border: 1px solid #4a3c35;
-  color: #d4c2a8;
-  padding: 12px 24px;
-  text-decoration: none;
-  font-family: 'Marcellus', serif;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  transition: all 0.2s ease;
-  letter-spacing: 0.1em;
-}
-
-.tab:hover {
-  border-color: var(--mh-gold);
-  color: #fff;
-  background: #251e1a;
-}
-
-.tabActive {
-  background: var(--mh-gold);
-  border-color: #f1e4c1;
-  color: #000;
-  font-weight: bold;
+  gap: 22px;
 }
 
 .wishlistUser {
@@ -156,7 +335,6 @@
   border: 1px solid var(--mh-border);
   padding: 16px 24px;
   text-decoration: none;
-  margin-bottom: 12px;
   transition: all 0.2s ease;
 }
 
@@ -202,6 +380,7 @@
   color: var(--mh-tan-dark);
   margin-bottom: 4px;
   letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .needsIcons {
@@ -230,8 +409,8 @@
 .tag,
 .tagGold,
 .tagRed {
-  padding: 4px 12px;
-  font-size: 0.75rem;
+  padding: 7px 12px;
+  font-size: 0.76rem;
   font-weight: 600;
   text-transform: uppercase;
   border: 1px solid var(--mh-border);
@@ -256,13 +435,44 @@
   background: rgba(0, 0, 0, 0.3);
 }
 
+.tagFallback {
+  color: var(--mh-tan-dark);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.sectionTitleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
 .sectionTitle {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 18px;
   border-bottom: 1px solid var(--mh-border);
   padding-bottom: 12px;
+}
+
+.sectionIcons {
+  display: flex;
+  align-items: center;
+}
+
+.overlapIcon {
+  margin-left: -8px;
+}
+
+.sectionMeta {
+  display: inline-block;
+  margin-top: 4px;
+  color: var(--mh-tan-dark);
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
 }
 
 .hunterList {
@@ -319,12 +529,12 @@
 
 .hunterItem {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: space-between;
-  padding: 10px 14px;
+  padding: 12px 14px;
   background: rgba(18, 13, 10, 0.5);
   border: 1px solid var(--mh-border);
-  gap: 10px;
+  gap: 12px;
   transition: var(--transition-mh);
 }
 
@@ -360,16 +570,21 @@
 
 .hunterMain {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 14px;
   flex: 1;
   min-width: 0;
   text-decoration: none;
 }
 
+.avatarWrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
 .avatar {
-  width: 42px;
-  height: 42px;
+  width: 46px;
+  height: 46px;
   border: 1px solid var(--mh-border);
   background: #000;
   flex-shrink: 0;
@@ -386,7 +601,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 
 .hunterTop {
@@ -414,8 +629,20 @@
 .crownBadges {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
+  flex-wrap: wrap;
   flex-shrink: 0;
+}
+
+.typeChip {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--mh-tan-dark);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--mh-border);
+  padding: 2px 7px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .ratingChip {
@@ -444,7 +671,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 2px 8px;
+  padding: 4px 9px;
   background: rgba(181, 154, 93, 0.06);
   border-left: 2px solid rgba(181, 154, 93, 0.35);
 }
@@ -459,14 +686,24 @@
   text-overflow: ellipsis;
 }
 
-.questRow {
+.hunterMetaRow {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 6px;
 }
 
+.questPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border: 1px solid var(--mh-border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
 .questLabel {
-  font-size: 0.7rem;
+  font-size: 0.66rem;
   color: var(--mh-tan-dark);
   text-transform: uppercase;
   letter-spacing: 0.07em;
@@ -478,7 +715,18 @@
   color: var(--mh-tan-dark);
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--mh-border);
-  padding: 1px 5px;
+  padding: 2px 6px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.hostPill {
+  font-size: 0.62rem;
+  color: var(--mh-tan-dark);
+  background: rgba(181, 154, 93, 0.07);
+  border: 1px solid rgba(181, 154, 93, 0.2);
+  padding: 2px 7px;
+  text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
@@ -486,6 +734,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
+  padding-top: 2px;
 }
 
 .ratingText {
@@ -519,6 +768,55 @@
   opacity: 0.75;
 }
 
+.hunterAction {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 6px;
+}
+
+.metaPanel {
+  padding: 24px;
+}
+
+.metaPanelHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.metaRows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.metaRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid rgba(181, 154, 93, 0.12);
+  background: rgba(255, 255, 255, 0.02);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.74rem;
+}
+
+.metaRow strong {
+  font-family: 'Marcellus', serif;
+  color: var(--mh-gold-bright);
+  font-size: 1.2rem;
+}
+
+.metaNote {
+  color: var(--mh-tan-dark);
+  line-height: 1.7;
+  font-size: 0.96rem;
+}
+
 .empty {
   color: var(--mh-tan-dark);
   font-style: italic;
@@ -526,18 +824,17 @@
   text-align: center;
   border: 1px dashed var(--mh-border);
   opacity: 0.5;
-  z-index: -50;
 }
 
 @media (max-width: 1200px) {
-  .infoGrid {
+  .heroShell,
+  .contentGrid {
     grid-template-columns: 1fr;
-    gap: 48px;
+    gap: 24px;
   }
 
-  .tacticalCard,
-  .records {
-    width: 100%;
+  .sidebarColumn {
+    position: static;
   }
 }
 
@@ -552,9 +849,23 @@
     text-align: center;
   }
 
+  .heroPanel,
+  .overviewCard,
+  .metaPanel,
+  .tacticalCard {
+    padding: 22px;
+  }
+
   .backBtn {
     margin: 0 auto 24px;
     justify-content: center;
+  }
+
+  .heroBanner,
+  .recordIntro {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
   }
 
   .hero {
@@ -574,17 +885,19 @@
     font-size: 2.8rem;
   }
 
-  .meta {
-    font-size: 0.9rem;
+  .heroSummary {
+    font-size: 1rem;
   }
 
-  .infoGrid {
-    margin-top: 32px;
-    gap: 32px;
+  .heroChips,
+  .overviewTabs,
+  .overviewGrid {
+    width: 100%;
   }
 
-  .tacticalCard {
-    padding: 24px;
+  .overviewGrid,
+  .overviewTabs {
+    grid-template-columns: 1fr;
   }
 
   .tacticalHeader,
@@ -597,7 +910,9 @@
 
   .description,
   .attributes,
-  .attrGroup {
+  .attrGroup,
+  .recordSummary,
+  .metaNote {
     text-align: center;
   }
 
@@ -605,19 +920,13 @@
     justify-content: center;
   }
 
-  .tabs {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-
-  .tab {
-    width: 100%;
-  }
-
+  .sectionTitleRow,
   .wishlistUser {
     flex-direction: column;
     align-items: center;
+  }
+
+  .wishlistUser {
     justify-content: center;
     gap: 14px;
     padding: 18px;
@@ -643,11 +952,6 @@
     gap: 12px;
   }
 
-  .pageBtn {
-    width: 36px;
-    height: 36px;
-  }
-
   .hunterItem {
     padding: 12px;
     flex-direction: column;
@@ -666,7 +970,7 @@
   .hunterDetail,
   .hunterTop,
   .statusBubble,
-  .questRow,
+  .hunterMetaRow,
   .linkedRow,
   .hostLine,
   .crownBadges {
@@ -692,6 +996,7 @@
   }
 
   .sectionTitle h2,
+  .sectionTitle h3,
   .tacticalHeader h3 {
     margin: 0;
   }
@@ -706,12 +1011,10 @@
     font-size: 2.2rem;
   }
 
-  .meta {
-    font-size: 0.8rem;
-    letter-spacing: 0.18em;
-  }
-
+  .heroPanel,
+  .overviewCard,
   .tacticalCard,
+  .metaPanel,
   .wishlistUser,
   .hunterItem,
   .empty {
@@ -722,7 +1025,6 @@
   .tag,
   .tagGold,
   .tagRed,
-  .tab,
   .pageInfo,
   .pageBtn,
   .questLabel,
@@ -731,7 +1033,12 @@
   .hostLine,
   .ratingChip,
   .temperedChip,
-  .usesChip {
+  .usesChip,
+  .typeChip,
+  .hostPill,
+  .overviewTab,
+  .heroChip,
+  .heroChipAlert {
     font-size: 0.72rem;
   }
 }
