@@ -171,12 +171,26 @@ export default function UnifiedQuestModal({ isOpen, onClose, initialGroup, onUpd
 
   const monsterOptions = monsters.map(m => ({ label: m.name, value: m.id }));
   const questOptions = QUEST_TYPES.map(q => ({ label: q.label, value: q.value }));
+  const modalTitle = initialGroup ? "Edit Hunt Record" : "Create Hunt Record";
+  const modalSubtitle = initialGroup
+    ? "Adjust linked crowns, quest context, and strength details for an existing record set."
+    : "Log a new crown sighting with its quest context, target monster, and strength details.";
 
   const modalContent = (
     <div className={`${styles.overlay} ${isOpen ? styles.overlayOpen : ""}`} onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className={styles.modal}>
         <header className={styles.modalHeader}>
-          <h2 className="mh-title">{initialGroup ? "Edit Hunt Record" : "New Hunt Record"}</h2>
+          <div className={styles.headerCopy}>
+            <span className={styles.headerEyebrow}>Crown Ledger</span>
+            <h2 className="mh-title">{modalTitle}</h2>
+            <p className={styles.headerSubtitle}>{modalSubtitle}</p>
+          </div>
+          <div className={styles.headerMeta}>
+            <span className={styles.headerBadge}>{entries.length} {entries.length === 1 ? "entry" : "entries"}</span>
+            {questData.quest === "Investigation Quests" && (
+              <span className={styles.headerBadge}>{questData.remaining_uses} uses left</span>
+            )}
+          </div>
           <button className={styles.closeBtn} onClick={onClose}>
             <Image src="/icons/MHWilds-Notes_X_Icon.png" width={24} height={24} alt="Close" className="pixel-art" />
           </button>
@@ -256,7 +270,21 @@ export default function UnifiedQuestModal({ isOpen, onClose, initialGroup, onUpd
             )}
           </section>
 
-          <div className={styles.entriesGrid}>
+          <section className={styles.entriesSection}>
+            <div className={styles.entriesHeader}>
+              <div>
+                <span className={styles.entriesEyebrow}>Crown Targets</span>
+                <h3 className={styles.entriesTitle}>Specimen Records</h3>
+              </div>
+              {entries.length < 4 && (
+                <button className={styles.addEntryButton} onClick={addEntry}>
+                  <Image src="/icons/MHWilds-Link_Party_Icon.png" width={16} height={16} alt="" className="pixel-art" />
+                  Add Another Monster
+                </button>
+              )}
+            </div>
+
+            <div className={styles.entriesGrid}>
             {entries.map((entry, index) => {
               const monster = monsters.find(m => m.id === parseInt(entry.monster_id));
               return (
@@ -341,15 +369,16 @@ export default function UnifiedQuestModal({ isOpen, onClose, initialGroup, onUpd
                 </button>
               </div>
             )}
-          </div>
+            </div>
+          </section>
         </div>
 
         <footer className={styles.modalFooter}>
           <div className={styles.footerStatus}>
             {isBeingHosted && (
-              <div style={{ color: '#ffaa00', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div className={styles.hostingWarning}>
                 <Image src="/icons/MHWilds-Notes_X_Icon.png" width={14} height={14} alt="" className="pixel-art" />
-                Currently Hosting
+                This crown cannot be edited while you are currently hosting it.
               </div>
             )}
           </div>
