@@ -103,16 +103,36 @@ export default async function ComparePage({ searchParams }) {
   return (
     <main className={styles.main}>
       <div className="premium-container">
-        <header className={`${styles.pageHeader} animate-mh`}>
-          <div className={styles.indicator}>
-            <Image src="/icons/MHWilds-Item_Pouch_Icon.png" width={18} height={18} alt="" className="pixel-art" />
-            <span>Wishlist Tools</span>
+        <div className={styles.pageHeader}>
+          <div className={styles.heroShell}>
+            <div className={styles.heroPanel}>
+              <div className={styles.titleGroup}>
+                <h1>Compare Wishlists</h1>
+                <span className={styles.indicator}>📊 Wishlist Tools</span>
+              </div>
+              <p className={styles.description}>
+                Find which crowns two hunters share, and where their goals diverge.
+              </p>
+            </div>
+            {data && (
+              <div className={styles.snapshotCard}>
+                <div className={styles.snapshotHeader}>
+                  <span>📈 Match Summary</span>
+                </div>
+                <div className={styles.snapshotGrid}>
+                  <div className={styles.snapshotStat}>
+                    <span>Shared Targets</span>
+                    <strong>{overlapCount}</strong>
+                  </div>
+                  <div className={styles.snapshotStat}>
+                    <span>Match Rate</span>
+                    <strong>{overlapRate}%</strong>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-          <h1 className="gold-text">Compare Wishlists</h1>
-          <p className={styles.subtitle}>
-            Find which crowns two hunters share, and where their goals diverge.
-          </p>
-        </header>
+        </div>
 
         <section className={styles.controlDock}>
           <div className={styles.controlTitle}>Hunter Pairing Console</div>
