@@ -53,7 +53,6 @@ export default function Nav() {
           />
         </span>
         <span className={styles.logoText}>
-          <span className={styles.logoEyebrow}>Hunter Ledger</span>
           <span className={styles.logoTitle}>Crown Guild</span>
         </span>
       </Link>

@@ -110,15 +110,6 @@
   font-weight: 400;
 }
 
-.heroSummary {
-  max-width: 620px;
-  color: var(--mh-tan);
-  font-size: 1.08rem;
-  line-height: 1.7;
-  opacity: 0.88;
-  margin-bottom: 20px;
-}
-
 .heroChips {
   display: flex;
   flex-wrap: wrap;
@@ -210,6 +201,27 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+}
+
+.wishlistQuickAction {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(181, 154, 93, 0.12);
+}
+
+.wishlistQuickLabel {
+  color: var(--mh-tan-dark);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-family: 'Marcellus', serif;
+}
+
+.wishlistQuickToggle {
+  flex-shrink: 0;
 }
 
 .overviewTab {
@@ -528,33 +540,52 @@
 }
 
 .hunterItem {
-  display: flex;
-  align-items: stretch;
-  justify-content: space-between;
-  padding: 12px 14px;
-  background: rgba(18, 13, 10, 0.5);
-  border: 1px solid var(--mh-border);
-  gap: 12px;
-  transition: var(--transition-mh);
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+  background:
+    linear-gradient(120deg, rgba(181, 154, 93, 0.13), transparent 40%),
+    linear-gradient(180deg, rgba(18, 13, 10, 0.96), rgba(9, 8, 7, 0.96));
+  border: 1px solid rgba(181, 154, 93, 0.24);
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.26);
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+  overflow: visible;
+  padding: 12px;
+}
+
+.hunterItem::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(181, 154, 93, 0.6), transparent);
+  pointer-events: none;
 }
 
 .hunterItem:hover {
-  background: rgba(181, 154, 93, 0.05);
-  border-color: var(--mh-gold);
+  transform: translateY(-2px);
+  border-color: rgba(181, 154, 93, 0.54);
+  box-shadow: 0 22px 42px rgba(0, 0, 0, 0.34);
 }
 
 .highlighted {
   border-color: var(--mh-gold) !important;
-  background: rgba(181, 154, 93, 0.12) !important;
-  box-shadow: 0 0 20px rgba(181, 154, 93, 0.3);
-  transform: scale(1.02);
+  background:
+    linear-gradient(120deg, rgba(181, 154, 93, 0.26), transparent 34%),
+    linear-gradient(180deg, rgba(28, 20, 15, 0.98), rgba(13, 10, 8, 0.98)) !important;
+  box-shadow: 0 0 0 1px rgba(181, 154, 93, 0.36), 0 0 24px rgba(181, 154, 93, 0.34);
+  transform: translateY(-1px);
   z-index: 5;
 }
 
 .highlighted::after {
   content: 'FEATURED';
   position: absolute;
-  top: -10px;
+  top: 0;
   right: 20px;
   background: var(--mh-gold);
   color: #000;
@@ -562,6 +593,8 @@
   font-weight: 800;
   padding: 2px 8px;
   font-family: 'Marcellus', serif;
+  transform: translateY(-50%);
+  z-index: 6;
 }
 
 .hunterItem:focus-within {
@@ -569,202 +602,165 @@
 }
 
 .hunterMain {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  flex: 1;
+  display: block;
+  align-items: center;
+  flex: 1 1 auto;
   min-width: 0;
   text-decoration: none;
+  position: relative;
+  z-index: 1;
+}
+
+.social {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.primaryQuestGhost {
+  position: absolute;
+  inset: 32px 18px 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.primaryQuestGhostImage {
+  object-fit: contain;
+  opacity: 0.2;
+  filter: grayscale(0.5) brightness(0.8) sepia(0.22);
+  transform: scale(0.84);
 }
 
 .avatarWrap {
   position: relative;
   flex-shrink: 0;
+  align-self: flex-start;
 }
 
 .avatar {
-  width: 46px;
-  height: 46px;
-  border: 1px solid var(--mh-border);
+  width: 66px;
+  height: 66px;
+  border: 1px solid rgba(181, 154, 93, 0.34);
   background: #000;
   flex-shrink: 0;
-  border-radius: 6px;
+  border-radius: 4px;
   transition: var(--transition-mh);
 }
 
 .hunterItem:hover .avatar {
   border-color: var(--mh-gold);
+  box-shadow: 0 0 0 2px rgba(181, 154, 93, 0.14);
 }
 
-.hunterDetail {
-  flex: 1;
-  min-width: 0;
+.hunterIdentity {
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
-
-.hunterTop {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  min-width: 0;
 }
 
 .name {
   font-family: 'Marcellus', serif;
-  font-size: 1rem;
-  color: var(--mh-tan);
-  letter-spacing: 0.04em;
+  font-size: 1.18rem;
+  color: var(--mh-gold-bright);
+  letter-spacing: 0.05em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   transition: var(--transition-mh);
+}
+
+.mobileName {
+  display: none;
 }
 
 .hunterItem:hover .name {
   color: var(--mh-gold);
 }
 
-.crownBadges {
+.status {
+  font-size: 0.72rem;
+  color: var(--mh-tan);
+  opacity: 0.88;
+  font-style: italic;
+  line-height: 1.45;
+}
+
+.chipRow {
   display: flex;
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
-  flex-shrink: 0;
 }
 
 .typeChip {
-  font-size: 0.6rem;
+  font-size: 0.62rem;
   font-weight: 700;
-  color: var(--mh-tan-dark);
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--mh-border);
-  padding: 2px 7px;
-  letter-spacing: 0.05em;
+  color: var(--mh-gold-bright);
+  background: rgba(181, 154, 93, 0.12);
+  border: 1px solid rgba(181, 154, 93, 0.3);
+  padding: 3px 8px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .ratingChip {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 700;
   color: var(--mh-gold);
   background: rgba(181, 154, 93, 0.1);
-  border: 1px solid rgba(181, 154, 93, 0.3);
-  padding: 2px 7px;
-  letter-spacing: 0.04em;
+  border: 1px solid rgba(181, 154, 93, 0.34);
+  padding: 3px 8px;
+  letter-spacing: 0.07em;
 }
 
 .temperedChip {
   font-size: 0.6rem;
   font-weight: 700;
-  color: #a335ee;
-  background: rgba(163, 53, 238, 0.1);
-  border: 1px solid rgba(163, 53, 238, 0.4);
-  padding: 1px 6px;
-  letter-spacing: 0.05em;
+  color: #d4b0f5;
+  background: rgba(163, 53, 238, 0.16);
+  border: 1px solid rgba(163, 53, 238, 0.42);
+  padding: 3px 8px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   border-radius: 2px;
 }
 
-.statusBubble {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 9px;
-  background: rgba(181, 154, 93, 0.06);
-  border-left: 2px solid rgba(181, 154, 93, 0.35);
-}
-
-.statusBubble span {
-  font-size: 0.65rem;
-  font-style: italic;
-  color: var(--mh-tan);
-  opacity: 0.75;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.hunterMetaRow {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.questPill {
+.questChip {
+  font-size: 0.62rem;
+  color: var(--mh-tan-dark);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(181, 154, 93, 0.18);
+  min-height: 24px;
+  padding: 3px 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 3px 8px;
-  border: 1px solid var(--mh-border);
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.questLabel {
-  font-size: 0.66rem;
-  color: var(--mh-tan-dark);
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  font-weight: 600;
 }
 
 .usesChip {
-  font-size: 0.6rem;
-  color: var(--mh-tan-dark);
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--mh-border);
-  padding: 2px 6px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.hostPill {
   font-size: 0.62rem;
   color: var(--mh-tan-dark);
-  background: rgba(181, 154, 93, 0.07);
-  border: 1px solid rgba(181, 154, 93, 0.2);
-  padding: 2px 7px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(181, 154, 93, 0.16);
+  min-height: 24px;
+  padding: 3px 8px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.linkedRow {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding-top: 2px;
-}
-
-.ratingText {
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: var(--mh-gold);
-  letter-spacing: 0.03em;
-}
-
-.temperedText {
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: #a335ee;
-  letter-spacing: 0.03em;
-}
-
-.linkedSep {
-  color: var(--mh-border);
-  font-size: 0.65rem;
-  margin: 0 1px;
 }
 
 .hostLine {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.6rem;
+  font-size: 0.62rem;
   color: var(--mh-tan-dark);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.07em;
   opacity: 0.75;
 }
 
@@ -772,7 +768,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-left: 6px;
+  min-width: 94px;
+  border-left: 1px solid rgba(181, 154, 93, 0.14);
+  position: relative;
+  z-index: 1;
 }
 
 .metaPanel {
@@ -885,14 +884,16 @@
     font-size: 2.8rem;
   }
 
-  .heroSummary {
-    font-size: 1rem;
-  }
-
   .heroChips,
   .overviewTabs,
   .overviewGrid {
     width: 100%;
+  }
+
+  .wishlistQuickAction {
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
   }
 
   .overviewGrid,
@@ -953,46 +954,58 @@
   }
 
   .hunterItem {
-    padding: 12px;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
+    grid-template-columns: 1fr;
+    padding: 10px;
   }
 
   .hunterMain {
     width: 100%;
-    flex-direction: column;
-    align-items: center;
+    padding: 0;
     text-align: center;
-    gap: 12px;
   }
 
-  .hunterDetail,
-  .hunterTop,
-  .statusBubble,
-  .hunterMetaRow,
-  .linkedRow,
+  .social {
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .avatarWrap {
+    align-self: center;
+  }
+
+  .hunterIdentity {
+    align-items: center;
+  }
+
   .hostLine,
-  .crownBadges {
+  .chipRow {
     width: 100%;
     justify-content: center;
     text-align: center;
     flex-wrap: wrap;
   }
 
-  .hunterTop {
-    flex-direction: column;
-    gap: 10px;
+  .status {
+    text-align: center;
+  }
+
+  .primaryQuestGhost {
+    inset: 26px 14px 22px;
+  }
+
+  .avatar {
+    width: 58px;
+    height: 58px;
+  }
+
+  .hunterAction {
+    border-left: 0;
+    min-width: 0;
   }
 
   .name {
     white-space: normal;
-  }
-
-  .statusBubble {
-    border-left: 0;
-    border-top: 2px solid rgba(181, 154, 93, 0.35);
-    padding: 8px 12px;
   }
 
   .sectionTitle h2,
@@ -1027,18 +1040,56 @@
   .tagRed,
   .pageInfo,
   .pageBtn,
-  .questLabel,
-  .statusBubble span,
   .needsLabel,
   .hostLine,
   .ratingChip,
   .temperedChip,
   .usesChip,
   .typeChip,
-  .hostPill,
+  .questChip,
   .overviewTab,
   .heroChip,
   .heroChipAlert {
     font-size: 0.72rem;
+  }
+
+  .social {
+    align-items: flex-start;
+  }
+
+  .avatarWrap {
+    align-self: flex-start;
+    margin-right: 110px;
+  }
+
+  .mobileName {
+    display: block;
+    position: absolute;
+    top: 4px;
+    left: calc(100% + 8px);
+    width: max-content;
+    max-width: min(180px, calc(100vw - 132px));
+    font-family: 'Marcellus', serif;
+    font-size: 0.74rem;
+    line-height: 1.2;
+    letter-spacing: 0.04em;
+    color: var(--mh-gold-bright);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
+
+  .hunterIdentity {
+    width: 100%;
+    margin-top: -4px;
+  }
+
+  .name {
+    display: none;
+  }
+
+  .status {
+    font-size: 0.68rem;
   }
 }

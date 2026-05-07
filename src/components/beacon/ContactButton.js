@@ -300,28 +300,35 @@ export default function ContactButton({ hostId, monsterId, monsterName, crownId,
     return null;
   }
 
+  const confirmModal = confirmingDeploy ? createPortal(
+    <div className={styles.confirmBackdrop} onClick={() => setConfirmingDeploy(false)}>
+      <div className={styles.confirmModal} onClick={e => e.stopPropagation()}>
+        <div className={styles.confirmHeader}>Spend an investigation use?</div>
+        <div className={styles.confirmActions}>
+          <button
+            className={`${styles.trigger} ${styles.deployTrigger}`}
+            onClick={() => { setConfirmingDeploy(false); handleDeployCrown(); }}
+            disabled={status === 'loading'}
+          >
+            {status === 'loading' ? 'Working...' : 'Yes'}
+          </button>
+          <button
+            className={styles.trigger}
+            onClick={() => setConfirmingDeploy(false)}
+            disabled={status === 'loading'}
+          >
+            No
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  ) : null;
+
   if (showOwnerDeployButton) {
     return (
-      <div className={styles.wrapper} ref={wrapperRef}>
-        {confirmingDeploy ? (
-          <div className={styles.confirmRow}>
-            <span className={styles.confirmLabel}>Spend a use?</span>
-            <button
-              className={`${styles.trigger} ${styles.deployTrigger}`}
-              onClick={() => { setConfirmingDeploy(false); handleDeployCrown(); }}
-              disabled={status === 'loading'}
-            >
-              {status === 'loading' ? 'Working...' : 'Yes'}
-            </button>
-            <button
-              className={styles.trigger}
-              onClick={() => setConfirmingDeploy(false)}
-              disabled={status === 'loading'}
-            >
-              No
-            </button>
-          </div>
-        ) : (
+      <>
+        <div className={styles.wrapper} ref={wrapperRef}>
           <button
             className={`${styles.trigger} ${styles.deployTrigger}`}
             onClick={() => setConfirmingDeploy(true)}
@@ -331,13 +338,14 @@ export default function ContactButton({ hostId, monsterId, monsterName, crownId,
             <Image src="/icons/MHWilds-Completed_Objective_Icon.png" width={16} height={16} alt="" className="pixel-art" />
             {status === 'deployed' ? 'Deployed!' : 'Deploy Crown'}
           </button>
-        )}
-        {status === 'error' && (
-          <div className={styles.error}>
-            {errorMsg}
-          </div>
-        )}
-      </div>
+          {status === 'error' && (
+            <div className={styles.error}>
+              {errorMsg}
+            </div>
+          )}
+        </div>
+        {confirmModal}
+      </>
     );
   }
 

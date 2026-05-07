@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import styles from "./UnifiedQuestModal.module.css";
 import MonsterIcon from "../ui/MonsterIcon";
@@ -24,9 +24,17 @@ const DEFAULT_ENTRY = {
   strength_rating: 1
 };
 
+const SLOT_ICON_SIZE = 56;
+const SLOT_REEL_MIDDLE_STEPS = 8;
+const SLOT_REEL_DURATION_MS = 1050;
+const SLOT_PRELOAD_TIMEOUT_MS = 260;
+
 export default function UnifiedQuestModal({ isOpen, onClose, initialGroup, onUpdated }) {
   const toast = useToast();
   const [monsters, setMonsters] = useState([]);
+  const [monsterReels, setMonsterReels] = useState({});
+  const reelTimeoutsRef = useRef({});
+  const loadedMonsterImagesRef = useRef(new Set());
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [isBeingHosted, setIsBeingHosted] = useState(false);
@@ -90,6 +98,20 @@ export default function UnifiedQuestModal({ isOpen, onClose, initialGroup, onUpd
     }
   }, [isOpen, initialGroup]);
 
+  useEffect(() => {
+    return () => {
+      Object.values(reelTimeoutsRef.current).forEach(clearTimeout);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) {
+      Object.values(reelTimeoutsRef.current).forEach(clearTimeout);
+      reelTimeoutsRef.current = {};
+      setMonsterReels({});
+    }
+  }, [isOpen]);
+
   const addEntry = () => {
     if (entries.length >= 4) return;
     setEntries([...entries, { ...DEFAULT_ENTRY, monster_id: monsters[0]?.id || "" }]);
@@ -98,6 +120,96 @@ export default function UnifiedQuestModal({ isOpen, onClose, initialGroup, onUpd
   const removeEntry = (index) => {
     if (entries.length <= 1) return;
     setEntries(entries.filter((_, i) => i !== index));
+  };
+
+  const buildSpinSequence = (fromMonsterId, toMonsterId) => {
+    const fromMonster = monsters.find((m) => String(m.id) === String(fromMonsterId));
+    const toMonster = monsters.find((m) => String(m.id) === String(toMonsterId));
+
+    const pool = monsters.filter((m) => String(m.id) !== String(toMonsterId));
+    const randomSteps = [];
+
+    for (let i = 0; i < SLOT_REEL_MIDDLE_STEPS; i += 1) {
+      if (pool.length === 0) break;
+      randomSteps.push(pool[Math.floor(Math.random() * pool.length)]);
+    }
+
+    const start = fromMonster || randomSteps[0] || toMonster;
+    const end = toMonster || start;
+    return [start, ...randomSteps, end].filter(Boolean);
+  };
+
+  const preloadReelImages = async (reelItems) => {
+    if (typeof window === "undefined") return;
+
+    const preloadTasks = reelItems
+      .map((item) => item?.image_name)
+      .filter(Boolean)
+      .filter((name, idx, arr) => arr.indexOf(name) === idx)
+      .filter((name) => !loadedMonsterImagesRef.current.has(name))
+      .map((name) => new Promise((resolve) => {
+        const img = new window.Image();
+        img.src = `/monsters/${name}`;
+        img.onload = () => {
+          loadedMonsterImagesRef.current.add(name);
+          resolve();
+        };
+        img.onerror = resolve;
+      }));
+
+    if (preloadTasks.length === 0) return;
+
+    await Promise.race([
+      Promise.allSettled(preloadTasks),
+      new Promise((resolve) => setTimeout(resolve, SLOT_PRELOAD_TIMEOUT_MS))
+    ]);
+  };
+
+  const clearReel = (entryIndex) => {
+    setMonsterReels((prev) => {
+      if (!prev[entryIndex]) return prev;
+      const next = { ...prev };
+      delete next[entryIndex];
+      return next;
+    });
+  };
+
+  const triggerMonsterSpin = async (entryIndex, fromMonsterId, toMonsterId) => {
+    if (monsters.length === 0) return;
+
+    if (reelTimeoutsRef.current[entryIndex]) {
+      clearTimeout(reelTimeoutsRef.current[entryIndex]);
+    }
+
+    const reelItems = buildSpinSequence(fromMonsterId, toMonsterId);
+
+    setMonsterReels((prev) => ({
+      ...prev,
+      [entryIndex]: {
+        spinToken: (prev[entryIndex]?.spinToken || 0) + 1,
+        reelItems,
+        isSpinning: false
+      }
+    }));
+
+    await preloadReelImages(reelItems);
+
+    setMonsterReels((prev) => {
+      const state = prev[entryIndex];
+      if (!state) return prev;
+      return {
+        ...prev,
+        [entryIndex]: {
+          ...state,
+          isSpinning: true
+        }
+      };
+    });
+
+    reelTimeoutsRef.current[entryIndex] = setTimeout(() => {
+      clearReel(entryIndex);
+      delete reelTimeoutsRef.current[entryIndex];
+    }, SLOT_REEL_DURATION_MS);
   };
 
   const updateEntry = (index, field, value) => {
@@ -287,6 +399,18 @@ export default function UnifiedQuestModal({ isOpen, onClose, initialGroup, onUpd
             <div className={styles.entriesGrid}>
             {entries.map((entry, index) => {
               const monster = monsters.find(m => m.id === parseInt(entry.monster_id));
+              const reelState = monsterReels[index];
+              const reelToken = reelState?.spinToken ?? 0;
+              const isSpinning = !!reelState?.isSpinning;
+              const reelItems = reelState?.reelItems?.length
+                ? reelState.reelItems
+                : [
+                    {
+                      id: monster?.id || entry.monster_id || `fallback-${index}`,
+                      image_name: monster?.image_name || entry.image_name,
+                      name: monster?.name || entry.name
+                    }
+                  ];
               return (
                 <div key={index} className={styles.entryCard}>
                   <div className={styles.entryHeader}>
@@ -300,17 +424,38 @@ export default function UnifiedQuestModal({ isOpen, onClose, initialGroup, onUpd
 
                   <div className={styles.entryContent}>
                     <div className={styles.monsterRow}>
-                      <MonsterIcon
-                        imageName={monster?.image_name || entry.image_name}
-                        name={monster?.name || entry.name}
-                        tempered={entry.tempered}
-                        size={56}
-                      />
+                      <div className={`${styles.monsterSlot} ${reelToken > 0 ? styles.monsterSlotSpin : ""}`}>
+                        <div
+                          key={`monster-reel-${index}-${reelToken}`}
+                          className={`${styles.monsterReel} ${isSpinning ? styles.monsterReelSpin : ""}`}
+                          style={{
+                            '--slot-end': `${-SLOT_ICON_SIZE * Math.max(reelItems.length - 1, 0)}px`,
+                            '--slot-duration': `${SLOT_REEL_DURATION_MS}ms`
+                          }}
+                        >
+                          {reelItems.map((monsterItem, itemIndex) => (
+                            <div key={`${monsterItem.id}-${itemIndex}-${reelToken}`} className={styles.monsterReelItem}>
+                              <MonsterIcon
+                                imageName={monsterItem.image_name}
+                                name={monsterItem.name}
+                                tempered={entry.tempered}
+                                size={56}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                       <div className={styles.monsterSelect}>
                         <CustomSelect
                           options={monsterOptions}
                           value={entry.monster_id}
-                          onChange={val => updateEntry(index, 'monster_id', val)}
+                          onChange={async (val) => {
+                            const changed = String(entry.monster_id || "") !== String(val || "");
+                            if (changed) {
+                              await triggerMonsterSpin(index, entry.monster_id, val);
+                            }
+                            updateEntry(index, 'monster_id', val);
+                          }}
                           placeholder="Select Target..."
                         />
                       </div>
