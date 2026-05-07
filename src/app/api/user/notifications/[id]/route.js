@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import db from "@/lib/db";
 import { auth } from "@/auth";
 import { pusherServer } from "@/lib/pusher";
+import { logServerError } from "@/lib/logger";
 
 export async function POST(request, { params }) {
   try {
@@ -100,7 +101,7 @@ export async function POST(request, { params }) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error accepting beacon:", error);
+    logServerError("Error accepting beacon:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
@@ -122,7 +123,7 @@ export async function DELETE(request, { params }) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error declining beacon:", error);
+    logServerError("Error declining beacon:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

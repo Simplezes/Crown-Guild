@@ -2,6 +2,7 @@ import db from "@/lib/db";
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import { pusherServer } from "@/lib/pusher";
+import { logServerError } from "@/lib/logger";
 
 export async function PATCH(req, { params }) {
   const session = await auth();
@@ -122,7 +123,7 @@ export async function PATCH(req, { params }) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Failed to update crown:", error);
+    logServerError("Failed to update crown:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
@@ -177,7 +178,7 @@ export async function DELETE(req, { params }) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Failed to delete crown:", error);
+    logServerError("Failed to delete crown:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

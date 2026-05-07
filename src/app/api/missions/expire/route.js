@@ -2,6 +2,7 @@ import db from "@/lib/db";
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import { pusherServer } from "@/lib/pusher";
+import { logServerError } from "@/lib/logger";
 
 export async function POST() {
   try {
@@ -25,7 +26,7 @@ export async function POST() {
 
     return NextResponse.json({ success: true });
   } catch (e) {
-    console.error(e);
+    logServerError("Unhandled server error", e);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }

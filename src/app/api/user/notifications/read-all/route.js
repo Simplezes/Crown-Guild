@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import db from "@/lib/db";
 import { auth } from "@/auth";
+import { logServerError } from "@/lib/logger";
 
 export async function POST(request) {
   try {
@@ -23,7 +24,7 @@ export async function POST(request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error marking all as read:", error);
+    logServerError("Error marking all as read:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

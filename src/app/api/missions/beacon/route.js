@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { pusherServer } from "@/lib/pusher";
 import { checkRateLimit } from "@/lib/ratelimit";
 import { SOS_DISABLED_MESSAGE, SOS_FEATURE_ENABLED } from '@/lib/sos';
+import { logServerError } from "@/lib/logger";
 
 export async function POST(request) {
   if (!SOS_FEATURE_ENABLED) {
@@ -73,7 +74,7 @@ export async function POST(request) {
     
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error creating beacon:", error);
+    logServerError("Error creating beacon:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

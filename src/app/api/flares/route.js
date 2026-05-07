@@ -2,6 +2,7 @@ import db from "@/lib/db";
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import { SOS_FEATURE_ENABLED } from '@/lib/sos';
+import { logServerError } from "@/lib/logger";
 
 export async function GET() {
   if (!SOS_FEATURE_ENABLED) {
@@ -39,7 +40,7 @@ export async function GET() {
 
     return NextResponse.json(flares);
   } catch (e) {
-    console.error(e);
+    logServerError("Unhandled server error", e);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import db from "@/lib/db";
 import { auth } from "@/auth";
+import { logServerError } from "@/lib/logger";
 
 export async function POST(request, { params }) {
   try {
@@ -17,7 +18,7 @@ export async function POST(request, { params }) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error marking notification as read:", error);
+    logServerError("Error marking notification as read:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

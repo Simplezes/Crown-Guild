@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import db from "@/lib/db";
 import { NextResponse } from "next/server";
+import { logServerError } from "@/lib/logger";
 
 export async function POST(req) {
   const session = await auth();
@@ -29,7 +30,7 @@ export async function POST(req) {
 
     return NextResponse.json({ success: true });
   } catch (e) {
-    console.error(e);
+    logServerError("Unhandled server error", e);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
@@ -49,7 +50,7 @@ export async function DELETE(req) {
 
     return NextResponse.json({ success: true });
   } catch (e) {
-    console.error(e);
+    logServerError("Unhandled server error", e);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
