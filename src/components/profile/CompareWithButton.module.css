@@ -1,0 +1,23 @@
+.container {
+  margin-top: 12px;
+  width: 100%;
+}
+
+.compareBtn {
+  width: 100%;
+  gap: 12px;
+  background: var(--mh-umber) !important;
+  border-color: var(--mh-border) !important;
+  color: var(--mh-tan-dark) !important;
+}
+
+.compareBtn:hover {
+  border-color: var(--mh-gold) !important;
+  color: var(--mh-gold) !important;
+}
+
+@media (max-width: 768px) {
+  .container {
+    margin-top: 0;
+  }
+}

@@ -1,0 +1,268 @@
+import db from "@/lib/db";
+import styles from "./compare.module.css";
+import Image from "next/image";
+import CompareForm from "./CompareForm";
+import { getProfileData, getRankProgress } from "@/lib/profile";
+
+export const dynamic = "force-dynamic";
+
+function toPlainUser(user, fallback) {
+  if (!user) return fallback || null;
+  return {
+    id: String(user.id || fallback?.id || ""),
+    username: user.username || fallback?.username || "Unknown Hunter",
+    avatar_url: user.avatar_url || null,
+  };
+}
+
+async function getCompareData(a, b) {
+  if (!a || !b) return null;
+  try {
+    const [profileA, profileB] = await Promise.all([getProfileData(a), getProfileData(b)]);
+    if (!profileA || !profileB) return null;
+
+    const userA = profileA.user;
+    const userB = profileB.user;
+
+    const wishlistA = profileA.wishlist || [];
+    const wishlistB = profileB.wishlist || [];
+    const mapA = new Map(wishlistA.map((r) => [r.monster_id, r]));
+    const mapB = new Map(wishlistB.map((r) => [r.monster_id, r]));
+
+    const both = wishlistA.filter((r) => mapB.has(r.monster_id));
+    const onlyA = wishlistA.filter((r) => !mapB.has(r.monster_id));
+    const onlyB = wishlistB.filter((r) => !mapA.has(r.monster_id));
+
+    const ownedA = new Set((profileA.crowns || []).map((c) => c.monster_id));
+    const ownedB = new Set((profileB.crowns || []).map((c) => c.monster_id));
+    const sharedOwnedCount = [...ownedA].filter((id) => ownedB.has(id)).length;
+    const onlyOwnedA = [...ownedA].filter((id) => !ownedB.has(id)).length;
+    const onlyOwnedB = [...ownedB].filter((id) => !ownedA.has(id)).length;
+
+    return {
+      userA,
+      userB,
+      profileA,
+      profileB,
+      both,
+      onlyA,
+      onlyB,
+      sharedOwnedCount,
+      onlyOwnedA,
+      onlyOwnedB,
+    };
+  } catch (e) {
+    console.error("Compare page error", e);
+    return null;
+  }
+}
+
+function CrownIcons({ type }) {
+  return (
+    <span className={styles.crownIcons}>
+      {(type === "small" || type === "both") && (
+        <Image src="/icons/smallcrown.png" width={12} height={12} alt="S" className="pixel-art" />
+      )}
+      {(type === "large" || type === "both") && (
+        <Image src="/icons/largecrown.png" width={12} height={12} alt="L" className="pixel-art" />
+      )}
+    </span>
+  );
+}
+
+function WishlistColumn({ title, items, emptyText }) {
+  return (
+    <div className={styles.column}>
+      <div className={styles.sectionTitle}>
+        {title}
+        <span className={styles.count}>{items.length}</span>
+      </div>
+      {items.length === 0 ? (
+        <p className={styles.emptyMessage}>{emptyText}</p>
+      ) : (
+        <div className={styles.list}>
+          {items.map((item) => (
+            <div key={item.monster_id} className={styles.item}>
+              <Image
+                src={`/monsters/${item.image_name}`}
+                alt={item.monster_name}
+                width={28}
+                height={28}
+                className="pixel-art"
+              />
+              <span className={styles.monsterName}>{item.monster_name}</span>
+              <CrownIcons type={item.type} />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default async function ComparePage({ searchParams }) {
+  const { a, b } = await searchParams;
+  const data = a && b ? await getCompareData(a, b) : null;
+  const initialA = toPlainUser(data?.userA, a ? { id: a, username: "Hunter A" } : null);
+  const initialB = toPlainUser(data?.userB, b ? { id: b, username: "Hunter B" } : null);
+  const overlapCount = data?.both?.length || 0;
+  const onlyACount = data?.onlyA?.length || 0;
+  const onlyBCount = data?.onlyB?.length || 0;
+  const totalTracked = overlapCount + onlyACount + onlyBCount;
+  const overlapRate = totalTracked > 0 ? Math.round((overlapCount / totalTracked) * 100) : 0;
+  const rankA = data ? getRankProgress(Number(data.profileA?.masteryPoints || 0)).currentRank?.title : null;
+  const rankB = data ? getRankProgress(Number(data.profileB?.masteryPoints || 0)).currentRank?.title : null;
+
+  return (
+    <main className={styles.main}>
+      <div className="premium-container">
+        <header className={`${styles.pageHeader} animate-mh`}>
+          <div className={styles.indicator}>
+            <Image src="/icons/MHWilds-Item_Pouch_Icon.png" width={18} height={18} alt="" className="pixel-art" />
+            <span>Wishlist Tools</span>
+          </div>
+          <h1 className="gold-text">Compare Wishlists</h1>
+          <p className={styles.subtitle}>
+            Find which crowns two hunters share, and where their goals diverge.
+          </p>
+        </header>
+
+        <section className={styles.controlDock}>
+          <div className={styles.controlTitle}>Hunter Pairing Console</div>
+          <CompareForm initialA={initialA} initialB={initialB} />
+        </section>
+
+        {data && (
+          <>
+            <section className={styles.summaryBoard}>
+              <div className={styles.metricCard}>
+                <span className={styles.metricLabel}>Shared Targets</span>
+                <span className={styles.metricValue}>{overlapCount}</span>
+              </div>
+              <div className={styles.metricCard}>
+                <span className={styles.metricLabel}>Only {data.userA.username}</span>
+                <span className={styles.metricValue}>{onlyACount}</span>
+              </div>
+              <div className={styles.metricCard}>
+                <span className={styles.metricLabel}>Only {data.userB.username}</span>
+                <span className={styles.metricValue}>{onlyBCount}</span>
+              </div>
+              <div className={styles.metricCard + " " + styles.metricCardEmphasis}>
+                <span className={styles.metricLabel}>Shared Match</span>
+                <span className={styles.metricValue}>{overlapRate}%</span>
+              </div>
+            </section>
+
+            <section className={styles.accountCompareGrid}>
+              <article className={styles.accountPanel}>
+                <header className={styles.accountHeader}>
+                  <img
+                    src={data.userA.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"}
+                    alt=""
+                    className={styles.accountAvatar}
+                  />
+                  <div>
+                    <h3 className={styles.accountName}>{data.userA.username}</h3>
+                    <p className={styles.accountRank}>{rankA || "Fledgling"}</p>
+                  </div>
+                </header>
+                <div className={styles.accountStats}>
+                  <div className={styles.statRow}><span>Total Crowns</span><strong>{data.profileA?.stats?.total || 0}</strong></div>
+                  <div className={styles.statRow}><span>Mastery Points</span><strong>{data.profileA?.masteryPoints || 0}</strong></div>
+                  <div className={styles.statRow}><span>Collection Completion</span><strong>{data.profileA?.completion || 0}%</strong></div>
+                  <div className={styles.statRow}><span>Small Crowns</span><strong>{data.profileA?.stats?.small || 0}</strong></div>
+                  <div className={styles.statRow}><span>Large Crowns</span><strong>{data.profileA?.stats?.large || 0}</strong></div>
+                  <div className={styles.statRow}><span>Tempered Crowns</span><strong>{data.profileA?.stats?.tempered || 0}</strong></div>
+                </div>
+              </article>
+
+              <article className={styles.accountPanel}>
+                <header className={styles.accountHeader}>
+                  <img
+                    src={data.userB.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"}
+                    alt=""
+                    className={styles.accountAvatar}
+                  />
+                  <div>
+                    <h3 className={styles.accountName}>{data.userB.username}</h3>
+                    <p className={styles.accountRank}>{rankB || "Fledgling"}</p>
+                  </div>
+                </header>
+                <div className={styles.accountStats}>
+                  <div className={styles.statRow}><span>Total Crowns</span><strong>{data.profileB?.stats?.total || 0}</strong></div>
+                  <div className={styles.statRow}><span>Mastery Points</span><strong>{data.profileB?.masteryPoints || 0}</strong></div>
+                  <div className={styles.statRow}><span>Collection Completion</span><strong>{data.profileB?.completion || 0}%</strong></div>
+                  <div className={styles.statRow}><span>Small Crowns</span><strong>{data.profileB?.stats?.small || 0}</strong></div>
+                  <div className={styles.statRow}><span>Large Crowns</span><strong>{data.profileB?.stats?.large || 0}</strong></div>
+                  <div className={styles.statRow}><span>Tempered Crowns</span><strong>{data.profileB?.stats?.tempered || 0}</strong></div>
+                </div>
+              </article>
+            </section>
+
+            <section className={styles.summaryBoard}>
+              <div className={styles.metricCard}>
+                <span className={styles.metricLabel}>Shared Crown Species</span>
+                <span className={styles.metricValue}>{data.sharedOwnedCount}</span>
+              </div>
+              <div className={styles.metricCard}>
+                <span className={styles.metricLabel}>Unique Species {data.userA.username}</span>
+                <span className={styles.metricValue}>{data.onlyOwnedA}</span>
+              </div>
+              <div className={styles.metricCard}>
+                <span className={styles.metricLabel}>Unique Species {data.userB.username}</span>
+                <span className={styles.metricValue}>{data.onlyOwnedB}</span>
+              </div>
+              <div className={styles.metricCard + " " + styles.metricCardEmphasis}>
+                <span className={styles.metricLabel}>Combined Species</span>
+                <span className={styles.metricValue}>{data.sharedOwnedCount + data.onlyOwnedA + data.onlyOwnedB}</span>
+              </div>
+            </section>
+
+            <div className={styles.sharedSection}>
+              <div className={styles.sharedTitle}>
+                Shared Hunt Board
+                <span className={styles.count}>{data.both.length}</span>
+              </div>
+              {data.both.length > 0 ? (
+                <div className={styles.list}>
+                  {data.both.map((item) => (
+                    <div key={item.monster_id} className={styles.item}>
+                      <Image
+                        src={`/monsters/${item.image_name}`}
+                        alt={item.monster_name}
+                        width={30}
+                        height={30}
+                        className="pixel-art"
+                      />
+                      <span className={styles.monsterName}>{item.monster_name}</span>
+                      <CrownIcons type={item.type} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className={styles.emptyMessage}>No overlap yet. Try comparing another pair to find matching hunts.</p>
+              )}
+            </div>
+
+            <div className={styles.columns}>
+              <WishlistColumn
+                title={`Only ${data.userA.username}`}
+                items={data.onlyA}
+                emptyText="Nothing exclusive to this hunter."
+              />
+              <WishlistColumn
+                title={`Only ${data.userB.username}`}
+                items={data.onlyB}
+                emptyText="Nothing exclusive to this hunter."
+              />
+            </div>
+          </>
+        )}
+
+        {a && b && !data && (
+          <div className={styles.errorState}>Could not load comparison. Try selecting both hunters again.</div>
+        )}
+      </div>
+    </main>
+  );
+}
