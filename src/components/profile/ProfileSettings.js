@@ -6,7 +6,7 @@ import styles from './ProfileSettings.module.css';
 import Image from 'next/image';
 import { useToast, useConfirm } from '@/app/UIProvider';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import { emojiservers } from '@/lib/emojiservers';
 
 function getGuildIconUrl(guild) {
@@ -16,6 +16,7 @@ function getGuildIconUrl(guild) {
 
 function SettingsContent({ user, isOwner, sessionData }) {
   const session = sessionData;
+  const { update: updateSession } = useSession();
   const toast = useToast();
   const confirm = useConfirm();
   const router = useRouter();
@@ -87,6 +88,7 @@ function SettingsContent({ user, isOwner, sessionData }) {
       if (res.ok) {
         toast.success('Settings updated successfully!');
         setIsEditing(false);
+        await updateSession();
         router.refresh();
       } else {
         const data = await res.json().catch(() => null);
