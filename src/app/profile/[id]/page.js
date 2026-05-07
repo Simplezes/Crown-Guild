@@ -136,7 +136,7 @@ export default async function Profile({ params }) {
               <div className={styles.noOp}>Standby - No Active Operation</div>
             )}
             <div className={styles.opActions}>
-              <ProfileSettings user={user} isOwner={isOwner} sessionData={session} />
+              <ProfileSettings user={user} isOwner={isOwner} />
             </div>
           </div>
 
@@ -183,7 +183,7 @@ export default async function Profile({ params }) {
               <h2 className="mh-title">Crown Collection</h2>
             </div>
             <div className={styles.ledgerMeta}>
-              <DiscordShare id={user.id} username={user.username} crowns={crowns} wishlist={data.wishlist} sessionData={session} />
+              <DiscordShare id={user.id} username={user.username} crowns={crowns} wishlist={data.wishlist} />
             </div>
           </header>
 

@@ -4,16 +4,18 @@ import { useEffect, useRef, useState } from 'react';
 import styles from './DiscordShare.module.css';
 import Image from 'next/image';
 import { buildShareMonstersFromCrowns, formatEmojiGrid } from '@/lib/discordShareFormatter';
+import { emojiservers, emojiServerMeta } from '@/lib/emojiservers';
 
-export default function DiscordShare({ id, username, crowns, wishlist, sessionData }) {
-  const session = sessionData;
+const emojiServerList = Object.keys(emojiservers).map((id) => ({
+  id,
+  name: emojiServerMeta?.[id]?.name || `Server ${id}`,
+}));
+
+export default function DiscordShare({ id, username, crowns, wishlist }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [showServerPicker, setShowServerPicker] = useState(false);
   const [copiedMode, setCopiedMode] = useState('');
   const wrapperRef = useRef(null);
-  const canUseEmojiMode = !!session?.user?.canUseEmojiShare;
-  const selectedServerName = (Array.isArray(session?.user?.guilds)
-    ? session.user.guilds.find((guild) => String(guild?.id) === String(session?.user?.mainCrownServerId || ''))?.name
-    : null) || 'Selected Server';
 
   const buildShareNonce = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
@@ -21,6 +23,7 @@ export default function DiscordShare({ id, username, crowns, wishlist, sessionDa
     const handleClickOutside = (event) => {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
         setIsOpen(false);
+        setShowServerPicker(false);
       }
     };
 
@@ -28,24 +31,25 @@ export default function DiscordShare({ id, username, crowns, wishlist, sessionDa
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const generateShareText = (useEmojis) => {
+  const generateShareText = (useEmojis, emojiServerId) => {
     const shareId = buildShareNonce();
     return formatEmojiGrid({
       username,
       userId: id,
       shareId,
-      emojiServerId: session?.user?.mainCrownServerId,
+      emojiServerId: emojiServerId || null,
       monsters: buildShareMonstersFromCrowns(crowns),
       wishlist: wishlist || [],
       useEmojis,
     });
   };
 
-  const copyShare = (useEmojis) => {
-    const text = generateShareText(useEmojis);
+  const copyShare = (useEmojis, emojiServerId) => {
+    const text = generateShareText(useEmojis, emojiServerId);
     navigator.clipboard.writeText(text).then(() => {
       setCopiedMode(useEmojis ? 'emoji' : 'text');
       setIsOpen(false);
+      setShowServerPicker(false);
       setTimeout(() => setCopiedMode(''), 2000);
     });
   };
@@ -55,11 +59,7 @@ export default function DiscordShare({ id, username, crowns, wishlist, sessionDa
       <button
         className={`mh-button ${styles.shareBtn} ${copiedMode ? styles.copied : ''}`}
         onClick={() => {
-          if (!canUseEmojiMode) {
-            copyShare(false);
-            return;
-          }
-
+          setShowServerPicker(false);
           setIsOpen((prev) => !prev);
         }}
         title="Share for discord"
@@ -68,19 +68,37 @@ export default function DiscordShare({ id, username, crowns, wishlist, sessionDa
         <Image src="/icons/MHWilds-Link_Party_Icon.png" width={18} height={18} alt="" className="pixel-art" />
         <span>
           {copiedMode === 'text' && 'Text Copied!'}
-          {copiedMode === 'emoji' && 'Emoji Share Copied!'}
+          {copiedMode === 'emoji' && 'Compact Copied!'}
           {!copiedMode && 'Share for discord'}
         </span>
       </button>
 
-      {isOpen && canUseEmojiMode && (
+      {isOpen && (
         <div className={styles.menu}>
           <button className={styles.option} onClick={() => copyShare(false)}>
             Text
           </button>
-          <button className={styles.option} onClick={() => copyShare(true)}>
-            Emojis for {selectedServerName}
+          <button className={styles.option} onClick={() => {
+            setIsOpen(false);
+            setShowServerPicker(true);
+          }}>
+            Compact format
           </button>
+        </div>
+      )}
+
+      {showServerPicker && (
+        <div className={styles.menu}>
+          <div className={styles.serverPickerTitle}>Select a server</div>
+          {emojiServerList.map((server) => (
+            <button
+              key={server.id}
+              className={styles.option}
+              onClick={() => copyShare(true, server.id)}
+            >
+              {server.name}
+            </button>
+          ))}
         </div>
       )}
     </div>

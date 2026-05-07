@@ -1,3 +1,7 @@
+export const emojiServerMeta = {
+  '854896452131094559': { name: 'Crown Guild' },
+};
+
 export const emojiservers = {
   '854896452131094559': {
     Ajarakan: '<:Ajarakan:1344853189379362877>',
