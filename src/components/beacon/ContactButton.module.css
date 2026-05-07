@@ -30,6 +30,18 @@
   border-color: var(--mh-gold);
 }
 
+.deployTrigger {
+  background: rgba(230, 126, 34, 0.18);
+  border-color: #E67E22;
+  color: #ffd8b0;
+}
+
+.deployTrigger:hover {
+  background: #E67E22;
+  color: #111;
+  border-color: #E67E22;
+}
+
 .trigger:disabled {
   opacity: 0.6;
   cursor: not-allowed;

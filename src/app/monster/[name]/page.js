@@ -373,6 +373,7 @@ export default async function MonsterDetail({ params, searchParams }) {
                               crown={smallC}
                               linkedCrown={largeC}
                               monsterName={monster.name}
+                              monsterImageName={monster.image_name}
                               isHighlighted={isHl}
                             />
                           );
@@ -396,7 +397,7 @@ export default async function MonsterDetail({ params, searchParams }) {
                     </div>
                     <div className={styles.hunterList}>
                       {largeCrowns.length > 0 ? pagedLarge.items.map((c, i) => (
-                        <HunterItem key={i} crown={c} monsterName={monster.name} isHighlighted={String(c.id) === String(highlightCrownId)} />
+                        <HunterItem key={i} crown={c} monsterName={monster.name} monsterImageName={monster.image_name} isHighlighted={String(c.id) === String(highlightCrownId)} />
                       )) : (
                         <p className={styles.empty}>No large crowns recorded yet.</p>
                       )}
@@ -418,7 +419,7 @@ export default async function MonsterDetail({ params, searchParams }) {
                     </div>
                     <div className={styles.hunterList}>
                       {smallCrowns.length > 0 ? pagedSmall.items.map((c, i) => (
-                        <HunterItem key={i} crown={c} monsterName={monster.name} isHighlighted={String(c.id) === String(highlightCrownId)} />
+                        <HunterItem key={i} crown={c} monsterName={monster.name} monsterImageName={monster.image_name} isHighlighted={String(c.id) === String(highlightCrownId)} />
                       )) : (
                         <p className={styles.empty}>No small crowns recorded yet.</p>
                       )}

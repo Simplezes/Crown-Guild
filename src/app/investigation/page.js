@@ -96,7 +96,6 @@ export default async function FieldGuide() {
                     <div className={styles.demandStat}>
                       <span className={styles.demandLabel}>Active Requests</span>
                       <div className={styles.demandValue}>
-                        <Image src="/icons/MHWilds-Wishlist_Pin_Icon.png" width={10} height={10} alt="" className="pixel-art" />
                         <span>{monster.demand}</span>
                       </div>
                     </div>

@@ -5,10 +5,12 @@ import { createPortal } from 'react-dom';
 import styles from './ContactButton.module.css';
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { SOS_FEATURE_ENABLED } from '@/lib/sos';
 
-export default function ContactButton({ hostId, monsterId, monsterName, crownId, discordId }) {
+export default function ContactButton({ hostId, monsterId, monsterName, crownId, discordId, quest, canDeploy = false }) {
   const { data: session } = useSession();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [dropUp, setDropUp] = useState(false);
   const [status, setStatus] = useState('idle');
@@ -166,6 +168,39 @@ export default function ContactButton({ hostId, monsterId, monsterName, crownId,
     }
   };
 
+  const handleDeployCrown = async () => {
+    setStatus('loading');
+    setErrorMsg('');
+
+    try {
+      const res = await fetch('/api/crowns/deploy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ crownId }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setStatus('deployed');
+        setTimeout(() => {
+          setStatus('idle');
+          setIsOpen(false);
+          router.refresh();
+        }, 1200);
+      } else {
+        setStatus('error');
+        setErrorMsg(data?.error || 'Failed to deploy crown');
+        setTimeout(() => setStatus('idle'), 3000);
+      }
+    } catch {
+      setStatus('error');
+      setErrorMsg('Network error');
+      setTimeout(() => setStatus('idle'), 3000);
+    }
+  };
+
+  const showOwnerDeployButton = isOwnCrown && canDeploy;
+
   const menu = isOpen ? createPortal(
     <div
       ref={popupRef}
@@ -260,8 +295,29 @@ export default function ContactButton({ hostId, monsterId, monsterName, crownId,
     document.body
   ) : null;
 
-  if (!SOS_FEATURE_ENABLED && isOwnCrown) {
+  if (!SOS_FEATURE_ENABLED && isOwnCrown && !showOwnerDeployButton) {
     return null;
+  }
+
+  if (showOwnerDeployButton) {
+    return (
+      <div className={styles.wrapper} ref={wrapperRef}>
+        <button
+          className={`${styles.trigger} ${styles.deployTrigger}`}
+          onClick={handleDeployCrown}
+          disabled={status === 'loading'}
+          title={quest === 'Investigation Quests' ? 'Spend one investigation use and mark as deployed' : 'Deploy crown'}
+        >
+          <Image src="/icons/MHWilds-Completed_Objective_Icon.png" width={16} height={16} alt="" className="pixel-art" />
+          {status === 'loading' ? 'Working...' : (status === 'deployed' ? 'Deployed!' : 'Deploy Crown')}
+        </button>
+        {status === 'error' && (
+          <div className={styles.error}>
+            {errorMsg}
+          </div>
+        )}
+      </div>
+    );
   }
 
   return (
