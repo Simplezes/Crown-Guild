@@ -112,6 +112,10 @@ export default async function Profile({ params }) {
                   <p>"{user.status_message}"</p>
                 </div>
               )}
+
+              <div className={styles.identityActions}>
+                <CompareWithButton baseUserId={user.id} baseUsername={user.username} variant="identity" />
+              </div>
             </div>
           </div>
 
@@ -137,7 +141,6 @@ export default async function Profile({ params }) {
               <div className={styles.noOp}>Standby - No Active Operation</div>
             )}
             <div className={styles.opActions}>
-              <CompareWithButton baseUserId={user.id} baseUsername={user.username} />
               <ProfileSettings user={user} isOwner={isOwner} />
             </div>
           </div>

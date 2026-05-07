@@ -4,6 +4,7 @@ import { Providers } from "./providers";
 import Nav from "@/components/ui/Nav";
 import ToastManager from "@/components/ui/ToastManager";
 import MissionControl from "@/components/missions/MissionControl";
+import { SOS_FEATURE_ENABLED } from "@/lib/sos";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
@@ -31,7 +32,7 @@ export default function RootLayout({ children }) {
         <Providers>
           <Nav />
           <ToastManager />
-          <MissionControl />
+          {SOS_FEATURE_ENABLED && <MissionControl />}
           {children}
         </Providers>
       </body>

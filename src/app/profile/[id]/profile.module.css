@@ -27,7 +27,6 @@
 .tile:hover {
   border-color: var(--mh-gold-dim);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-  transform: translateY(-4px);
 }
 
 .tile::before {
@@ -106,6 +105,12 @@
 .memberId {
   font-size: 0.75rem;
   color: var(--mh-tan-dark);
+}
+
+.identityActions {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .opTile {
