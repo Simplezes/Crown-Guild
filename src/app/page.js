@@ -114,7 +114,7 @@ export default async function Home() {
             <div className={styles.heroPanel}>
               <div className={styles.titleGroup}>
                 <h1>Crown Guild</h1>
-                <span className={styles.indicator}>📋 Monster Hunter Wilds Community</span>
+                <span className={styles.indicator}>Monster Hunter Wilds Community</span>
               </div>
               <p className={styles.description}>
                 The central hub for coordinating crown hunts, tracking legendary catches, and connecting with fellow hunters in the Crown Guild.
@@ -127,7 +127,7 @@ export default async function Home() {
             </div>
             <div className={styles.snapshotCard}>
               <div className={styles.snapshotHeader}>
-                <span>🎯 Guild Stats</span>
+                <span>Guild Stats</span>
               </div>
               <div className={styles.snapshotGrid}>
                 <div className={styles.snapshotStat}>

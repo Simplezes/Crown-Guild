@@ -108,7 +108,7 @@ export default async function ComparePage({ searchParams }) {
             <div className={styles.heroPanel}>
               <div className={styles.titleGroup}>
                 <h1>Compare Wishlists</h1>
-                <span className={styles.indicator}>📊 Wishlist Tools</span>
+                <span className={styles.indicator}>Wishlist Tools</span>
               </div>
               <p className={styles.description}>
                 Find which crowns two hunters share, and where their goals diverge.
@@ -117,7 +117,7 @@ export default async function ComparePage({ searchParams }) {
             {data && (
               <div className={styles.snapshotCard}>
                 <div className={styles.snapshotHeader}>
-                  <span>📈 Match Summary</span>
+                  <span>Match Summary</span>
                 </div>
                 <div className={styles.snapshotGrid}>
                   <div className={styles.snapshotStat}>
