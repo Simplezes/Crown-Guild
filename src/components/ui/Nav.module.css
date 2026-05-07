@@ -12,6 +12,7 @@
   align-items: center;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   background: linear-gradient(to bottom, rgba(12, 10, 9, 0.8), transparent);
+  animation: navEnter 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .scrolled {
@@ -26,26 +27,26 @@
   position: relative;
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 6px 14px 6px 8px;
-  border: 1px solid rgba(181, 154, 93, 0.14);
-  background: linear-gradient(135deg, rgba(181, 154, 93, 0.08), rgba(255, 255, 255, 0.02));
-  backdrop-filter: var(--glass-blur);
+  gap: 10px;
+  padding: 4px 8px 4px 4px;
+  border: 1px solid rgba(181, 154, 93, 0.1);
+  background: rgba(12, 10, 9, 0.5);
   transition: var(--transition-mh);
+  overflow: hidden;
 }
 
 .logo:hover {
   transform: translateY(-1px);
-  border-color: rgba(181, 154, 93, 0.34);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+  border-color: rgba(181, 154, 93, 0.24);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
 }
 
 .logo::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, rgba(181, 154, 93, 0.14), transparent 38%);
-  pointer-events: none;
+  content: none;
+}
+
+.logo::after {
+  content: none;
 }
 
 .logoMark {
@@ -56,13 +57,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(181, 154, 93, 0.28);
-  background: radial-gradient(circle, rgba(181, 154, 93, 0.16), rgba(12, 10, 9, 0.98));
-  box-shadow: inset 0 0 12px rgba(181, 154, 93, 0.08);
+  border: 1px solid rgba(181, 154, 93, 0.22);
+  background: rgba(12, 10, 9, 0.92);
 }
 
 .logoImage {
   filter: drop-shadow(0 0 10px rgba(181, 154, 93, 0.22));
+  animation: logoBreath 2.8s ease-in-out infinite;
 }
 
 .logoText {
@@ -73,20 +74,11 @@
   line-height: 1;
 }
 
-.logoEyebrow {
-  color: var(--mh-tan-dark);
-  font-family: 'Marcellus', serif;
-  font-size: 0.55rem;
-  letter-spacing: 0.26em;
-  text-transform: uppercase;
-  margin-bottom: 4px;
-}
-
 .logoTitle {
-  font-size: 1.28rem;
+  font-size: 1.08rem;
   color: var(--mh-gold);
   font-family: 'Marcellus', serif;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   font-weight: 400;
 }
 
@@ -152,11 +144,13 @@
   top: calc(100% + 10px);
   right: -1px;
   min-width: 180px;
-  background: var(--mh-glass);
-  backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--mh-gold);
+  background:
+    linear-gradient(145deg, rgba(181, 154, 93, 0.08), transparent 34%),
+    linear-gradient(180deg, rgba(23, 19, 16, 0.98), rgba(10, 9, 8, 0.98));
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(181, 154, 93, 0.28);
   z-index: 100;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.58);
   display: flex;
   flex-direction: column;
   animation: dropdownIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
@@ -171,22 +165,29 @@
   padding: 12px 16px;
   color: var(--mh-tan);
   font-family: 'Marcellus', serif;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   text-decoration: none;
   transition: all 0.2s ease;
-  border-bottom: 1px solid var(--mh-border);
+  border-bottom: 1px solid rgba(181, 154, 93, 0.12);
   background: transparent;
-  border-left: 3px solid transparent;
+  border-left: 2px solid transparent;
   border-top: none;
   border-right: none;
   text-align: left;
   cursor: pointer;
+  animation: itemRise 0.22s ease both;
 }
+
+.dropdownItem:nth-child(2) { animation-delay: 0.03s; }
+.dropdownItem:nth-child(3) { animation-delay: 0.06s; }
+.dropdownItem:nth-child(4) { animation-delay: 0.09s; }
 
 .dropdownItem:hover {
   background: rgba(181, 154, 93, 0.1);
   border-left-color: var(--mh-gold);
-  padding-left: 20px;
+  color: var(--mh-gold-bright);
 }
 
 .dropdownSignOut {
@@ -194,8 +195,8 @@
 }
 
 .dropdownSignOut:hover {
-  background: rgba(139, 46, 46, 0.1);
-  border-left-color: var(--mh-red);
+  background: rgba(139, 46, 46, 0.16);
+  border-left-color: var(--mh-red-bright);
 }
 
 .createBtn {
@@ -218,6 +219,10 @@
   background: var(--mh-gold-bright);
   box-shadow: 0 0 15px rgba(181, 154, 93, 0.3);
   transform: translateY(-2px);
+}
+
+.createBtn:active {
+  transform: translateY(0);
 }
 
 .menuToggle {
@@ -249,16 +254,17 @@
   }
 
   .logoText {
-    min-width: 0;
+    display: none;
   }
 
-  .logoTitle {
-    font-size: 1.02rem;
+  .logo {
+    gap: 0;
+    padding: 4px;
   }
 
-  .logoEyebrow {
-    font-size: 0.48rem;
-    letter-spacing: 0.18em;
+  .logoMark {
+    width: 38px;
+    height: 38px;
   }
 
   .navLinks {
@@ -284,6 +290,64 @@
     animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 
+  .navLinks.mobileActive .createBtn,
+  .navLinks.mobileActive .userProfile {
+    animation: itemRise 0.28s ease both;
+  }
+
+
+@keyframes navEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes logoBreath {
+  0%,
+  100% {
+    transform: translateY(0);
+    filter: drop-shadow(0 0 10px rgba(181, 154, 93, 0.22));
+  }
+  50% {
+    transform: translateY(-1px);
+    filter: drop-shadow(0 0 14px rgba(181, 154, 93, 0.28));
+  }
+}
+
+@keyframes itemRise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav,
+  .logoImage,
+  .dropdown,
+  .dropdownItem,
+  .navLinks.mobileActive,
+  .navLinks.mobileActive .createBtn,
+  .navLinks.mobileActive .userProfile {
+    animation: none !important;
+  }
+
+  .nav,
+  .logo,
+  .dropdownItem,
+  .createBtn {
+    transition: none !important;
+  }
+}
   @keyframes slideDown {
     from { transform: translateY(-15px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
@@ -333,23 +397,13 @@
   }
 
   .logo {
-    gap: 8px;
-    padding: 6px 10px 6px 6px;
+    gap: 0;
+    padding: 4px;
   }
 
   .logoMark {
     width: 36px;
     height: 36px;
-  }
-
-  .logoTitle {
-    font-size: 0.9rem;
-    letter-spacing: 0.04em;
-  }
-
-  .logoEyebrow {
-    font-size: 0.42rem;
-    letter-spacing: 0.14em;
   }
 
   .createBtn {

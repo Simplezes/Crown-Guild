@@ -108,9 +108,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.32);
   padding: 16px 20px;
-  border: 1px solid var(--mh-border);
+  border: 1px solid rgba(181, 154, 93, 0.16);
   cursor: pointer;
   transition: var(--transition-mh);
 }
@@ -129,9 +129,10 @@
 .toggleInfo label {
   cursor: pointer;
   font-family: 'Marcellus', serif;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: var(--mh-tan);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .switchWrapper {
@@ -142,8 +143,8 @@
   position: relative;
   width: 56px;
   height: 28px;
-  background: #000;
-  border: 1px solid var(--mh-border);
+  background: rgba(0, 0, 0, 0.34);
+  border: 1px solid rgba(181, 154, 93, 0.16);
   box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.9);
   transition: var(--transition-mh);
 }
@@ -154,8 +155,8 @@
   left: 3px;
   width: 20px;
   height: 20px;
-  background: #333;
-  border: 1px solid #444;
+  background: #efe5cf;
+  border: 1px solid rgba(0, 0, 0, 0.22);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -164,15 +165,15 @@
 }
 
 .toggleInput:checked + .switch {
-  border-color: var(--mh-purple);
-  background: rgba(163, 53, 238, 0.15);
+  border-color: rgba(181, 154, 93, 0.56);
+  background: rgba(181, 154, 93, 0.24);
 }
 
 .toggleInput:checked + .switch .switchHandle {
   transform: translateX(28px);
-  background: var(--mh-purple);
-  border-color: #d195ff;
-  box-shadow: 0 0 12px rgba(163, 53, 238, 0.5);
+  background: #fff7e6;
+  border-color: rgba(181, 154, 93, 0.6);
+  box-shadow: 0 0 12px rgba(181, 154, 93, 0.32);
 }
 
 .actions {

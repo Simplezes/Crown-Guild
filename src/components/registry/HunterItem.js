@@ -1,10 +1,8 @@
 import Link from "next/link";
-import Image from "next/image";
 import ContactButton from "../beacon/ContactButton";
-import { getQuestIcon } from "@/lib/monsters";
 import styles from "@/app/monster/[name]/monster.module.css";
 
-export default function HunterItem({ crown, linkedCrown = null, monsterName, isHighlighted }) {
+export default function HunterItem({ crown, linkedCrown = null, monsterName, monsterImageName, isHighlighted }) {
   const {
     user_id,
     avatar_url,
@@ -27,71 +25,58 @@ export default function HunterItem({ crown, linkedCrown = null, monsterName, isH
     ? inv_monster_name?.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
     : null;
 
-  const smallC = linkedCrown ? (crown.type === 'small' ? crown : linkedCrown) : null;
-  const largeC = linkedCrown ? (crown.type === 'large' ? crown : linkedCrown) : null;
-  const crownTypeLabel = crown.type === 'small' ? 'Small Crown' : 'Large Crown';
+  const smallC = linkedCrown ? (crown.type === 'small' ? crown : linkedCrown) : crown.type === 'small' ? crown : null;
+  const largeC = linkedCrown ? (crown.type === 'large' ? crown : linkedCrown) : crown.type === 'large' ? crown : null;
+  const crownTypeLabel = linkedCrown ? 'Crown Pair' : crown.type === 'small' ? 'Small Crown' : 'Large Crown';
+  const ratingLabel = linkedCrown
+    ? `S ${smallC?.strength_rating ?? '-'}★ • L ${largeC?.strength_rating ?? '-'}★`
+    : `${strength_rating}★`;
+  const hasTempered = linkedCrown
+    ? Boolean(smallC?.tempered || largeC?.tempered)
+    : Boolean(tempered);
+  const showUses = quest === "Investigation Quests" && effectiveUses != null;
+  const noteText = status_message?.trim() || "No note set";
+  const questLabel = quest || "Hunt";
+  const ghostImageName = hasHost && inv_monster_name
+    ? `MHWilds-${inv_monster_name.replace(/\s+/g, '_')}_Icon.png`
+    : null;
 
   return (
-    <div className={`${styles.hunterItem} mh-card ${isHighlighted ? styles.highlighted : ''}`} id={`crown-${crownId}`}>
-      <Link href={`/profile/${user_id}`} className={styles.hunterMain}>
-        <div className={styles.avatarWrap}>
-          <img
-            src={avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"}
-            alt=""
-            className={styles.avatar}
-          />
+    <div className={`${styles.hunterItem} ${isHighlighted ? styles.highlighted : ''}`} id={`crown-${crownId}`}>
+      {ghostImageName && (
+        <div className={styles.primaryQuestGhost}>
+          <img src={`/monsters/${ghostImageName}`} alt="" className={`${styles.primaryQuestGhostImage} pixel-art`} />
         </div>
-        <div className={styles.hunterDetail}>
-          <div className={styles.hunterTop}>
+      )}
+
+      <Link href={`/profile/${user_id}`} className={styles.hunterMain}>
+        <div className={styles.social}>
+          <div className={styles.avatarWrap}>
+            <img
+              src={avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"}
+              alt=""
+              className={styles.avatar}
+            />
+            <span className={styles.mobileName}>{username}</span>
+          </div>
+          <div className={styles.hunterIdentity}>
             <span className={styles.name}>{username}</span>
-            <div className={styles.crownBadges}>
-              {!linkedCrown && (
-                <span className={styles.ratingChip}>
-                  {strength_rating}★
-                </span>
-              )}
+            <div className={styles.status}>"{noteText}"</div>
+
+            <div className={styles.chipRow}>
               <span className={styles.typeChip}>{crownTypeLabel}</span>
-              {!!tempered && !linkedCrown && (
-                <span className={styles.temperedChip}>
-                  Tempered
-                </span>
-              )}
+              <span className={styles.ratingChip}>{ratingLabel}</span>
+              {hasTempered && <span className={styles.temperedChip}>Tempered</span>}
+              <span className={styles.questChip}>{questLabel}</span>
+              {showUses && <span className={styles.usesChip}>{effectiveUses} left</span>}
             </div>
-          </div>
 
-          {status_message && (
-            <div className={styles.statusBubble}>
-              <Image src="/icons/MHWilds-Notes_Checkmark_Icon.png" width={10} height={10} alt="" className="pixel-art" />
-              <span>{status_message}</span>
-            </div>
-          )}
-
-          <div className={styles.hunterMetaRow}>
-            <div className={styles.questPill}>
-              <Image src={`/icons/${getQuestIcon(quest)}`} width={14} height={14} alt="" className="pixel-art" />
-              <span className={styles.questLabel}>{quest || "Hunt"}</span>
-            </div>
-            {quest === "Investigation Quests" && effectiveUses != null && (
-              <span className={styles.usesChip}>{effectiveUses} left</span>
-            )}
             {hasHost && (
-              <span className={styles.hostPill}>
-                {quest === "Field Survey Quests" ? `${hostName} Field Survey` : `${hostName} Investigation`}
-              </span>
+              <div className={styles.hostLine}>
+                Hosted on {hostName} {quest === "Field Survey Quests" ? "Field Survey" : "Investigation"}
+              </div>
             )}
           </div>
-
-          {linkedCrown && (
-            <div className={styles.linkedRow}>
-              <Image src="/icons/smallcrown.png" width={10} height={10} alt="S" className="pixel-art" />
-              <span className={smallC.tempered ? styles.temperedText : styles.ratingText}>{smallC.strength_rating}★</span>
-              {!!smallC.tempered && <span className={styles.temperedChip}>T</span>}
-              <span className={styles.linkedSep}>·</span>
-              <Image src="/icons/largecrown.png" width={12} height={12} alt="L" className="pixel-art" />
-              <span className={largeC.tempered ? styles.temperedText : styles.ratingText}>{largeC.strength_rating}★</span>
-              {!!largeC.tempered && <span className={styles.temperedChip}>T</span>}
-            </div>
-          )}
         </div>
       </Link>
 

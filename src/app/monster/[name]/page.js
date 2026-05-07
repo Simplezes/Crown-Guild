@@ -7,6 +7,8 @@ import { notFound } from "next/navigation";
 import { getCrownById } from "@/lib/profile";
 import { getMonsterByName } from "@/lib/monsters";
 import CrownHighlighter from "@/components/ui/CrownHighlighter";
+import WishlistToggle from "@/components/wishlist/WishlistToggle";
+import { auth } from "@/auth";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -45,7 +47,7 @@ function buildMonsterSummaryVersion(row) {
   return `${latest}-${total}-${small}-${large}-${tempered}-${wish}`;
 }
 
-async function getMonsterData(name) {
+async function getMonsterData(name, userId) {
   try {
     const monster = await getMonsterByName(name);
     if (!monster) return null;
@@ -77,11 +79,27 @@ async function getMonsterData(name) {
       args: [monster.id]
     });
 
+    let userWishlistType = null;
+    if (userId) {
+      const userWishlistRes = await db.execute({
+        sql: `
+          SELECT type
+          FROM wishlist
+          WHERE user_id = ? AND monster_id = ?
+          LIMIT 1
+        `,
+        args: [userId, monster.id]
+      });
+
+      userWishlistType = userWishlistRes.rows?.[0]?.type || null;
+    }
+
     return {
       monster,
       extraInfo: monster.extraInfo,
       crowns: crownsRes.rows.map((row) => ({ ...row })),
-      wishlist: wishlistRes.rows.map((row) => ({ ...row }))
+      wishlist: wishlistRes.rows.map((row) => ({ ...row })),
+      userWishlistType
     };
   } catch (error) {
     console.error("Monster fetch error", error);
@@ -264,6 +282,8 @@ export async function generateMetadata({ params, searchParams }) {
 export default async function MonsterDetail({ params, searchParams }) {
   const { name } = await params;
   const search = await searchParams;
+  const session = await auth();
+  const currentUserId = session?.user?.id;
   let highlightCrownId = search?.crownId;
   const userId = search?.user;
   const activeTab = search?.tab || 'hosts';
@@ -272,7 +292,7 @@ export default async function MonsterDetail({ params, searchParams }) {
   const smallPage = parsePageParam(search?.smallPage);
   const seekingPage = parsePageParam(search?.seekingPage);
 
-  const data = await getMonsterData(name);
+  const data = await getMonsterData(name, currentUserId);
   if (!data) notFound();
 
   if (!highlightCrownId && userId) {
@@ -280,7 +300,7 @@ export default async function MonsterDetail({ params, searchParams }) {
     if (userCrown) highlightCrownId = userCrown.id;
   }
 
-  const { monster, extraInfo, crowns, wishlist } = data;
+  const { monster, extraInfo, crowns, wishlist, userWishlistType } = data;
 
   const pairMap = new Map();
   for (const crown of crowns) {
@@ -413,9 +433,6 @@ export default async function MonsterDetail({ params, searchParams }) {
                 </div>
                 <div className={styles.titles}>
                   <h1 className="gold-text">{monster.name}</h1>
-                  <p className={styles.heroSummary}>
-                    Review crown availability, pair postings, and current pursuit demand without losing the guild field-guide feel.
-                  </p>
                   <div className={styles.heroChips}>
                     <span className={styles.heroChip}>{monster.is_large ? 'Large Hunt' : 'Small Hunt'}</span>
                     {pairedGroups.length > 0 && <span className={styles.heroChip}>{pairedGroups.length} Pair Posts</span>}
@@ -455,6 +472,15 @@ export default async function MonsterDetail({ params, searchParams }) {
                 >
                   Seeking Board
                 </Link>
+              </div>
+
+              <div className={styles.wishlistQuickAction}>
+                <span className={styles.wishlistQuickLabel}>Track This Monster</span>
+                <WishlistToggle
+                  monsterId={monster.id}
+                  initialType={userWishlistType}
+                  className={styles.wishlistQuickToggle}
+                />
               </div>
             </div>
           </div>

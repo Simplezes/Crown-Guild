@@ -26,7 +26,7 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
   };
 
   const hasPrimaryQuestMonster = (crown) => {
-    return Boolean(crown?.inv_monster_image && (crown?.inv_monster_name || crown?.name));
+    return hasDifferentHostMonster(crown);
   };
 
   const buildShareNonce = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;

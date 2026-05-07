@@ -2,6 +2,7 @@
   min-height: 100vh;
   padding-top: 120px;
   padding-bottom: 80px;
+  animation: pageRise 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .pageHeader {
@@ -24,6 +25,7 @@
     linear-gradient(135deg, rgba(181, 154, 93, 0.12), transparent 48%),
     linear-gradient(180deg, rgba(23, 17, 13, 0.92), rgba(12, 10, 9, 0.86));
   box-shadow: var(--premium-shadow);
+  animation: sectionRise 0.38s ease both;
 }
 
 .heroPanel::after {
@@ -116,6 +118,8 @@
     linear-gradient(140deg, rgba(181, 154, 93, 0.08), transparent 45%),
     var(--mh-glass);
   border: 1px solid var(--mh-border);
+  animation: sectionRise 0.38s ease both;
+  animation-delay: 0.06s;
 }
 
 .snapshotHeader {
@@ -244,6 +248,8 @@
     linear-gradient(140deg, rgba(181, 154, 93, 0.04), transparent 45%),
     var(--mh-glass);
   margin-bottom: 32px;
+  animation: sectionRise 0.36s ease both;
+  animation-delay: 0.08s;
 }
 
 .sectionTitle {
@@ -304,6 +310,8 @@
     var(--mh-glass);
   border: 1px solid var(--mh-border);
   padding: 36px;
+  animation: sectionRise 0.38s ease both;
+  animation-delay: 0.12s;
 }
 
 .ledgerHeader {
@@ -501,7 +509,12 @@
   position: relative;
   overflow: hidden;
   transition: var(--transition-mh);
+  animation: cardEnter 0.32s ease both;
 }
+
+.crownCard:nth-child(2n) { animation-delay: 0.03s; }
+.crownCard:nth-child(3n) { animation-delay: 0.06s; }
+.crownCard:nth-child(4n) { animation-delay: 0.09s; }
 
 .crownCard:hover {
   transform: translateY(-4px);
@@ -541,6 +554,7 @@
   opacity: 0.35;
   filter: grayscale(0.5) brightness(0.8) sepia(0.22);
   transform: scale(1.14);
+  animation: ghostFloat 3.2s ease-in-out infinite;
 }
 
 .cardTop,
@@ -585,11 +599,12 @@
   padding: 18px 12px 14px;
   text-decoration: none;
   flex-shrink: 0;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s, transform 0.2s ease;
 }
 
 .cardMedia:hover {
   opacity: 0.85;
+  transform: translateY(-2px);
 }
 
 .cardBody {
@@ -690,7 +705,7 @@
   justify-content: center;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: color 0.2s, border-color 0.2s, background 0.2s;
+  transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.2s;
   flex-shrink: 0;
   line-height: 1;
 }
@@ -700,6 +715,7 @@
   color: var(--mh-gold) !important;
   border-color: rgba(181, 154, 93, 0.45) !important;
   background: rgba(181, 154, 93, 0.08) !important;
+  transform: translateY(-1px);
 }
 
 .cardActions {
@@ -711,13 +727,15 @@
   justify-content: center;
   gap: 10px;
   opacity: 0;
+  transform: scale(0.96);
   pointer-events: none;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s ease, transform 0.2s ease;
   z-index: 5;
 }
 
 .cardActionsActive {
   opacity: 1 !important;
+  transform: scale(1) !important;
   pointer-events: all !important;
 }
 
@@ -731,12 +749,13 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
+  transition: border-color 0.2s, background 0.2s, transform 0.2s;
 }
 
 .actionBtn:hover {
   border-color: rgba(181, 154, 93, 0.5);
   background: rgba(181, 154, 93, 0.1);
+  transform: translateY(-1px);
 }
 
 .deleteBtn:hover {
@@ -761,11 +780,12 @@
   padding: 16px 10px;
   text-decoration: none;
   min-width: 0;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.2s;
 }
 
 .dualSide:hover {
   background: rgba(181, 154, 93, 0.05);
+  transform: translateY(-1px);
 }
 
 .dualDivider {
@@ -837,13 +857,14 @@
   font-family: 'Marcellus', serif;
   font-size: 1rem;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.2s;
 }
 
 .pageBtn:hover:not(:disabled) {
   background: rgba(181, 154, 93, 0.15);
   border-color: rgba(181, 154, 93, 0.45);
   color: var(--mh-gold-bright);
+  transform: translateY(-1px);
 }
 
 .pageBtn:disabled {
@@ -857,6 +878,71 @@
   color: var(--mh-tan-dark);
   text-transform: uppercase;
   letter-spacing: 0.1em;
+}
+
+@keyframes pageRise {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sectionRise {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cardEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ghostFloat {
+  0%,
+  100% {
+    transform: scale(1.14) translateY(0);
+  }
+  50% {
+    transform: scale(1.14) translateY(-3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .main,
+  .heroPanel,
+  .snapshotCard,
+  .lobbySection,
+  .ledgerSection,
+  .crownCard,
+  .primaryQuestGhostImage {
+    animation: none !important;
+  }
+
+  .crownCard,
+  .cardMedia,
+  .actionsTrigger,
+  .cardActions,
+  .actionBtn,
+  .dualSide,
+  .pageBtn {
+    transition: none !important;
+  }
 }
 
 @media (max-width: 1024px) {
