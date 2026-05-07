@@ -411,13 +411,17 @@
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--mh-border);
   color: var(--mh-tan);
-  padding: 8px 16px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: 'Marcellus', serif;
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  font-size: 1.2rem;
+  line-height: 1;
   cursor: pointer;
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .pageBtn:hover:not(:disabled) {
@@ -467,4 +471,4 @@
 .commended {
   background: var(--mh-gold);
   color: #000;
-}
+}
