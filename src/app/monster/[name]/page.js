@@ -11,7 +11,7 @@ import { getMonsterByName, getQuestIcon } from "@/lib/monsters";
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-const MONSTER_LIST_PAGE_SIZE = 12;
+const MONSTER_LIST_PAGE_SIZE = 5;
 
 function buildFeaturedCrownVersion(crown) {
   if (!crown) return '0';
