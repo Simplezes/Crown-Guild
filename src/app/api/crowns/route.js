@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import { pusherServer } from "@/lib/pusher";
 import { checkRateLimit } from "@/lib/ratelimit";
+import { logServerError } from "@/lib/logger";
 
 export async function POST(req) {
   const session = await auth();
@@ -93,7 +94,7 @@ export async function POST(req) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Failed to add crown:", error);
+    logServerError("Failed to add crown:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

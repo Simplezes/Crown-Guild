@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import db from "@/lib/db";
 import { auth } from "@/auth";
 import { checkRateLimit } from "@/lib/ratelimit";
+import { logServerError } from "@/lib/logger";
 
 export async function POST(request) {
   try {
@@ -26,7 +27,7 @@ export async function POST(request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error updating status:", error);
+    logServerError("Error updating status:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

@@ -3,6 +3,7 @@ import db from "@/lib/db";
 import { auth } from "@/auth";
 import { pusherServer } from "@/lib/pusher";
 import { checkRateLimit } from "@/lib/ratelimit";
+import { logServerError } from "@/lib/logger";
 
 export async function POST(request) {
   try {
@@ -177,7 +178,7 @@ export async function POST(request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error completing mission:", error);
+    logServerError("Error completing mission:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

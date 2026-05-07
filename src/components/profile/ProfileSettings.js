@@ -55,6 +55,7 @@ function SettingsContent({ user, isOwner, sessionData }) {
 
   const guilds = Array.isArray(session?.user?.guilds) ? session.user.guilds : [];
   const emojiGuilds = guilds.filter((guild) => !!emojiservers[String(guild?.id || '')]);
+  const hasGuildContext = emojiGuilds.length > 0;
   const selectedGuild = emojiGuilds.find((guild) => String(guild.id) === String(formData.main_crown_server_id || '')) || null;
 
   const selectedLabel = selectedGuild ? selectedGuild.name : 'Text only (no emoji server)';
@@ -72,10 +73,15 @@ function SettingsContent({ user, isOwner, sessionData }) {
     setValidationError('');
     setLoading(true);
     try {
+      const payload = { ...formData };
+      if (!hasGuildContext) {
+        delete payload.main_crown_server_id;
+      }
+
       const res = await fetch('/api/user/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {

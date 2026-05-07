@@ -1,6 +1,7 @@
 import db from "@/lib/db";
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
+import { logServerError } from "@/lib/logger";
 
 export async function GET() {
   const session = await auth();
@@ -31,7 +32,7 @@ export async function GET() {
 
     return NextResponse.json(res.rows.map(r => ({ ...r })));
   } catch (error) {
-    console.error("Failed to fetch investigations:", error);
+    logServerError("Failed to fetch investigations:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

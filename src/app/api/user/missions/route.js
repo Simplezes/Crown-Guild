@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import db from "@/lib/db";
 import { auth } from "@/auth";
+import { logServerError } from "@/lib/logger";
 
 export async function GET(request) {
   try {
@@ -38,7 +39,7 @@ export async function GET(request) {
 
     return NextResponse.json({ missions: res.rows, total, page, limit });
   } catch (error) {
-    console.error("Error fetching mission history:", error);
+    logServerError("Error fetching mission history:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

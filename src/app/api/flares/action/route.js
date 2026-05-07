@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { pusherServer } from "@/lib/pusher";
 import { randomUUID } from "crypto";
 import { SOS_DISABLED_MESSAGE, SOS_FEATURE_ENABLED } from '@/lib/sos';
+import { logServerError } from "@/lib/logger";
 
 export async function POST(req) {
   if (!SOS_FEATURE_ENABLED) {
@@ -141,7 +142,7 @@ export async function POST(req) {
 
     return new NextResponse("Invalid action", { status: 400 });
   } catch (e) {
-    console.error(e);
+    logServerError("Unhandled server error", e);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }

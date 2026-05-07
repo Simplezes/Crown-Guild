@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import db from "@/lib/db";
 import { auth } from "@/auth";
+import { logServerError } from "@/lib/logger";
 
 export async function GET(request) {
   try {
@@ -56,7 +57,7 @@ export async function GET(request) {
 
     return NextResponse.json({ missions: dedupedMissions });
   } catch (error) {
-    console.error("Error fetching current mission:", error);
+    logServerError("Error fetching current mission:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

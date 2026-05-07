@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import db from "@/lib/db";
 import { NextResponse } from "next/server";
 import { emojiservers } from "@/lib/emojiservers";
+import { logServerError } from "@/lib/logger";
 
 let mainCrownColumnChecked = false;
 
@@ -71,7 +72,7 @@ async function updateSettings(req) {
 
     return NextResponse.json({ success: true });
   } catch (e) {
-    console.error(e);
+    logServerError("Unhandled server error", e);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
@@ -100,7 +101,7 @@ export async function DELETE() {
 
     return NextResponse.json({ success: true });
   } catch (e) {
-    console.error(e);
+    logServerError("Unhandled server error", e);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
