@@ -16,7 +16,7 @@ export default function CompletionTracker({
   userId
 }) {
   const [activeTab, setActiveTab] = useState('host');
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const [collection, setCollection] = useState(initialCollection || []);
   const [wishlist, setWishlist] = useState(initialWishlist || []);
   const toast = useToast();
