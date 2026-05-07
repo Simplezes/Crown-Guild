@@ -41,10 +41,13 @@ export async function PATCH(req, { params }) {
     const oldInvestigationId = checkRes.rows[0].old_investigation_id ?? null;
     let resolvedInvestigationId = null;
 
-    const hostEnabled =
+    const requestedHostEnabled =
       typeof mission_host_enabled === "boolean"
         ? mission_host_enabled
         : (investigation_monster_id !== undefined ? investigation_monster_id !== null && investigation_monster_id !== "" : oldInvestigationId !== null);
+
+    // Investigation quests always need an investigation record to track remaining uses.
+    const hostEnabled = quest === "Investigation Quests" ? true : requestedHostEnabled;
 
     if (!hostEnabled) {
       resolvedInvestigationId = null;

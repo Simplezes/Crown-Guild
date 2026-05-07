@@ -95,6 +95,8 @@ export default function HunterItem({ crown, linkedCrown = null, monsterName, isH
           monsterName={monsterName}
           crownId={crownId}
           discordId={username}
+          quest={quest}
+          canDeploy={quest === "Investigation Quests" && effectiveUses > 0}
         />
       )}
     </div>
