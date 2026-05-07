@@ -2,11 +2,10 @@ import db from "@/lib/db";
 import styles from "./monster.module.css";
 import Link from "next/link";
 import Image from "next/image";
-import MonsterIcon from "@/components/ui/MonsterIcon";
 import HunterItem from "@/components/registry/HunterItem";
 import { notFound } from "next/navigation";
 import { getCrownById } from "@/lib/profile";
-import { getMonsterByName, getQuestIcon } from "@/lib/monsters";
+import { getMonsterByName } from "@/lib/monsters";
 import CrownHighlighter from "@/components/ui/CrownHighlighter";
 
 export const dynamic = 'force-dynamic';
@@ -81,11 +80,11 @@ async function getMonsterData(name) {
     return {
       monster,
       extraInfo: monster.extraInfo,
-      crowns: crownsRes.rows.map(r => ({ ...r })),
-      wishlist: wishlistRes.rows.map(r => ({ ...r }))
+      crowns: crownsRes.rows.map((row) => ({ ...row })),
+      wishlist: wishlistRes.rows.map((row) => ({ ...row }))
     };
-  } catch (e) {
-    console.error("Monster fetch error", e);
+  } catch (error) {
+    console.error("Monster fetch error", error);
     return null;
   }
 }
@@ -112,6 +111,7 @@ function buildMonsterPageHref(search, updates) {
 
   Object.entries(search || {}).forEach(([key, value]) => {
     if (value == null) return;
+
     if (Array.isArray(value)) {
       value.forEach((entry) => {
         if (entry != null && entry !== '') params.append(key, String(entry));
@@ -135,7 +135,7 @@ function buildMonsterPageHref(search, updates) {
   return query ? `?${query}` : '?';
 }
 
-function renderPagination({ page, totalPages, search, pageKey, activeTab, sectionLabel }) {
+function renderPagination({ page, totalPages, search, pageKey, activeTab }) {
   if (totalPages <= 1) return null;
 
   return (
@@ -163,6 +163,18 @@ function renderPagination({ page, totalPages, search, pageKey, activeTab, sectio
       </Link>
     </div>
   );
+}
+
+function renderTagList(values, className, fallback = 'Unknown') {
+  if (!values?.length) {
+    return <span className={styles.tagFallback}>{fallback}</span>;
+  }
+
+  return values.map((value, index) => (
+    <span key={`${value}-${index}`} className={className}>
+      {value}
+    </span>
+  ));
 }
 
 export async function generateMetadata({ params, searchParams }) {
@@ -264,36 +276,37 @@ export default async function MonsterDetail({ params, searchParams }) {
   if (!data) notFound();
 
   if (!highlightCrownId && userId) {
-    const userCrown = data.crowns.find(c => String(c.user_id) === String(userId));
+    const userCrown = data.crowns.find((crown) => String(crown.user_id) === String(userId));
     if (userCrown) highlightCrownId = userCrown.id;
   }
 
   const { monster, extraInfo, crowns, wishlist } = data;
 
   const pairMap = new Map();
-  for (const c of crowns) {
-    if (c.pair_id) {
-      if (!pairMap.has(c.pair_id)) pairMap.set(c.pair_id, []);
-      pairMap.get(c.pair_id).push(c);
+  for (const crown of crowns) {
+    if (crown.pair_id) {
+      if (!pairMap.has(crown.pair_id)) pairMap.set(crown.pair_id, []);
+      pairMap.get(crown.pair_id).push(crown);
     }
   }
-  const pairedGroups = [...pairMap.values()].filter(g => g.length >= 2);
-  const pairedCrownIds = new Set(pairedGroups.flatMap(g => g.map(c => c.id)));
 
-  const smallCrowns = crowns.filter(c => c.type === 'small' && !pairedCrownIds.has(c.id));
-  const largeCrowns = crowns.filter(c => c.type === 'large' && !pairedCrownIds.has(c.id));
+  const pairedGroups = [...pairMap.values()].filter((group) => group.length >= 2);
+  const pairedCrownIds = new Set(pairedGroups.flatMap((group) => group.map((crown) => crown.id)));
+  const smallCrowns = crowns.filter((crown) => crown.type === 'small' && !pairedCrownIds.has(crown.id));
+  const largeCrowns = crowns.filter((crown) => crown.type === 'large' && !pairedCrownIds.has(crown.id));
 
   let effectivePairsPage = pairsPage;
   let effectiveLargePage = largePage;
   let effectiveSmallPage = smallPage;
+
   if (highlightCrownId) {
-    const pairGroupIdx = pairedGroups.findIndex(g => g.some(c => String(c.id) === String(highlightCrownId)));
+    const pairGroupIdx = pairedGroups.findIndex((group) => group.some((crown) => String(crown.id) === String(highlightCrownId)));
     if (pairGroupIdx >= 0) effectivePairsPage = Math.floor(pairGroupIdx / MONSTER_LIST_PAGE_SIZE) + 1;
 
-    const largeIdx = largeCrowns.findIndex(c => String(c.id) === String(highlightCrownId));
+    const largeIdx = largeCrowns.findIndex((crown) => String(crown.id) === String(highlightCrownId));
     if (largeIdx >= 0) effectiveLargePage = Math.floor(largeIdx / MONSTER_LIST_PAGE_SIZE) + 1;
 
-    const smallIdx = smallCrowns.findIndex(c => String(c.id) === String(highlightCrownId));
+    const smallIdx = smallCrowns.findIndex((crown) => String(crown.id) === String(highlightCrownId));
     if (smallIdx >= 0) effectiveSmallPage = Math.floor(smallIdx / MONSTER_LIST_PAGE_SIZE) + 1;
   }
 
@@ -301,32 +314,263 @@ export default async function MonsterDetail({ params, searchParams }) {
   const pagedLarge = paginateItems(largeCrowns, effectiveLargePage);
   const pagedSmall = paginateItems(smallCrowns, effectiveSmallPage);
   const pagedSeeking = paginateItems(wishlist, seekingPage);
-  const gameInfo = extraInfo?.games?.find(g => g.game === "Monster Hunter Wilds");
+  const gameInfo = extraInfo?.games?.find((game) => game.game === "Monster Hunter Wilds");
+  const totalTemperedLogs = crowns.filter((crown) => crown.tempered).length;
+  const overviewStats = [
+    { label: 'Logged Crowns', value: crowns.length, tone: 'gold' },
+    { label: 'Pair Posts', value: pairedGroups.length, tone: 'default' },
+    { label: 'Tempered Logs', value: totalTemperedLogs, tone: totalTemperedLogs > 0 ? 'alert' : 'default' },
+    { label: 'Hunters Seeking', value: wishlist.length, tone: 'default' },
+  ];
+
+  const hostSections = [
+    {
+      key: 'large',
+      title: 'Large Crowns',
+      count: largeCrowns.length,
+      pagination: { page: pagedLarge.page, totalPages: pagedLarge.totalPages, pageKey: 'largePage' },
+      empty: 'No large crowns recorded yet.',
+      icons: [{ src: '/icons/largecrown.png', width: 24, height: 24 }],
+      items: largeCrowns.length > 0
+        ? pagedLarge.items.map((crown) => (
+            <HunterItem
+              key={crown.id}
+              crown={crown}
+              monsterName={monster.name}
+              monsterImageName={monster.image_name}
+              isHighlighted={String(crown.id) === String(highlightCrownId)}
+            />
+          ))
+        : null,
+    },
+    {
+      key: 'small',
+      title: 'Small Crowns',
+      count: smallCrowns.length,
+      pagination: { page: pagedSmall.page, totalPages: pagedSmall.totalPages, pageKey: 'smallPage' },
+      empty: 'No small crowns recorded yet.',
+      icons: [{ src: '/icons/smallcrown.png', width: 24, height: 24 }],
+      items: smallCrowns.length > 0
+        ? pagedSmall.items.map((crown) => (
+            <HunterItem
+              key={crown.id}
+              crown={crown}
+              monsterName={monster.name}
+              monsterImageName={monster.image_name}
+              isHighlighted={String(crown.id) === String(highlightCrownId)}
+            />
+          ))
+        : null,
+    },
+  ];
+
+  if (pairedGroups.length > 0) {
+    hostSections.unshift({
+      key: 'pairs',
+      title: 'Crown Pairs',
+      count: pairedGroups.length,
+      pagination: { page: pagedPairs.page, totalPages: pagedPairs.totalPages, pageKey: 'pairsPage' },
+      empty: 'No pair postings logged yet.',
+      icons: [
+        { src: '/icons/largecrown.png', width: 20, height: 20 },
+        { src: '/icons/smallcrown.png', width: 16, height: 16, className: styles.overlapIcon },
+      ],
+      items: pagedPairs.items.map((group) => {
+        const smallCrown = group.find((crown) => crown.type === 'small');
+        const largeCrown = group.find((crown) => crown.type === 'large');
+        const isHighlighted = group.some((crown) => String(crown.id) === String(highlightCrownId));
+
+        return (
+          <HunterItem
+            key={smallCrown.id}
+            crown={smallCrown}
+            linkedCrown={largeCrown}
+            monsterName={monster.name}
+            monsterImageName={monster.image_name}
+            isHighlighted={isHighlighted}
+          />
+        );
+      }),
+    });
+  }
 
   return (
     <main className={styles.main}>
       {highlightCrownId && <CrownHighlighter crownId={highlightCrownId} />}
       <div className="premium-container">
-        <header className={styles.header + " animate-mh"}>
+        <header className={`${styles.header} animate-mh`}>
           <Link href="/registry" className={styles.backBtn}>← Ledger</Link>
-          <div className={styles.hero}>
-            <div className={styles.monsterIcon}>
-              <Image src={`/monsters/${monster.image_name}`} width={140} height={140} alt="" className="pixel-art" />
+          <div className={styles.heroShell}>
+            <div className={styles.heroPanel}>
+              <div className={styles.heroBanner}>
+                <span className={styles.heroEyebrow}>Monster Dossier</span>
+                <span className={styles.heroType}>{extraInfo?.type || (monster.is_large ? 'Large Monster' : 'Small Monster')}</span>
+              </div>
+
+              <div className={styles.hero}>
+                <div className={styles.monsterIcon}>
+                  <Image src={`/monsters/${monster.image_name}`} width={140} height={140} alt="" className="pixel-art" />
+                </div>
+                <div className={styles.titles}>
+                  <h1 className="gold-text">{monster.name}</h1>
+                  <p className={styles.heroSummary}>
+                    Review crown availability, pair postings, and current pursuit demand without losing the guild field-guide feel.
+                  </p>
+                  <div className={styles.heroChips}>
+                    <span className={styles.heroChip}>{monster.is_large ? 'Large Hunt' : 'Small Hunt'}</span>
+                    {pairedGroups.length > 0 && <span className={styles.heroChip}>{pairedGroups.length} Pair Posts</span>}
+                    {totalTemperedLogs > 0 && <span className={styles.heroChipAlert}>{totalTemperedLogs} Tempered</span>}
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className={styles.titles}>
-              <h1 className="gold-text">{monster.name}</h1>
-              <div className={styles.meta}>
-                <span>{extraInfo?.type || (monster.is_large ? 'Large Monster' : 'Small Monster')}</span>
+
+            <div className={`${styles.overviewCard} mh-card`}>
+              <div className={styles.overviewHeader}>
+                <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={18} height={18} alt="" className="pixel-art" />
+                <span>Activity Snapshot</span>
+              </div>
+
+              <div className={styles.overviewGrid}>
+                {overviewStats.map((stat) => (
+                  <div key={stat.label} className={styles.overviewStat}>
+                    <span className={styles.overviewLabel}>{stat.label}</span>
+                    <strong className={stat.tone === 'alert' ? styles.overviewValueAlert : styles.overviewValue}>{stat.value}</strong>
+                  </div>
+                ))}
+              </div>
+
+              <div className={styles.overviewTabs}>
+                <Link
+                  href={buildMonsterPageHref(search, { tab: 'hosts' })}
+                  className={`${styles.overviewTab} ${activeTab === 'hosts' ? styles.overviewTabActive : ''}`}
+                  scroll={false}
+                >
+                  Host Ledger
+                </Link>
+                <Link
+                  href={buildMonsterPageHref(search, { tab: 'seeking' })}
+                  className={`${styles.overviewTab} ${activeTab === 'seeking' ? styles.overviewTabActive : ''}`}
+                  scroll={false}
+                >
+                  Seeking Board
+                </Link>
               </div>
             </div>
           </div>
         </header>
 
-        <div className={styles.infoGrid + " animate-mh"}>
-          <div className={styles.tacticalCard}>
+        <div className={`${styles.contentGrid} animate-mh`}>
+          <section className={styles.recordsColumn}>
+            <div className={styles.recordShell}>
+              <div className={styles.recordIntro}>
+                <div>
+                  <span className={styles.sectionEyebrow}>{activeTab === 'hosts' ? 'Host Coverage' : 'Hunt Demand'}</span>
+                  <h2 className="mh-title">{activeTab === 'hosts' ? 'Crowns on Record' : 'Hunters Tracking This Monster'}</h2>
+                </div>
+                <p className={styles.recordSummary}>
+                  {activeTab === 'hosts'
+                    ? 'The ledger is grouped by crown type so active entries are easier to scan and contact.'
+                    : 'Open demand is grouped in one place so you can see who still needs this monster and which sizes they are chasing.'}
+                </p>
+              </div>
+
+              {activeTab === 'hosts' ? (
+                <div className={styles.recordSections}>
+                  {hostSections.map((section) => (
+                    <section key={section.key} className={styles.crownSection}>
+                      <div className={styles.sectionTitleRow}>
+                        <div className={styles.sectionTitle}>
+                          <div className={styles.sectionIcons}>
+                            {section.icons.map((icon, index) => (
+                              <Image
+                                key={`${section.key}-${index}`}
+                                src={icon.src}
+                                width={icon.width}
+                                height={icon.height}
+                                alt=""
+                                className={`pixel-art ${icon.className || ''}`.trim()}
+                              />
+                            ))}
+                          </div>
+                          <div>
+                            <h3 className="mh-title">{section.title}</h3>
+                            <span className={styles.sectionMeta}>{section.count} active entries</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className={styles.hunterList}>
+                        {section.items || <p className={styles.empty}>{section.empty}</p>}
+                      </div>
+
+                      {renderPagination({
+                        page: section.pagination.page,
+                        totalPages: section.pagination.totalPages,
+                        search,
+                        pageKey: section.pagination.pageKey,
+                        activeTab: 'hosts',
+                      })}
+                    </section>
+                  ))}
+                </div>
+              ) : (
+                <section className={styles.crownSection}>
+                  <div className={styles.sectionTitleRow}>
+                    <div className={styles.sectionTitle}>
+                      <div className={styles.sectionIcons}>
+                        <Image src="/icons/MHWilds-Wishlist_Pin_Icon.png" width={24} height={24} alt="" className="pixel-art" />
+                      </div>
+                      <div>
+                        <h3 className="mh-title">Seeking Board</h3>
+                        <span className={styles.sectionMeta}>{wishlist.length} hunters watching</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={styles.hunterList}>
+                    {wishlist.length > 0 ? pagedSeeking.items.map((entry) => (
+                      <Link href={`/profile/${entry.user_id}`} key={entry.id || entry.user_id} className={styles.wishlistUser}>
+                        <div className={styles.userLeft}>
+                          {entry.avatar_url && <img src={entry.avatar_url} alt="" className={styles.userAvatar} />}
+                          <div className={styles.userInfo}>
+                            <span className={styles.userName}>{entry.username}</span>
+                            <span className={styles.userStatus}>{entry.status_message || "Active Hunter"}</span>
+                          </div>
+                        </div>
+                        <div className={styles.userRight}>
+                          <div className={styles.needsLabel}>Needs</div>
+                          <div className={styles.needsIcons}>
+                            {(entry.type === 'small' || entry.type === 'both') && <Image src="/icons/smallcrown.png" width={16} height={16} alt="S" className="pixel-art" />}
+                            {(entry.type === 'large' || entry.type === 'both') && <Image src="/icons/largecrown.png" width={16} height={16} alt="L" className="pixel-art" />}
+                          </div>
+                        </div>
+                      </Link>
+                    )) : (
+                      <p className={styles.empty}>No hunters are currently tracking this monster.</p>
+                    )}
+                  </div>
+
+                  {renderPagination({
+                    page: pagedSeeking.page,
+                    totalPages: pagedSeeking.totalPages,
+                    search,
+                    pageKey: 'seekingPage',
+                    activeTab: 'seeking',
+                  })}
+                </section>
+              )}
+            </div>
+          </section>
+
+          <aside className={styles.sidebarColumn}>
+            <div className={styles.tacticalCard}>
               <div className={styles.tacticalHeader}>
                 <Image src="/icons/MHWilds-Quest_Members_Icon.png" width={40} height={40} alt="" className="pixel-art" />
-                <h3 className="mh-title">Guild Intelligence</h3>
+                <div>
+                  <span className={styles.sectionEyebrow}>Field Guide</span>
+                  <h3 className="mh-title">Guild Intelligence</h3>
+                </div>
               </div>
               <p className={styles.description}>
                 {gameInfo?.info || "No field guide data currently available for this specimen."}
@@ -335,163 +579,44 @@ export default async function MonsterDetail({ params, searchParams }) {
               <div className={styles.attributes}>
                 <div className={styles.attrGroup}>
                   <label>Weaknesses</label>
-                  <div className={styles.tags}>
-                    {extraInfo?.weakness?.map((w, i) => <span key={i} className={styles.tagGold}>{w}</span>) || "Unknown"}
-                  </div>
+                  <div className={styles.tags}>{renderTagList(extraInfo?.weakness, styles.tagGold, 'Unknown')}</div>
                 </div>
                 <div className={styles.attrGroup}>
                   <label>Elements</label>
-                  <div className={styles.tags}>
-                    {extraInfo?.elements?.map((e, i) => <span key={i} className={styles.tag}>{e}</span>) || "None"}
-                  </div>
+                  <div className={styles.tags}>{renderTagList(extraInfo?.elements, styles.tag, 'None')}</div>
                 </div>
                 <div className={styles.attrGroup}>
                   <label>Ailments</label>
-                  <div className={styles.tags}>
-                    {extraInfo?.ailments?.map((a, i) => <span key={i} className={styles.tagRed}>{a}</span>) || "None"}
-                  </div>
+                  <div className={styles.tags}>{renderTagList(extraInfo?.ailments, styles.tagRed, 'None')}</div>
                 </div>
               </div>
             </div>
 
-            <div className={styles.records}>
-              <div className={styles.tabs}>
-                <Link
-                  href={`?tab=hosts`}
-                  className={`${styles.tab} ${activeTab === 'hosts' ? styles.tabActive : ''}`}
-                  scroll={false}
-                >
-                  Hosts ({crowns.length})
-                </Link>
-                <Link
-                  href={`?tab=seeking`}
-                  className={`${styles.tab} ${activeTab === 'seeking' ? styles.tabActive : ''}`}
-                  scroll={false}
-                >
-                  Seeking ({wishlist.length})
-                </Link>
+            <div className={`${styles.metaPanel} mh-card`}>
+              <div className={styles.metaPanelHeader}>
+                <span className={styles.sectionEyebrow}>Breakdown</span>
+                <h3 className="mh-title">Crown Distribution</h3>
               </div>
-
-              {activeTab === 'hosts' ? (
-                <>
-                  {pairedGroups.length > 0 && (
-                    <section className={styles.crownSection} style={{ marginBottom: '40px' }}>
-                      <div className={styles.sectionTitle}>
-                        <Image src="/icons/largecrown.png" width={20} height={20} alt="" className="pixel-art" />
-                        <Image src="/icons/smallcrown.png" width={16} height={16} alt="" className="pixel-art" style={{ marginLeft: -8 }} />
-                        <h2 className="mh-title">Crown Pairs</h2>
-                      </div>
-                      <div className={styles.hunterList}>
-                        {pagedPairs.items.map((group) => {
-                          const smallC = group.find(c => c.type === 'small');
-                          const largeC = group.find(c => c.type === 'large');
-                          const isHl = group.some(c => String(c.id) === String(highlightCrownId));
-                          return (
-                            <HunterItem
-                              key={smallC.id}
-                              crown={smallC}
-                              linkedCrown={largeC}
-                              monsterName={monster.name}
-                              monsterImageName={monster.image_name}
-                              isHighlighted={isHl}
-                            />
-                          );
-                        })}
-                      </div>
-                      {renderPagination({
-                        page: pagedPairs.page,
-                        totalPages: pagedPairs.totalPages,
-                        search,
-                        pageKey: 'pairsPage',
-                        activeTab: 'hosts',
-                        sectionLabel: 'Pairs',
-                      })}
-                    </section>
-                  )}
-
-                  <section className={styles.crownSection} style={{ marginBottom: '40px' }}>
-                    <div className={styles.sectionTitle}>
-                      <Image src="/icons/largecrown.png" width={24} height={24} alt="" className="pixel-art" />
-                      <h2 className="mh-title">Large Crowns</h2>
-                    </div>
-                    <div className={styles.hunterList}>
-                      {largeCrowns.length > 0 ? pagedLarge.items.map((c, i) => (
-                        <HunterItem key={i} crown={c} monsterName={monster.name} monsterImageName={monster.image_name} isHighlighted={String(c.id) === String(highlightCrownId)} />
-                      )) : (
-                        <p className={styles.empty}>No large crowns recorded yet.</p>
-                      )}
-                    </div>
-                    {renderPagination({
-                      page: pagedLarge.page,
-                      totalPages: pagedLarge.totalPages,
-                      search,
-                      pageKey: 'largePage',
-                      activeTab: 'hosts',
-                      sectionLabel: 'Large',
-                    })}
-                  </section>
-
-                  <section className={styles.crownSection}>
-                    <div className={styles.sectionTitle}>
-                      <Image src="/icons/smallcrown.png" width={24} height={24} alt="" className="pixel-art" />
-                      <h2 className="mh-title">Small Crowns</h2>
-                    </div>
-                    <div className={styles.hunterList}>
-                      {smallCrowns.length > 0 ? pagedSmall.items.map((c, i) => (
-                        <HunterItem key={i} crown={c} monsterName={monster.name} monsterImageName={monster.image_name} isHighlighted={String(c.id) === String(highlightCrownId)} />
-                      )) : (
-                        <p className={styles.empty}>No small crowns recorded yet.</p>
-                      )}
-                    </div>
-                    {renderPagination({
-                      page: pagedSmall.page,
-                      totalPages: pagedSmall.totalPages,
-                      search,
-                      pageKey: 'smallPage',
-                      activeTab: 'hosts',
-                      sectionLabel: 'Small',
-                    })}
-                  </section>
-                </>
-              ) : (
-                <section className={styles.crownSection}>
-                  <div className={styles.sectionTitle}>
-                    <Image src="/icons/MHWilds-Wishlist_Pin_Icon.png" width={24} height={24} alt="" className="pixel-art" />
-                    <h2 className="mh-title">Hunters Seeking This Monster</h2>
-                  </div>
-                  <div className={styles.hunterList}>
-                    {wishlist.length > 0 ? pagedSeeking.items.map((w, i) => (
-                      <Link href={`/profile/${w.user_id}`} key={i} className={styles.wishlistUser}>
-                        <div className={styles.userLeft}>
-                          {w.avatar_url && <img src={w.avatar_url} alt="" className={styles.userAvatar} />}
-                          <div className={styles.userInfo}>
-                            <span className={styles.userName}>{w.username}</span>
-                            <span className={styles.userStatus}>{w.status_message || "Active Hunter"}</span>
-                          </div>
-                        </div>
-                        <div className={styles.userRight}>
-                          <div className={styles.needsLabel}>NEEDS:</div>
-                          <div className={styles.needsIcons}>
-                            {(w.type === 'small' || w.type === 'both') && <Image src="/icons/smallcrown.png" width={16} height={16} alt="S" className="pixel-art" />}
-                            {(w.type === 'large' || w.type === 'both') && <Image src="/icons/largecrown.png" width={16} height={16} alt="L" className="pixel-art" />}
-                          </div>
-                        </div>
-                      </Link>
-                    )) : (
-                      <p className={styles.empty}>No hunters are currently tracking this monster.</p>
-                    )}
-                  </div>
-                  {renderPagination({
-                    page: pagedSeeking.page,
-                    totalPages: pagedSeeking.totalPages,
-                    search,
-                    pageKey: 'seekingPage',
-                    activeTab: 'seeking',
-                    sectionLabel: 'Seeking',
-                  })}
-                </section>
-              )}
+              <div className={styles.metaRows}>
+                <div className={styles.metaRow}><span>Large</span><strong>{largeCrowns.length}</strong></div>
+                <div className={styles.metaRow}><span>Small</span><strong>{smallCrowns.length}</strong></div>
+                <div className={styles.metaRow}><span>Pairs</span><strong>{pairedGroups.length}</strong></div>
+                <div className={styles.metaRow}><span>Tempered</span><strong>{totalTemperedLogs}</strong></div>
+              </div>
             </div>
+
+            <div className={`${styles.metaPanel} mh-card`}>
+              <div className={styles.metaPanelHeader}>
+                <span className={styles.sectionEyebrow}>Pursuit Status</span>
+                <h3 className="mh-title">Current Demand</h3>
+              </div>
+              <p className={styles.metaNote}>
+                {wishlist.length > 0
+                  ? `${wishlist.length} hunters still need this monster in their collection log.`
+                  : 'No open wishlist demand is currently registered for this monster.'}
+              </p>
+            </div>
+          </aside>
         </div>
       </div>
     </main>
