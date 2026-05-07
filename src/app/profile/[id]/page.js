@@ -97,98 +97,115 @@ export default async function Profile({ params }) {
   return (
     <main className={styles.main}>
       <div className="premium-container">
-        <div className={styles.bentoGrid + " animate-mh"}>
-          <div className={styles.tile + " " + styles.identityTile}>
-            <div className={styles.avatarGlow}>
-              <img src={user.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" className={styles.avatar} />
-            </div>
-            <div className={styles.idContent}>
-              <div className={styles.rankBadge}>{userRank}</div>
-              <h1 className="gold-text">{user.username}</h1>
-              <p className={styles.memberId}>ID: {user.id}</p>
+        <div className={styles.pageHeader}>
+          <div className={styles.heroShell + " animate-mh"}>
+            <div className={styles.heroPanel}>
+              <div className={styles.titleGroup}>
+                <span className={styles.indicator}>👤 Hunter Profile</span>
+                <div className={styles.identityRow}>
+                  <img
+                    src={user.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"}
+                    alt={user.username}
+                    className={styles.profileAvatar}
+                  />
+                  <div>
+                    <h1>{user.username}</h1>
+                    <div className={styles.rankBadge}>{userRank}</div>
+                    <p className={styles.memberId}>ID: {user.id}</p>
+                  </div>
+                </div>
+              </div>
 
               {user.status_message && (
-                <div className={styles.statusBox}>
-                  <p>"{user.status_message}"</p>
-                </div>
+                <div className={styles.statusMessage}>"{user.status_message}"</div>
               )}
 
-              <div className={styles.identityActions}>
+              <div className={styles.heroActions}>
+                <DiscordShare id={user.id} username={user.username} crowns={crowns} wishlist={data.wishlist} />
+              </div>
+            </div>
+
+            <div className={styles.snapshotCard}>
+              <div className={styles.snapshotHeader}>
+                <span>📊 Collection Mastery</span>
+                <div className={styles.infoWrapper}>
+                  <button className={styles.infoTrigger}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
+                    </svg>
+                  </button>
+                  <div className={styles.infoPopover}>
+                    <MasteryInfo points={masteryPoints} rank={userRank} nextRank={nextRank} progress={progress} />
+                  </div>
+                </div>
+              </div>
+              <div className={styles.snapshotGrid}>
+                <div className={styles.snapshotStat}>
+                  <span>Total Crowns</span>
+                  <strong>{stats.total || 0}</strong>
+                </div>
+                <div className={styles.snapshotStat}>
+                  <span>Mastery Points</span>
+                  <strong>{masteryPoints}</strong>
+                </div>
+                <div className={styles.snapshotStat}>
+                  <span>Small Crowns</span>
+                  <strong>{stats.small || 0}</strong>
+                </div>
+                <div className={styles.snapshotStat}>
+                  <span>Large Crowns</span>
+                  <strong>{stats.large || 0}</strong>
+                </div>
+              </div>
+              <div className={styles.progressBar}>
+                <div className={styles.progressFill} style={{ width: `${progress}%` }} />
+              </div>
+              <div className={styles.progressMeta}>
+                <span>{Math.round(progress)}% Rank Progress</span>
+                {nextRank && <span>{nextRank.minPoints - masteryPoints} to {nextRank.title}</span>}
+              </div>
+              <div className={styles.snapshotActions}>
                 <CompareWithButton baseUserId={user.id} baseUsername={user.username} variant="identity" />
               </div>
             </div>
           </div>
-
-          <div className={styles.tile + " " + styles.opTile}>
-            <div className={styles.tileHeader}>
-              <Image src="/icons/MHWilds-Lobby_Icon.png" width={16} height={16} alt="" className="pixel-art" />
-              <span>LOBBY INFO</span>
-            </div>
-            {user.lobby_id ? (
-              <div className={styles.opBody}>
-                <div className={styles.opData}>
-                  <label>LOBBY ID</label>
-                  <code>{user.lobby_id}</code>
-                </div>
-                {user.quest_password && (
-                  <div className={styles.opData}>
-                    <label>PASSCODE</label>
-                    <code>{user.quest_password}</code>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className={styles.noOp}>Standby - No Active Operation</div>
-            )}
-            <div className={styles.opActions}>
-              <ProfileSettings user={user} isOwner={isOwner} />
-            </div>
-          </div>
-
-          <div className={styles.tile + " " + styles.progressTile}>
-            <div className={styles.tileHeader}>
-              <div className={styles.headerTitleArea}>
-                <Image src="/icons/MHWilds-Item_Pouch_Icon.png" width={16} height={16} alt="" className="pixel-art" />
-                <span>COLLECTION MASTERY</span>
-              </div>
-              <div className={styles.infoWrapper}>
-                <button className={styles.infoTrigger}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
-                  </svg>
-                </button>
-                <div className={styles.infoPopover}>
-                  <MasteryInfo
-                    points={masteryPoints}
-                    rank={userRank}
-                    nextRank={nextRank}
-                    progress={progress}
-                  />
-                </div>
-              </div>
-            </div>
-            <div className={styles.progressBody}>
-              <div className={styles.masteryVal}>{masteryPoints} <span className={styles.mpLabel}>MP</span></div>
-              <div className={styles.rankBadgeSmall}>{userRank}</div>
-            </div>
-            <div className={styles.masteryMeta}>
-              <span>{Math.round(progress)}% Rank Progress</span>
-              {nextRank && <span>{nextRank.minPoints - masteryPoints} to {nextRank.title}</span>}
-            </div>
-            <div className={styles.progressBar}>
-              <div className={styles.progressFill} style={{ width: `${progress}%` }} />
-            </div>
-          </div>
         </div>
+
+        {(user.lobby_id || isOwner) && (
+          <section className={styles.lobbySection}>
+            <div className={styles.sectionTitle}>
+              <Image src="/icons/MHWilds-Lobby_Icon.png" width={16} height={16} alt="" className="pixel-art" />
+              Lobby Info
+            </div>
+            <div className={styles.lobbyContent}>
+              {user.lobby_id ? (
+                <>
+                  <div className={styles.lobbyInfo}>
+                    <span className={styles.lobbyLabel}>Lobby ID</span>
+                    <code className={styles.lobbyCode}>{user.lobby_id}</code>
+                  </div>
+                  {user.quest_password && (
+                    <div className={styles.lobbyInfo}>
+                      <span className={styles.lobbyLabel}>Passcode</span>
+                      <code className={styles.lobbyCode}>{user.quest_password}</code>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <p className={styles.noLobby}>No active lobby — standing by.</p>
+              )}
+              <div style={{ marginLeft: "auto" }}>
+                <ProfileSettings user={user} isOwner={isOwner} />
+              </div>
+            </div>
+          </section>
+        )}
 
         <section className={styles.ledgerSection}>
           <header className={styles.ledgerHeader}>
             <div className={styles.ledgerTitle}>
               <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={24} height={24} alt="" className="pixel-art" />
               <h2 className="mh-title">Crown Collection</h2>
-            </div>
-            <div className={styles.ledgerMeta}>
-              <DiscordShare id={user.id} username={user.username} crowns={crowns} wishlist={data.wishlist} />
             </div>
           </header>
 
