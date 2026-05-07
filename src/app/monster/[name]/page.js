@@ -7,6 +7,7 @@ import HunterItem from "@/components/registry/HunterItem";
 import { notFound } from "next/navigation";
 import { getCrownById } from "@/lib/profile";
 import { getMonsterByName, getQuestIcon } from "@/lib/monsters";
+import CrownHighlighter from "@/components/ui/CrownHighlighter";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -142,21 +143,23 @@ function renderPagination({ page, totalPages, search, pageKey, activeTab, sectio
       <Link
         href={buildMonsterPageHref(search, { tab: activeTab, [pageKey]: page > 1 ? page - 1 : 1 })}
         className={`${styles.pageBtn} ${page === 1 ? styles.pageBtnDisabled : ''}`}
+        aria-label="Previous page"
         aria-disabled={page === 1}
         tabIndex={page === 1 ? -1 : undefined}
         scroll={false}
       >
-        Previous
+        ‹
       </Link>
-      <span className={styles.pageInfo}>{sectionLabel} Page {page} of {totalPages}</span>
+      <span className={styles.pageInfo}>Page {page} of {totalPages}</span>
       <Link
         href={buildMonsterPageHref(search, { tab: activeTab, [pageKey]: page < totalPages ? page + 1 : totalPages })}
         className={`${styles.pageBtn} ${page === totalPages ? styles.pageBtnDisabled : ''}`}
+        aria-label="Next page"
         aria-disabled={page === totalPages}
         tabIndex={page === totalPages ? -1 : undefined}
         scroll={false}
       >
-        Next
+        ›
       </Link>
     </div>
   );
@@ -279,14 +282,30 @@ export default async function MonsterDetail({ params, searchParams }) {
 
   const smallCrowns = crowns.filter(c => c.type === 'small' && !pairedCrownIds.has(c.id));
   const largeCrowns = crowns.filter(c => c.type === 'large' && !pairedCrownIds.has(c.id));
-  const pagedPairs = paginateItems(pairedGroups, pairsPage);
-  const pagedLarge = paginateItems(largeCrowns, largePage);
-  const pagedSmall = paginateItems(smallCrowns, smallPage);
+
+  let effectivePairsPage = pairsPage;
+  let effectiveLargePage = largePage;
+  let effectiveSmallPage = smallPage;
+  if (highlightCrownId) {
+    const pairGroupIdx = pairedGroups.findIndex(g => g.some(c => String(c.id) === String(highlightCrownId)));
+    if (pairGroupIdx >= 0) effectivePairsPage = Math.floor(pairGroupIdx / MONSTER_LIST_PAGE_SIZE) + 1;
+
+    const largeIdx = largeCrowns.findIndex(c => String(c.id) === String(highlightCrownId));
+    if (largeIdx >= 0) effectiveLargePage = Math.floor(largeIdx / MONSTER_LIST_PAGE_SIZE) + 1;
+
+    const smallIdx = smallCrowns.findIndex(c => String(c.id) === String(highlightCrownId));
+    if (smallIdx >= 0) effectiveSmallPage = Math.floor(smallIdx / MONSTER_LIST_PAGE_SIZE) + 1;
+  }
+
+  const pagedPairs = paginateItems(pairedGroups, effectivePairsPage);
+  const pagedLarge = paginateItems(largeCrowns, effectiveLargePage);
+  const pagedSmall = paginateItems(smallCrowns, effectiveSmallPage);
   const pagedSeeking = paginateItems(wishlist, seekingPage);
   const gameInfo = extraInfo?.games?.find(g => g.game === "Monster Hunter Wilds");
 
   return (
     <main className={styles.main}>
+      {highlightCrownId && <CrownHighlighter crownId={highlightCrownId} />}
       <div className="premium-container">
         <header className={styles.header + " animate-mh"}>
           <Link href="/registry" className={styles.backBtn}>← Ledger</Link>

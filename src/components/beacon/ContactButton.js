@@ -15,6 +15,7 @@ export default function ContactButton({ hostId, monsterId, monsterName, crownId,
   const [dropUp, setDropUp] = useState(false);
   const [status, setStatus] = useState('idle');
   const [errorMsg, setErrorMsg] = useState('');
+  const [confirmingDeploy, setConfirmingDeploy] = useState(false);
   const wrapperRef = useRef(null);
   const triggerRef = useRef(null);
   const popupRef = useRef(null);
@@ -302,15 +303,35 @@ export default function ContactButton({ hostId, monsterId, monsterName, crownId,
   if (showOwnerDeployButton) {
     return (
       <div className={styles.wrapper} ref={wrapperRef}>
-        <button
-          className={`${styles.trigger} ${styles.deployTrigger}`}
-          onClick={handleDeployCrown}
-          disabled={status === 'loading'}
-          title={quest === 'Investigation Quests' ? 'Spend one investigation use and mark as deployed' : 'Deploy crown'}
-        >
-          <Image src="/icons/MHWilds-Completed_Objective_Icon.png" width={16} height={16} alt="" className="pixel-art" />
-          {status === 'loading' ? 'Working...' : (status === 'deployed' ? 'Deployed!' : 'Deploy Crown')}
-        </button>
+        {confirmingDeploy ? (
+          <div className={styles.confirmRow}>
+            <span className={styles.confirmLabel}>Spend a use?</span>
+            <button
+              className={`${styles.trigger} ${styles.deployTrigger}`}
+              onClick={() => { setConfirmingDeploy(false); handleDeployCrown(); }}
+              disabled={status === 'loading'}
+            >
+              {status === 'loading' ? 'Working...' : 'Yes'}
+            </button>
+            <button
+              className={styles.trigger}
+              onClick={() => setConfirmingDeploy(false)}
+              disabled={status === 'loading'}
+            >
+              No
+            </button>
+          </div>
+        ) : (
+          <button
+            className={`${styles.trigger} ${styles.deployTrigger}`}
+            onClick={() => setConfirmingDeploy(true)}
+            disabled={status === 'loading'}
+            title={quest === 'Investigation Quests' ? 'Spend one investigation use and mark as deployed' : 'Deploy crown'}
+          >
+            <Image src="/icons/MHWilds-Completed_Objective_Icon.png" width={16} height={16} alt="" className="pixel-art" />
+            {status === 'deployed' ? 'Deployed!' : 'Deploy Crown'}
+          </button>
+        )}
         {status === 'error' && (
           <div className={styles.error}>
             {errorMsg}

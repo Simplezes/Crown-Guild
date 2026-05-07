@@ -280,9 +280,9 @@
 }
 
 .pageBtn {
-  min-width: 96px;
-  height: 40px;
-  padding: 0 16px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -291,10 +291,10 @@
   color: var(--mh-tan);
   text-decoration: none;
   font-family: 'Marcellus', serif;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-size: 1.2rem;
+  line-height: 1;
   transition: var(--transition-mh);
+  flex-shrink: 0;
 }
 
 .pageBtn:hover {
@@ -640,13 +640,12 @@
   }
 
   .pagination {
-    flex-direction: column;
     gap: 12px;
   }
 
   .pageBtn {
-    width: 100%;
-    max-width: 220px;
+    width: 36px;
+    height: 36px;
   }
 
   .hunterItem {

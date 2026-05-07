@@ -353,9 +353,9 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
         </div>
         {totalPages > 1 && (
           <div className={styles.pagination}>
-            <button className={styles.pageBtn} onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>←</button>
-            <span className={styles.pageInfo}>{page} / {totalPages}</span>
-            <button className={styles.pageBtn} onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>→</button>
+            <button className={styles.pageBtn} onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} aria-label="Previous page">‹</button>
+            <span className={styles.pageInfo}>Page {page} / {totalPages}</span>
+            <button className={styles.pageBtn} onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} aria-label="Next page">›</button>
           </div>
         )}
       </div>
