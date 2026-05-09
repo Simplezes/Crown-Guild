@@ -1,13 +1,46 @@
 import { ImageResponse } from 'next/og';
 import { getProfileData, getRankProgress } from "@/lib/profile";
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+
+async function urlToDataUrl(url, fallbackMime = 'image/png') {
+  const parsedUrl = new URL(url);
+  const isLocalAsset = parsedUrl.hostname === 'localhost' || parsedUrl.hostname === '127.0.0.1';
+  if (isLocalAsset) {
+    const bytes = new Uint8Array(await readFile(path.join(process.cwd(), 'public', parsedUrl.pathname.replace(/^\//, ''))));
+    let binary = '';
+
+    for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+      binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+    }
+
+    return `data:${fallbackMime};base64,${btoa(binary)}`;
+  }
+
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to load image: ${url}`);
+  }
+
+  const mimeType = response.headers.get('content-type') || fallbackMime;
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  let binary = '';
+
+  for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+  }
+
+  return `data:${mimeType};base64,${btoa(binary)}`;
+}
 
 export async function GET(request, { params }) {
   const { id } = await params;
   const data = await getProfileData(id);
+  const cardMode = new URL(request.url).searchParams.get('card') === 'monsters' ? 'monsters' : 'full';
 
   const colors = {
     black: '#0c0a09',
@@ -109,16 +142,150 @@ export async function GET(request, { params }) {
   );
 
   const filterValid = (list) => list.filter(m => !m.image_name || validImageSet.has(m.image_name));
+  const wishlistPreview = filterValid(wishlistItems).slice(0, 8);
+  const renderMonsterRows = filterValid(allMonsters);
+  const avatarImageUrl = await urlToDataUrl(user.avatar_url || `${baseUrl}/icons/MHWilds-Quest_Members_Icon.png`);
+  const boardIconUrl = await urlToDataUrl(`${baseUrl}/icons/MHWilds-Expedition_Record_Board_Icon.png`);
+  const monsterImageUrlMap = new Map();
 
-  let avatarUrl = user.avatar_url || `${baseUrl}/icons/MHWilds-Quest_Members_Icon.png`;
-  if (avatarUrl.includes('cdn.discordapp.com') && avatarUrl.endsWith('.webp')) {
-    avatarUrl = avatarUrl.replace('.webp', '.png');
+  if (cardMode === 'monsters') {
+    for (const monster of renderMonsterRows) {
+      if (!monster.image_name) continue;
+      const imageUrl = `${baseUrl}/monsters/${monster.image_name}`;
+      if (!monsterImageUrlMap.has(imageUrl)) {
+        monsterImageUrlMap.set(imageUrl, await urlToDataUrl(imageUrl));
+      }
+    }
+
+    const iconGap = 3;
+    const availW = 1100;
+    const availH = 520;
+    const iconSizeCandidates = [112, 104, 96, 88, 80, 72, 64, 56, 48, 40];
+    const groups = [smallOnly.length, largeOnly.length, multi.length].filter((n) => n > 0);
+    const iconSize = iconSizeCandidates.find((s) => {
+      const perRow = Math.floor(availW / (s + iconGap));
+      if (perRow === 0) return false;
+
+      let h = 0;
+      for (let i = 0; i < groups.length; i += 1) {
+        if (i > 0) h += 10;
+        h += 24;
+        h += Math.ceil(groups[i] / perRow) * (s + iconGap);
+      }
+
+      return h <= availH;
+    }) ?? 32;
+
+    const renderMonsterGroup = (label, rawItems) => {
+      const items = filterValid(rawItems);
+      if (items.length === 0) return null;
+
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: 10, color: colors.gold, letterSpacing: '3px', fontWeight: 'bold', display: 'flex' }}>{label}</span>
+            <span style={{ fontSize: 9, color: colors.tanDark, display: 'flex' }}>×{items.length}</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: `${iconGap}px` }}>
+            {items.map((monster) => (
+              <div key={monster.name} style={{ width: iconSize, height: iconSize, border: `1px solid ${colors.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.03)' }}>
+                <img src={monsterImageUrlMap.get(`${baseUrl}/monsters/${monster.image_name}`)} width={iconSize - 4} height={iconSize - 4} style={{ objectFit: 'contain', imageRendering: 'pixelated' }} />
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    };
+
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            background: colors.black,
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '28px',
+            color: colors.tan,
+            fontFamily: 'serif',
+            position: 'relative',
+          }}
+        >
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0.1, backgroundImage: `radial-gradient(circle at 2px 2px, ${colors.gold} 1px, transparent 0)`, backgroundSize: '28px 28px' }} />
+
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            width: '100%',
+            height: '100%',
+            background: colors.glass,
+            border: `1px solid ${colors.border}`,
+            position: 'relative',
+            padding: '18px 20px',
+            gap: '12px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '2px' }}>
+              <img src={boardIconUrl} width={24} height={24} style={{ imageRendering: 'pixelated' }} />
+              <span style={{ fontSize: 16, letterSpacing: '4px', color: colors.gold, display: 'flex' }}>MONSTER CARD</span>
+              <span style={{ fontSize: 11, color: colors.tanDark, marginLeft: '6px', display: 'flex' }}>— {allMonsters.length} species</span>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', overflow: 'hidden', flex: 1 }}>
+              {renderMonsterGroup('SMALL', smallOnly)}
+              {renderMonsterGroup('LARGE', largeOnly)}
+              {renderMonsterGroup('S & L', multi)}
+
+              {allMonsters.length === 0 && (
+                <span style={{ fontSize: 16, color: colors.tanDark, display: 'flex' }}>No crowns recorded yet.</span>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', marginTop: 'auto', justifyContent: 'flex-end' }}>
+              <span style={{ fontSize: 10, color: colors.tanDark, opacity: 0.5, letterSpacing: '2px', display: 'flex' }}>MONSTERS ONLY</span>
+            </div>
+          </div>
+        </div>
+      ),
+      {
+        width: 1200,
+        height: 630,
+        headers: {
+          'Cache-Control': 'no-store, no-cache, max-age=0, must-revalidate, proxy-revalidate',
+          Pragma: 'no-cache',
+          Expires: '0',
+        },
+      }
+    );
+  }
+
+  for (const monster of renderMonsterRows) {
+    if (!monster.image_name) continue;
+    const imageUrl = `${baseUrl}/monsters/${monster.image_name}`;
+    if (!monsterImageUrlMap.has(imageUrl)) {
+      monsterImageUrlMap.set(imageUrl, await urlToDataUrl(imageUrl));
+    }
+  }
+
+  for (const item of wishlistPreview) {
+    if (!item.image_name) continue;
+    const imageUrl = `${baseUrl}/monsters/${item.image_name}`;
+    if (!monsterImageUrlMap.has(imageUrl)) {
+      monsterImageUrlMap.set(imageUrl, await urlToDataUrl(imageUrl));
+    }
+  }
+
+  if (topAssist?.image_name) {
+    const imageUrl = `${baseUrl}/monsters/${topAssist.image_name}`;
+    if (!monsterImageUrlMap.has(imageUrl)) {
+      monsterImageUrlMap.set(imageUrl, await urlToDataUrl(imageUrl));
+    }
   }
 
   const iconGap = 4;
   const availW = 799;
   const availH = 486;
-  const iconSizeCandidates = [96, 80, 72, 64, 56, 48, 40, 32];
+  const iconSizeCandidates = [108, 100, 92, 84, 76, 68, 60, 52, 44, 36];
   const groups = [smallOnly.length, largeOnly.length, multi.length].filter(n => n > 0);
   const iconSize = iconSizeCandidates.find(s => {
     const perRow = Math.floor(availW / (s + iconGap));
@@ -144,7 +311,7 @@ export async function GET(request, { params }) {
         <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: `${iconGap}px` }}>
           {items.map(m => (
             <div key={m.name} style={{ width: iconSize, height: iconSize, border: `1px solid ${colors.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.03)' }}>
-              <img src={`${baseUrl}/monsters/${m.image_name}`} width={iconSize - 4} height={iconSize - 4} style={{ objectFit: 'contain', imageRendering: 'pixelated' }} />
+              <img src={monsterImageUrlMap.get(`${baseUrl}/monsters/${m.image_name}`)} width={iconSize - 4} height={iconSize - 4} style={{ objectFit: 'contain', imageRendering: 'pixelated' }} />
             </div>
           ))}
         </div>
@@ -152,7 +319,6 @@ export async function GET(request, { params }) {
     );
   };
 
-  const wishlistPreview = filterValid(wishlistItems).slice(0, 8);
   const statusMessage = String(user.status_message || '').trim();
   const statusPreview = statusMessage.length > 80 ? `${statusMessage.slice(0, 77)}...` : statusMessage;
 
@@ -190,13 +356,13 @@ export async function GET(request, { params }) {
             display: 'flex',
             flexDirection: 'column',
             flex: 1,
-            padding: '18px 12px 18px 22px',
+            padding: '16px 12px 16px 18px',
             borderRight: `1px solid ${colors.border}`,
             gap: '8px',
             overflow: 'hidden',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '2px' }}>
-              <img src={`${baseUrl}/icons/MHWilds-Expedition_Record_Board_Icon.png`} width={24} height={24} style={{ imageRendering: 'pixelated' }} />
+              <img src={boardIconUrl} width={24} height={24} style={{ imageRendering: 'pixelated' }} />
               <span style={{ fontSize: 16, letterSpacing: '4px', color: colors.gold, display: 'flex' }}>CROWN REGISTRY</span>
               <span style={{ fontSize: 11, color: colors.tanDark, marginLeft: '6px', display: 'flex' }}>— {allMonsters.length} species</span>
             </div>
@@ -213,14 +379,14 @@ export async function GET(request, { params }) {
           <div style={{
             display: 'flex',
             flexDirection: 'column',
-            width: '286px',
-            padding: '16px 14px',
+            width: '258px',
+            padding: '14px 12px',
             gap: '8px',
           }}>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <div style={{ width: '58px', height: '58px', border: `1px solid ${colors.border}`, display: 'flex', flexShrink: 0 }}>
-                <img src={avatarUrl} width={58} height={58} style={{ objectFit: 'cover' }} />
+                <img src={avatarImageUrl} width={58} height={58} style={{ objectFit: 'cover' }} />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 <span style={{ fontSize: 20, color: colors.goldBright, display: 'flex', lineHeight: '1.1' }}>{user.username}</span>
@@ -299,7 +465,7 @@ export async function GET(request, { params }) {
                   <span style={{ fontSize: 10, color: colors.gold, letterSpacing: '3px', display: 'flex' }}>TOP ASSIST</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.03)', padding: '8px 10px', border: `1px solid ${colors.border}` }}>
                     {topAssist.image_name && (
-                      <img src={`${baseUrl}/monsters/${topAssist.image_name}`} width={36} height={36} style={{ objectFit: 'contain', imageRendering: 'pixelated' }} />
+                      <img src={monsterImageUrlMap.get(`${baseUrl}/monsters/${topAssist.image_name}`)} width={36} height={36} style={{ objectFit: 'contain', imageRendering: 'pixelated' }} />
                     )}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                       <span style={{ fontSize: 13, color: colors.tan, display: 'flex' }}>{topAssist.name}</span>
@@ -321,7 +487,7 @@ export async function GET(request, { params }) {
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                     {wishlistPreview.map((item) => (
                       <div key={item.monster_id} style={{ display: 'flex', alignItems: 'center', gap: '6px', border: `1px solid ${colors.border}`, background: 'rgba(255,255,255,0.03)', padding: '3px 6px', minWidth: '92px' }}>
-                        <img src={`${baseUrl}/monsters/${item.image_name}`} width={24} height={24} style={{ objectFit: 'contain', imageRendering: 'pixelated' }} />
+                        <img src={monsterImageUrlMap.get(`${baseUrl}/monsters/${item.image_name}`)} width={24} height={24} style={{ objectFit: 'contain', imageRendering: 'pixelated' }} />
                         <span style={{ fontSize: 9, color: colors.tanDark, letterSpacing: '1px', display: 'flex' }}>
                           {item.type === 'both' ? 'Small & Large' : item.type === 'small' ? 'Small' : 'Large'}
                         </span>
