@@ -109,7 +109,7 @@ export function formatEmojiGrid(data, useEmojis = true) {
     const variant = crown?.variant || (crown?.tempered ? 'Tempered' : null);
     const fakeMonster = { name: crown?.name || crown?.monster_name, variant };
     const emoji = getMonsterEmojiOrFallback(fakeMonster, serverEmojis, serverEmojiLookup);
-    const key = `${crown?.name}||${crown?.tempered ? 1 : 0}`;
+    const key = `${crown?.name}||${crown?.tempered ? 1 : 0}||${Number(crown?.strength_rating || 0)}`;
     if (String(crown?.type).toLowerCase() === 'small' && !seenSmall.has(key)) {
       seenSmall.add(key);
       smallCrowns.push({ ...crown, _emoji: emoji });
@@ -121,9 +121,19 @@ export function formatEmojiGrid(data, useEmojis = true) {
 
   function formatAvailLine(prefix, crowns) {
     const regular = crowns.filter((c) => !c.tempered).map((c) => c._emoji);
-    const tempered = crowns.filter((c) => c.tempered).map((c) => c._emoji);
+    const temperedByStrength = new Map();
+    crowns
+      .filter((c) => c.tempered)
+      .forEach((crown) => {
+        const strength = Number(crown?.strength_rating || 0);
+        const label = strength > 0 ? `${strength}★` : 'Tempered';
+        if (!temperedByStrength.has(label)) temperedByStrength.set(label, []);
+        temperedByStrength.get(label).push(crown._emoji);
+      });
     const parts = [...regular];
-    if (tempered.length) parts.push(`( ${tempered.join(' ')} 9★)`);
+    for (const [label, emojis] of temperedByStrength.entries()) {
+      parts.push(`(${label}: ${emojis.join(' ')})`);
+    }
     if (!parts.length) return null;
     return `${prefix}: ${parts.join(' ')}`;
   }
