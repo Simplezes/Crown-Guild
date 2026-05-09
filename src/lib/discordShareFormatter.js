@@ -97,35 +97,74 @@ export function formatEmojiGrid(data, useEmojis = true) {
     return lines.join('\n');
   }
 
-  const grouped = {
-    'S+L': [],
-    Small: [],
-    Large: [],
-  };
+  const rawCrowns = Array.isArray(data?.crowns) ? data.crowns : [];
 
-  for (const monster of monsters) {
-    const category = CATEGORY_ORDER.includes(monster?.category) ? monster.category : 'Small';
-    grouped[category].push(getMonsterEmojiOrFallback(monster, serverEmojis, serverEmojiLookup));
+  // Deduplicate into small and large lists preserving order
+  const smallCrowns = [];
+  const largeCrowns = [];
+  const seenSmall = new Set();
+  const seenLarge = new Set();
+
+  for (const crown of rawCrowns) {
+    const variant = crown?.variant || (crown?.tempered ? 'Tempered' : null);
+    const fakeMonster = { name: crown?.name || crown?.monster_name, variant };
+    const emoji = getMonsterEmojiOrFallback(fakeMonster, serverEmojis, serverEmojiLookup);
+    const key = `${crown?.name}||${crown?.tempered ? 1 : 0}`;
+    if (String(crown?.type).toLowerCase() === 'small' && !seenSmall.has(key)) {
+      seenSmall.add(key);
+      smallCrowns.push({ ...crown, _emoji: emoji });
+    } else if (String(crown?.type).toLowerCase() === 'large' && !seenLarge.has(key)) {
+      seenLarge.add(key);
+      largeCrowns.push({ ...crown, _emoji: emoji });
+    }
   }
 
-  const compactWishlistLine = formatCompactWishlist(wishlist, serverEmojis, serverEmojiLookup);
-
-  const lines = [];
-
-  const slLine = appendCategoryLine('S+L', grouped['S+L']);
-  if (slLine) lines.push(slLine);
-
-  const smallLine = appendCategoryLine('Small', grouped.Small);
-  if (smallLine) lines.push(smallLine);
-
-  const largeLine = appendCategoryLine('Large', grouped.Large);
-  if (largeLine) lines.push(largeLine);
-
-  if (compactWishlistLine) {
-    lines.push(compactWishlistLine, '');
+  function formatAvailLine(prefix, crowns) {
+    const regular = crowns.filter((c) => !c.tempered).map((c) => c._emoji);
+    const tempered = crowns.filter((c) => c.tempered).map((c) => c._emoji);
+    const parts = [...regular];
+    if (tempered.length) parts.push(`( ${tempered.join(' ')} 9★)`);
+    if (!parts.length) return null;
+    return `${prefix}: ${parts.join(' ')}`;
   }
 
-  lines.push(profileUrl);
+  const sLine = formatAvailLine('S', smallCrowns);
+  const lLine = formatAvailLine('L', largeCrowns);
+
+  // Build Multi-Quest pairs from pair_id
+  const pairMap = new Map();
+  for (const crown of rawCrowns) {
+    if (!crown?.pair_id) continue;
+    const pairId = String(crown.pair_id);
+    if (!pairMap.has(pairId)) pairMap.set(pairId, []);
+    pairMap.get(pairId).push(crown);
+  }
+
+  const multiPairs = [];
+  const seenPairLabels = new Set();
+  for (const pair of pairMap.values()) {
+    if (pair.length < 2) continue;
+    const label = pair.slice(0, 2).map((c) => {
+      const variant = c?.variant || (c?.tempered ? 'Tempered' : null);
+      const emoji = getMonsterEmojiOrFallback({ name: c?.name || c?.monster_name, variant }, serverEmojis, serverEmojiLookup);
+      return `${String(c?.type).toLowerCase() === 'small' ? 'S' : 'L'} ${emoji}`;
+    }).join(' + ');
+    if (!seenPairLabels.has(label)) {
+      seenPairLabels.add(label);
+      multiPairs.push(label);
+    }
+  }
+
+  const lines = ['Available:'];
+  if (sLine) lines.push(sLine);
+  if (lLine) lines.push(lLine);
+
+  if (multiPairs.length) {
+    lines.push('Multi-Quest:');
+    lines.push(multiPairs.join(' / '));
+  }
+
+  lines.push('', profileUrl);
 
   return lines.join('\n');
 }

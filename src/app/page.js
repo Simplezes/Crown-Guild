@@ -14,6 +14,22 @@ export const metadata = {
   description: "The central command for Monster Hunter Wilds crown hunting.",
 };
 
+function getDiscordBotInviteUrl() {
+  const clientId = process.env.DISCORD_CLIENT_ID;
+
+  if (!clientId) {
+    return null;
+  }
+
+  const params = new URLSearchParams({
+    client_id: clientId,
+    scope: "bot applications.commands",
+    permissions: "0",
+  });
+
+  return `https://discord.com/oauth2/authorize?${params.toString()}`;
+}
+
 async function getHomeData() {
   try {
     const huntersRes = await db.execute("SELECT COUNT(*) as count FROM users");
@@ -91,6 +107,7 @@ async function getHomeData() {
 
 export default async function Home() {
   const { stats, wanted, recent, activeMissions, bounties, topRenown } = await getHomeData();
+  const discordBotInviteUrl = getDiscordBotInviteUrl();
 
   const displayMissions = [];
   const seenGroups = new Set();
@@ -122,8 +139,26 @@ export default async function Home() {
               <div className={styles.heroActions}>
                 <Link href="/registry" className="mh-button">Open Ledger</Link>
                 <Link href="/investigation" className="mh-button-outline">Browse Monsters</Link>
+                {discordBotInviteUrl && (
+                  <a
+                    href={discordBotInviteUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mh-button-outline"
+                  >
+                    Talk to the Bot
+                  </a>
+                )}
                 <a href="https://discord.gg/mhwilds" target="_blank" rel="noopener noreferrer" className="mh-button-outline">Join Discord</a>
               </div>
+              {discordBotInviteUrl && (
+                <div className={styles.botCallout}>
+                  <span className={styles.botBadge}>Discord Bot</span>
+                  <p>
+                    Add the Crown Guild bot to your Discord server and use slash commands without leaving chat.
+                  </p>
+                </div>
+              )}
             </div>
             <div className={styles.snapshotCard}>
               <div className={styles.snapshotHeader}>
