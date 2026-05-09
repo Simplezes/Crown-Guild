@@ -14,6 +14,7 @@ const emojiServerList = Object.keys(emojiservers).map((id) => ({
 export default function DiscordShare({ id, username, crowns, wishlist }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectingServer, setSelectingServer] = useState(false);
+  const [isCopyingImage, setIsCopyingImage] = useState(false);
   const [copiedMode, setCopiedMode] = useState('');
   const wrapperRef = useRef(null);
 
@@ -56,6 +57,8 @@ export default function DiscordShare({ id, username, crowns, wishlist }) {
   };
 
   const copyProfileCard = async (cardMode) => {
+    setIsCopyingImage(true);
+
     try {
       const imageUrl = buildProfileCardImageUrl(cardMode);
 
@@ -81,6 +84,8 @@ export default function DiscordShare({ id, username, crowns, wishlist }) {
       setTimeout(() => setCopiedMode(''), 2000);
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsCopyingImage(false);
     }
   };
 
@@ -97,11 +102,12 @@ export default function DiscordShare({ id, username, crowns, wishlist }) {
       >
         <Image src="/icons/MHWilds-Link_Party_Icon.png" width={18} height={18} alt="" className="pixel-art" />
         <span>
+          {isCopyingImage && 'Loading...'}
           {copiedMode === 'text' && 'Text Copied!'}
           {copiedMode === 'emoji' && 'Compact Copied!'}
           {copiedMode === 'full' && 'Full Card Copied!'}
           {copiedMode === 'monsters' && 'Monsters Card Copied!'}
-          {!copiedMode && 'Share for discord'}
+          {!isCopyingImage && !copiedMode && 'Share for discord'}
         </span>
       </button>
 
