@@ -41,6 +41,7 @@ export default function DiscordShare({ id, username, crowns, wishlist }) {
       shareId,
       emojiServerId: emojiServerId || null,
       monsters: buildShareMonstersFromCrowns(crowns),
+      crowns: crowns || [],
       wishlist: wishlist || [],
       useEmojis,
     });

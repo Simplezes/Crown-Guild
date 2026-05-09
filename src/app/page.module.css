@@ -75,6 +75,41 @@
   flex-wrap: wrap;
 }
 
+.botCallout {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px;
+  border: 1px solid rgba(181, 154, 93, 0.18);
+  background:
+    linear-gradient(140deg, rgba(181, 154, 93, 0.1), transparent 52%),
+    rgba(8, 7, 6, 0.34);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  max-width: 540px;
+}
+
+.botCallout p {
+  margin: 0;
+  color: var(--mh-tan);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.botBadge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 5px 10px;
+  border: 1px solid rgba(181, 154, 93, 0.22);
+  background: rgba(181, 154, 93, 0.08);
+  color: var(--mh-gold-bright);
+  font-family: 'Marcellus', serif;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
 .snapshotCard {
   padding: 26px;
   display: flex;
@@ -495,6 +530,14 @@
     font-size: 0.95rem;
   }
 
+  .botCallout {
+    padding: 14px 16px;
+  }
+
+  .botCallout p {
+    font-size: 0.92rem;
+  }
+
   .bountyGrid {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   }
@@ -532,6 +575,10 @@
 
   .description {
     font-size: 0.88rem;
+  }
+
+  .botCallout p {
+    font-size: 0.9rem;
   }
 
   .snapshotGrid {
