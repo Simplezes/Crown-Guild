@@ -1,7 +1,40 @@
 import { ImageResponse } from 'next/og';
 import db from '@/lib/db';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
+
+async function urlToDataUrl(url, fallbackMime = 'image/png') {
+  const parsedUrl = new URL(url);
+  const isLocalAsset = parsedUrl.hostname === 'localhost' || parsedUrl.hostname === '127.0.0.1';
+
+  if (isLocalAsset) {
+    const bytes = new Uint8Array(await readFile(path.join(process.cwd(), 'public', parsedUrl.pathname.replace(/^\//, ''))));
+    let binary = '';
+
+    for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+      binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+    }
+
+    return `data:${fallbackMime};base64,${btoa(binary)}`;
+  }
+
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to load image: ${url}`);
+  }
+
+  const mimeType = response.headers.get('content-type') || fallbackMime;
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  let binary = '';
+
+  for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+  }
+
+  return `data:${mimeType};base64,${btoa(binary)}`;
+}
 
 async function getGuildData(baseUrl) {
   const [crownsRes, statsRes] = await Promise.all([
@@ -54,6 +87,17 @@ async function getGuildData(baseUrl) {
   );
 
   const filterValid = (list) => list.filter(m => !m.image_name || validImageSet.has(m.image_name));
+  const boardIconUrl = await urlToDataUrl(`${baseUrl}/icons/MHWilds-Expedition_Record_Board_Icon.png`);
+  const huntIconUrl = await urlToDataUrl(`${baseUrl}/icons/MHWilds-Hunt_Icon.png`);
+  const monsterImageUrlMap = new Map();
+
+  for (const monster of [...smallOnly, ...largeOnly]) {
+    if (!monster.image_name) continue;
+    const imageUrl = `${baseUrl}/monsters/${monster.image_name}`;
+    if (!monsterImageUrlMap.has(imageUrl)) {
+      monsterImageUrlMap.set(imageUrl, await urlToDataUrl(imageUrl));
+    }
+  }
 
   return {
     guildStats,
@@ -81,7 +125,7 @@ export async function GET() {
   const iconGap = 4;
   const availW = 819;
   const availH = 486;
-  const iconSizeCandidates = [96, 80, 72, 64, 56, 48, 40, 32];
+  const iconSizeCandidates = [108, 100, 92, 84, 76, 68, 60, 52, 44, 36];
   const groups = [smallOnly.length, largeOnly.length].filter(n => n > 0);
   const iconSize = iconSizeCandidates.find(s => {
     const perRow = Math.floor(availW / (s + iconGap));
@@ -106,7 +150,7 @@ export async function GET() {
         <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: `${iconGap}px` }}>
           {items.map(m => (
             <div key={m.name} style={{ width: iconSize, height: iconSize, border: `1px solid ${colors.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.03)' }}>
-              <img src={`${baseUrl}/monsters/${m.image_name}`} width={iconSize - 4} height={iconSize - 4} style={{ objectFit: 'contain', imageRendering: 'pixelated' }} />
+              <img src={monsterImageUrlMap.get(`${baseUrl}/monsters/${m.image_name}`)} width={iconSize - 4} height={iconSize - 4} style={{ objectFit: 'contain', imageRendering: 'pixelated' }} />
             </div>
           ))}
         </div>
@@ -146,13 +190,13 @@ export async function GET() {
             display: 'flex',
             flexDirection: 'column',
             flex: 1,
-            padding: '22px 16px 22px 28px',
+            padding: '18px 14px 18px 22px',
             borderRight: `1px solid ${colors.border}`,
             gap: '10px',
             overflow: 'hidden',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '2px' }}>
-              <img src={`${baseUrl}/icons/MHWilds-Expedition_Record_Board_Icon.png`} width={24} height={24} style={{ imageRendering: 'pixelated' }} />
+              <img src={boardIconUrl} width={24} height={24} style={{ imageRendering: 'pixelated' }} />
               <span style={{ fontSize: 16, letterSpacing: '4px', color: colors.gold, display: 'flex' }}>GUILD CROWN REGISTRY</span>
               <span style={{ fontSize: 11, color: colors.tanDark, marginLeft: '6px', display: 'flex' }}>
                 — {[...new Set([...smallOnly.map(m => m.name), ...largeOnly.map(m => m.name)])].length} species
@@ -170,13 +214,13 @@ export async function GET() {
           <div style={{
             display: 'flex',
             flexDirection: 'column',
-            width: '280px',
-            padding: '22px 20px',
+            width: '260px',
+            padding: '18px 16px',
             gap: '14px',
           }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <img src={`${baseUrl}/icons/MHWilds-Hunt_Icon.png`} width={32} height={32} style={{ imageRendering: 'pixelated' }} />
+                <img src={huntIconUrl} width={32} height={32} style={{ imageRendering: 'pixelated' }} />
                 <span style={{ fontSize: 22, color: colors.goldBright, letterSpacing: '2px', display: 'flex', lineHeight: '1.1' }}>CROWN GUILD</span>
               </div>
               <span style={{ fontSize: 11, color: colors.tanDark, letterSpacing: '3px', display: 'flex' }}>OFFICIAL REGISTRY</span>

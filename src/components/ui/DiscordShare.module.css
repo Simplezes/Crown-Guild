@@ -1,6 +1,8 @@
 .wrapper {
   position: relative;
   width: 100%;
+  z-index: 1001;
+  isolation: isolate;
 }
 
 .shareBtn {
@@ -38,44 +40,199 @@
   background: rgba(20, 18, 17, 0.98);
   border: 1px solid var(--mh-gold);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
-  padding: 8px;
-  z-index: 50;
+  padding: 12px;
+  z-index: 10000;
+  min-width: 320px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sectionTitle {
+  font-family: 'Marcellus', serif;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--mh-gold);
+  opacity: 0.85;
+  padding: 0 4px 6px 4px;
+  font-weight: 600;
+}
+
+.actionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.optionCard {
+  border: 1.5px solid rgba(181, 154, 93, 0.25);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(181, 154, 93, 0.05) 100%);
+  color: var(--mh-tan);
+  text-align: left;
+  border-radius: 12px;
+  padding: 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.optionCard:hover {
+  background: linear-gradient(135deg, rgba(181, 154, 93, 0.12) 0%, rgba(181, 154, 93, 0.08) 100%);
+  border-color: rgba(181, 154, 93, 0.55);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(181, 154, 93, 0.1);
+}
+
+.optionLabel {
+  font-family: 'Marcellus', serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--mh-tan);
+  letter-spacing: 0.02em;
+}
+
+.optionDescription {
+  font-family: 'Marcellus', serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
+  color: rgba(212, 196, 161, 0.68);
+  line-height: 1.3;
+}
+
+.menuDivider {
+  height: 1px;
+  background: rgba(181, 154, 93, 0.2);
+  margin: 12px 0;
+}
+
+.serverSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(181, 154, 93, 0.2);
+}
+
+.serverGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
 
 .option {
   width: 100%;
   text-align: left;
-  border: none;
-  background: transparent;
+  border: 1.5px solid rgba(181, 154, 93, 0.25);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(181, 154, 93, 0.05) 100%);
   color: var(--mh-tan);
   font-family: 'Marcellus', serif;
-  font-size: 0.92rem;
-  padding: 10px 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 12px 14px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  border-radius: 10px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.02em;
 }
 
 .option:hover {
-  background: rgba(181, 154, 93, 0.14);
+  background: linear-gradient(135deg, rgba(181, 154, 93, 0.12) 0%, rgba(181, 154, 93, 0.08) 100%);
+  border-color: rgba(181, 154, 93, 0.55);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(181, 154, 93, 0.1);
 }
 
 .serverPickerTitle {
   font-family: 'Marcellus', serif;
   font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.15em;
   color: var(--mh-gold);
-  padding: 8px 12px 4px;
-  opacity: 0.7;
+  padding: 0 4px 6px 4px;
+  opacity: 0.85;
+  font-weight: 600;
+}
+
+.backButton {
+  width: 100%;
+  text-align: center;
+  border: 1.5px solid rgba(181, 154, 93, 0.25);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(181, 154, 93, 0.05) 100%);
+  color: var(--mh-tan);
+  font-family: 'Marcellus', serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 12px 14px;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.02em;
+}
+
+.backButton:hover {
+  background: linear-gradient(135deg, rgba(181, 154, 93, 0.12) 0%, rgba(181, 154, 93, 0.08) 100%);
+  border-color: rgba(181, 154, 93, 0.55);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(181, 154, 93, 0.1);
 }
 
 @media (max-width: 768px) {
-  .menu {
-    width: 100%;
+  .wrapper {
+    z-index: 1001;
   }
 
-  .option {
-    font-size: 1rem;
+  .menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100vw - 16px);
+    max-width: 100%;
+    max-height: 70vh;
+    z-index: 10000;
+    border-radius: 12px;
+  }
+
+  .actionGrid,
+  .serverGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .optionCard {
     padding: 12px;
+    font-size: 0.9rem;
+  }
+
+  .optionLabel {
+    font-size: 0.95rem;
+  }
+
+  .optionDescription {
+    font-size: 0.7rem;
+  }
+
+  .option,
+  .backButton {
+    font-size: 0.95rem;
+    padding: 10px 12px;
+  }
+
+  .shareBtn span {
+    font-size: 0.7rem;
+  }
+
+  .shareBtn {
+    gap: 8px !important;
+    font-size: 0.7rem !important;
   }
 }
