@@ -137,19 +137,21 @@ export default async function Home() {
                 The central hub for coordinating crown hunts, tracking legendary catches, and connecting with fellow hunters in the Crown Guild.
               </p>
               <div className={styles.heroActions}>
-                <Link href="/registry" className="mh-button">Open Ledger</Link>
+                <Link href="/registry" className="mh-button">View Crowns</Link>
                 <Link href="/investigation" className="mh-button-outline">Browse Monsters</Link>
+              </div>
+              <div className={styles.heroLinksRow}>
+                <a href="https://discord.gg/mhwilds" target="_blank" rel="noopener noreferrer" className={styles.heroTextLink}>Join Discord</a>
                 {discordBotInviteUrl && (
                   <a
                     href={discordBotInviteUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mh-button-outline"
+                    className={styles.heroTextLink}
                   >
-                    Talk to the Bot
+                    Invite Bot
                   </a>
                 )}
-                <a href="https://discord.gg/mhwilds" target="_blank" rel="noopener noreferrer" className="mh-button-outline">Join Discord</a>
               </div>
               {discordBotInviteUrl && (
                 <div className={styles.botCallout}>
@@ -178,33 +180,68 @@ export default async function Home() {
           </div>
         </div>
 
-        {QUEST_SYSTEM_ENABLED && (
-          <section className={styles.bountySection + " animate-mh"}>
-            <div className={styles.bountyHeader}>
-              <Image src="/icons/MHWilds-Completed_Objective_Icon.png" width={24} height={24} alt="" className="pixel-art" />
-              <h2 className="mh-title">Weekly Bounties</h2>
-              <InfoTrigger 
-                title="Weekly Bounties" 
-                content="Specific monsters designated by the Guild. Securing crowns for these monsters grants double Mastery Points." 
-                position="bottom"
-                align="left"
-              />
-              <span className={styles.bountyMeta}>2x Mastery Points Rewards</span>
-            </div>
-            <div className={styles.bountyGrid}>
-              {bounties.map(m => (
-                <Link href={`/monster/${m.name}`} key={m.id} className={styles.bountyCard}>
-                  <Image src={`/monsters/${m.image_name}`} width={48} height={48} alt={m.name} className="pixel-art" />
-                  <span className={styles.bountyName}>{m.name}</span>
-                </Link>
-              ))}
+        <div className={styles.tacticalGrid + " animate-mh"}>
+          <section className={styles.radarWrapper}>
+            <LiveRadarWrapper />
+          </section>
+
+          {SOS_FEATURE_ENABLED && (
+          <section className={styles.opsSection}>
+            <header className={styles.sectionHeader}>
+              <div className={styles.liveIndicator}>
+                <span className={styles.dot}></span>
+                LIVE OPERATIONS
+              </div>
+              <h2 className="mh-title">Ongoing Hunts</h2>
+            </header>
+            <div className={styles.opsGrid}>
+              {displayMissions && displayMissions.length > 0 ? (
+                displayMissions.map((mission) => (
+                  <div key={mission.isGroup ? mission.group_id : mission.id} className={styles.opCard}>
+                    <div className={styles.opMonster}>
+                      <Image src={`/monsters/${mission.image_name}`} width={40} height={40} alt="" className="pixel-art" />
+                      <div className={styles.opInfo}>
+                        <span className={styles.opName}>{mission.monster_name}</span>
+                        <span className={styles.opGoal}>{mission.strength_rating}★ {mission.type} Crown{mission.isGroup ? ' · SOS' : ''}</span>
+                      </div>
+                    </div>
+                    <div className={styles.opParty}>
+                      <div className={styles.opHunter}>
+                        <img src={mission.host_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" className={styles.opAvatar} />
+                        <Link href={`/profile/${mission.host_id}`}>{mission.host_name}</Link>
+                      </div>
+                      {mission.isGroup ? (
+                        <div className={styles.opGroupHunters}>
+                          {mission.hunters.map(h => (
+                            <div key={h.requester_id} className={styles.opHunter}>
+                              <img src={h.requester_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" className={styles.opAvatar} />
+                              <Link href={`/profile/${h.requester_id}`}>{h.requester_name}</Link>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <>
+                          <div className={styles.opVs}>
+                            <Image src="/icons/MHWilds-Squad_Information_Counter_Icon.png" width={30} height={30} alt="" className="pixel-art" />
+                          </div>
+                          <div className={styles.opHunter}>
+                            <img src={mission.requester_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" className={styles.opAvatar} />
+                            <Link href={`/profile/${mission.requester_id}`}>{mission.requester_name}</Link>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className={styles.emptyOps}>
+                  <p>No active operations in progress.</p>
+                </div>
+              )}
             </div>
           </section>
-        )}
-
-        <section className={styles.radarWrapper + " animate-mh"}>
-          <LiveRadarWrapper />
-        </section>
+          )}
+        </div>
 
         <div className={styles.intelGrid + " animate-mh"}>
           <section className={styles.intelCard}>
@@ -286,61 +323,28 @@ export default async function Home() {
           </section>
         </div>
 
-        {SOS_FEATURE_ENABLED && (
-        <section className={styles.opsSection + " animate-mh"}>
-          <header className={styles.sectionHeader}>
-            <div className={styles.liveIndicator}>
-              <span className={styles.dot}></span>
-              LIVE OPERATIONS
+        {QUEST_SYSTEM_ENABLED && (
+          <section className={styles.bountySection + " animate-mh"}>
+            <div className={styles.bountyHeader}>
+              <Image src="/icons/MHWilds-Completed_Objective_Icon.png" width={24} height={24} alt="" className="pixel-art" />
+              <h2 className="mh-title">Weekly Bounties</h2>
+              <InfoTrigger 
+                title="Weekly Bounties" 
+                content="Specific monsters designated by the Guild. Securing crowns for these monsters grants double Mastery Points." 
+                position="bottom"
+                align="left"
+              />
+              <span className={styles.bountyMeta}>2x Mastery Points Rewards</span>
             </div>
-            <h2 className="mh-title">Ongoing Hunts</h2>
-          </header>
-          <div className={styles.opsGrid}>
-            {displayMissions && displayMissions.length > 0 ? (
-              displayMissions.map((mission) => (
-                <div key={mission.isGroup ? mission.group_id : mission.id} className={styles.opCard}>
-                  <div className={styles.opMonster}>
-                    <Image src={`/monsters/${mission.image_name}`} width={40} height={40} alt="" className="pixel-art" />
-                    <div className={styles.opInfo}>
-                      <span className={styles.opName}>{mission.monster_name}</span>
-                      <span className={styles.opGoal}>{mission.strength_rating}★ {mission.type} Crown{mission.isGroup ? ' · SOS' : ''}</span>
-                    </div>
-                  </div>
-                  <div className={styles.opParty}>
-                    <div className={styles.opHunter}>
-                      <img src={mission.host_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" className={styles.opAvatar} />
-                      <Link href={`/profile/${mission.host_id}`}>{mission.host_name}</Link>
-                    </div>
-                    {mission.isGroup ? (
-                      <div className={styles.opGroupHunters}>
-                        {mission.hunters.map(h => (
-                          <div key={h.requester_id} className={styles.opHunter}>
-                            <img src={h.requester_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" className={styles.opAvatar} />
-                            <Link href={`/profile/${h.requester_id}`}>{h.requester_name}</Link>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <>
-                        <div className={styles.opVs}>
-                          <Image src="/icons/MHWilds-Squad_Information_Counter_Icon.png" width={30} height={30} alt="" className="pixel-art" />
-                        </div>
-                        <div className={styles.opHunter}>
-                          <img src={mission.requester_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" className={styles.opAvatar} />
-                          <Link href={`/profile/${mission.requester_id}`}>{mission.requester_name}</Link>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className={styles.emptyOps}>
-                <p>No active operations in progress.</p>
-              </div>
-            )}
-          </div>
-        </section>
+            <div className={styles.bountyGrid}>
+              {bounties.map(m => (
+                <Link href={`/monster/${m.name}`} key={m.id} className={styles.bountyCard}>
+                  <Image src={`/monsters/${m.image_name}`} width={48} height={48} alt={m.name} className="pixel-art" />
+                  <span className={styles.bountyName}>{m.name}</span>
+                </Link>
+              ))}
+            </div>
+          </section>
         )}
       </div>
     </main>
