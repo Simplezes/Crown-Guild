@@ -32,10 +32,10 @@ Log your Monster Hunter Wilds crown records, find hunters running investigation 
 You need Node 18+, a [Turso](https://turso.tech/) database, a Discord application with OAuth2, and a [Pusher](https://pusher.com/) Channels app.
 
 ```bash
-npm install
+pnpm install
 cp .env.example .env.local
 # fill in .env.local
-npm run dev
+pnpm dev
 ```
 
 App runs at `http://localhost:3000`.
