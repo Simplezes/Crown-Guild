@@ -9,7 +9,6 @@ export default function CrownHighlighter({ crownId }) {
     const el = document.getElementById(`crown-${crownId}`);
     if (!el) return;
 
-    // Small delay to allow layout to settle
     const t = setTimeout(() => {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 150);

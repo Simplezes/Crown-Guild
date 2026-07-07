@@ -2,10 +2,14 @@ import { auth } from "@/auth";
 import db from "@/lib/db";
 import { NextResponse } from "next/server";
 import { logServerError } from "@/lib/logger";
+import { checkRateLimit } from "@/lib/ratelimit";
 
 export async function POST(req) {
   const session = await auth();
   if (!session) return new NextResponse("Unauthorized", { status: 401 });
+
+  const rateLimitRes = await checkRateLimit("wishlist", session.user.id);
+  if (rateLimitRes) return rateLimitRes;
 
   try {
     const { monsterId, type } = await req.json();
@@ -38,6 +42,9 @@ export async function POST(req) {
 export async function DELETE(req) {
   const session = await auth();
   if (!session) return new NextResponse("Unauthorized", { status: 401 });
+
+  const rateLimitRes = await checkRateLimit("wishlist", session.user.id);
+  if (rateLimitRes) return rateLimitRes;
 
   try {
     const { monsterId } = await req.json();

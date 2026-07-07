@@ -102,8 +102,8 @@
 
 .ledgerGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 24px;
 }
 
 .monsterCard {
@@ -111,7 +111,7 @@
     linear-gradient(140deg, rgba(181, 154, 93, 0.08), transparent 45%),
     var(--mh-glass);
   border: 1px solid var(--mh-border);
-  padding: 20px;
+  padding: 22px;
   position: relative;
   display: block;
   text-decoration: none;
@@ -218,16 +218,16 @@
 .crownRows {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   border-top: 1px solid var(--mh-border);
-  padding-top: 14px;
+  padding-top: 16px;
 }
 
 .crownRow {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
+  gap: 12px;
+  padding: 10px 12px;
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid transparent;
   border-radius: 4px;
@@ -245,10 +245,10 @@
 }
 
 .stackAvatar {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   border: 1px solid var(--mh-gold);
-  margin-left: -8px;
+  margin-left: -5px;
   background: var(--mh-black);
   border-radius: 3px;
 }
@@ -258,8 +258,8 @@
 }
 
 .moreCount {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   background: var(--mh-gold);
   color: #000;
   font-size: 0.58rem;
@@ -267,7 +267,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: -8px;
+  margin-left: -5px;
   border-radius: 3px;
 }
 

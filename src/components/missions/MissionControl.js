@@ -262,13 +262,13 @@ export default function MissionControl() {
                   )}
                   <div className={styles.groupParty}>
                     <div className={styles.groupMember}>
-                      <img src={mission.host_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} className={styles.avatar} alt="" />
+                      <Image src={mission.host_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} width={20} height={20} className={styles.avatar} alt="" />
                       <span className={styles.groupMemberName}>{mission.host_name}</span>
                       <span className={styles.hostBadge}>Host</span>
                     </div>
                     {(group || []).map(m => (
                       <div key={m.requester_id} className={styles.groupMember}>
-                        <img src={m.requester_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} className={styles.avatar} alt="" />
+                        <Image src={m.requester_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} width={20} height={20} className={styles.avatar} alt="" />
                         <span className={styles.groupMemberName}>{m.requester_name}</span>
                         {m.hunter_confirmed === 1
                           ? <span className={styles.confirmedCheck}>✓</span>
@@ -318,12 +318,12 @@ export default function MissionControl() {
                 <div className={styles.party}>
                   <div className={styles.partyItem}>
                     <span className={styles.role}>Host</span>
-                    <img src={mission.host_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} className={styles.avatar} alt="" />
+                    <Image src={mission.host_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} width={20} height={20} className={styles.avatar} alt="" />
                     <span>{mission.host_name}</span>
                   </div>
                   <div className={styles.partyItem}>
                     <span className={styles.role}>Hunter</span>
-                    <img src={mission.requester_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} className={styles.avatar} alt="" />
+                    <Image src={mission.requester_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} width={20} height={20} className={styles.avatar} alt="" />
                     <span>{mission.requester_name}</span>
                   </div>
                 </div>

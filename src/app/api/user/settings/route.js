@@ -2,10 +2,14 @@ import { auth } from "@/auth";
 import db from "@/lib/db";
 import { NextResponse } from "next/server";
 import { logServerError } from "@/lib/logger";
+import { checkRateLimit } from "@/lib/ratelimit";
 
 async function updateSettings(req) {
   const session = await auth();
   if (!session) return new NextResponse("Unauthorized", { status: 401 });
+
+  const rateLimitRes = await checkRateLimit("settings", session.user.id);
+  if (rateLimitRes) return rateLimitRes;
 
   try {
     const { lobby_id, quest_password, status_message, receive_dms } = await req.json();
@@ -17,6 +21,14 @@ async function updateSettings(req) {
       if (normalizedPassword !== "" && !/^\d{4}$/.test(normalizedPassword)) {
         return NextResponse.json({ error: "Quest password must be exactly 4 digits." }, { status: 400 });
       }
+    }
+
+    if (status_message && status_message.length > 200) {
+      return NextResponse.json({ error: "Status message too long (max 200 characters)" }, { status: 400 });
+    }
+
+    if (lobby_id && lobby_id.length > 64) {
+      return NextResponse.json({ error: "Lobby ID too long (max 64 characters)" }, { status: 400 });
     }
 
     const updates = [];

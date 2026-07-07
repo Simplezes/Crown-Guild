@@ -293,6 +293,54 @@
     animation: itemRise 0.28s ease both;
   }
 
+  @keyframes slideDown {
+    from { transform: translateY(-15px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .menuToggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    flex-shrink: 0;
+    border: 1px solid rgba(181, 154, 93, 0.28);
+    background: rgba(181, 154, 93, 0.06);
+  }
+
+  .menuToggle:active {
+    background: rgba(181, 154, 93, 0.14);
+  }
+
+  .authSection {
+    margin-left: auto;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .createBtn {
+    padding: 8px 12px;
+    font-size: 0.64rem;
+    letter-spacing: 0.08em;
+  }
+
+  .userProfile {
+    gap: 8px;
+    padding: 4px 8px;
+    min-width: 0;
+  }
+
+  .userName {
+    display: none;
+  }
+
+  .dropdown {
+    right: 0;
+    min-width: 160px;
+  }
+}
 
 @keyframes navEnter {
   from {
@@ -344,48 +392,6 @@
   .dropdownItem,
   .createBtn {
     transition: none !important;
-  }
-}
-  @keyframes slideDown {
-    from { transform: translateY(-15px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-
-  .menuToggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 38px;
-    height: 38px;
-    padding: 0;
-    flex-shrink: 0;
-  }
-
-  .authSection {
-    margin-left: auto;
-    gap: 8px;
-    min-width: 0;
-  }
-
-  .createBtn {
-    padding: 8px 12px;
-    font-size: 0.64rem;
-    letter-spacing: 0.08em;
-  }
-
-  .userProfile {
-    gap: 8px;
-    padding: 4px 8px;
-    min-width: 0;
-  }
-
-  .userName {
-    display: none;
-  }
-
-  .dropdown {
-    right: 0;
-    min-width: 160px;
   }
 }
 

@@ -118,16 +118,18 @@ export default function LiveRadar() {
                   </span>
                 </div>
                 <div className={styles.hostLine}>
-                  <img src={flare.host_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" className={styles.hostAvatar} title={flare.host_name} />
+                  <Image src={flare.host_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" width={18} height={18} className={styles.hostAvatar} title={flare.host_name} />
                   <span className={styles.hostName}>{flare.host_name}</span>
                 </div>
                 {flare.members?.length > 0 && (
                   <div className={styles.memberRow}>
                     {flare.members.map(m => (
-                      <img
+                      <Image
                         key={m.id}
                         src={m.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"}
                         alt={m.username}
+                        width={22}
+                        height={22}
                         className={styles.memberAvatar}
                         title={m.username}
                       />

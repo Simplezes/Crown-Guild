@@ -7,3 +7,13 @@ export const pusherServer = new Pusher({
   cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
   useTLS: true
 });
+
+export function userChannel(userId) {
+  return `private-user-${userId}`;
+}
+
+export function notifyUsers(userIds, event, data) {
+  const channels = [...new Set(userIds.filter(Boolean))].map(userChannel);
+  if (channels.length === 0) return Promise.resolve();
+  return pusherServer.trigger(channels, event, data);
+}

@@ -1,7 +1,6 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import Pusher from 'pusher-js';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
@@ -40,15 +39,20 @@ export function NotificationProvider({ children }) {
 
     fetchNotifications();
 
-    const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY || 'fake-key', {
-      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER || 'us2'
-    });
+    let cancelled = false;
+    let cleanup = () => {};
 
-    const channel = pusher.subscribe('public-channel');
-    setPusherChannel(channel);
+    // pusher-js touches browser-only globals (`self`), so it must only be
+    // loaded on the client, not evaluated during SSR of this component.
+    import('@/lib/pusher-client').then(({ pusherClient }) => {
+      if (cancelled) return;
 
-    channel.bind('notification', (notif) => {
-      if (notif.recipient_id === session.user.id) {
+      const channelName = `private-user-${session.user.id}`;
+      const channel = pusherClient.subscribe(channelName);
+      const publicChannel = pusherClient.subscribe('public-channel');
+      setPusherChannel(channel);
+
+      const onNotification = (notif) => {
         setNotifications(prev => {
           if (prev.some(n => n.id === notif.id)) return prev;
           return [notif, ...prev];
@@ -57,38 +61,41 @@ export function NotificationProvider({ children }) {
 
         const audio = new Audio('/sounds/MHWilds-Ping.mp3');
         audio.play().catch(() => { });
-      }
-    });
+      };
 
-    channel.bind('notification_update', (update) => {
-      setNotifications(prev => prev.map(n => n.id === update.id ? { ...n, ...update } : n));
-    });
+      const onNotificationRemove = (filter) => {
+        setNotifications(prev => prev.filter(n => {
+          if (filter.id && n.id === filter.id) return false;
+          if (filter.user_id && n.user_id === filter.user_id && filter.monster_id && n.monster_id === filter.monster_id) return false;
+          return true;
+        }));
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      };
 
-    channel.bind('notification_remove', (filter) => {
-      setNotifications(prev => prev.filter(n => {
-        if (filter.id && n.id === filter.id) return false;
-        if (filter.user_id && n.user_id === filter.user_id && filter.monster_id && n.monster_id === filter.monster_id) return false;
-        return true;
-      }));
-      setUnreadCount(prev => Math.max(0, prev - 1));
-    });
+      const onMissionUpdate = () => fetchNotifications();
+      const onNotificationCreated = () => fetchNotifications();
+      const onCrownUpdate = () => router.refresh();
 
-    channel.bind('crown_update', () => {
-      router.refresh();
-    });
+      channel.bind('notification', onNotification);
+      channel.bind('notification_remove', onNotificationRemove);
+      channel.bind('mission_update', onMissionUpdate);
+      channel.bind('notification_created', onNotificationCreated);
+      publicChannel.bind('crown_update', onCrownUpdate);
 
-    channel.bind('mission_update', () => {
-      fetchNotifications();
-    });
-
-    channel.bind('notification_created', () => {
-      fetchNotifications();
+      cleanup = () => {
+        setPusherChannel(null);
+        channel.unbind('notification', onNotification);
+        channel.unbind('notification_remove', onNotificationRemove);
+        channel.unbind('mission_update', onMissionUpdate);
+        channel.unbind('notification_created', onNotificationCreated);
+        publicChannel.unbind('crown_update', onCrownUpdate);
+        pusherClient.unsubscribe(channelName);
+      };
     });
 
     return () => {
-      setPusherChannel(null);
-      pusher.unsubscribe('public-channel');
-      pusher.disconnect();
+      cancelled = true;
+      cleanup();
     };
   }, [session?.user?.id, fetchNotifications, router]);
 

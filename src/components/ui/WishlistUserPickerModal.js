@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
+import Image from "next/image";
 import styles from "./WishlistUserPickerModal.module.css";
 
 const PAGE_SIZE = 12;
@@ -135,9 +136,11 @@ export default function WishlistUserPickerModal({
                   }}
                 >
                   <span className={styles.userMain}>
-                    <img
+                    <Image
                       src={user.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"}
                       alt=""
+                      width={36}
+                      height={36}
                       className={styles.avatar}
                     />
                     <span className={styles.userInfo}>

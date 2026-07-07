@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Image from "next/image";
 import WishlistUserPickerModal from "@/components/ui/WishlistUserPickerModal";
 import styles from "./compare.module.css";
 
@@ -25,9 +26,11 @@ export default function CompareForm({ initialA, initialB }) {
           <label>Hunter A</label>
           <button type="button" className={styles.pickerBtn} onClick={() => setPickAOpen(true)}>
             <span className={styles.pickerBtnInner}>
-              <img
+              <Image
                 src={a?.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"}
                 alt=""
+                width={28}
+                height={28}
                 className={styles.pickerAvatar}
               />
               <span className={styles.pickerBtnText}>{a?.username || "Select hunter..."}</span>
@@ -40,9 +43,11 @@ export default function CompareForm({ initialA, initialB }) {
           <label>Hunter B</label>
           <button type="button" className={styles.pickerBtn} onClick={() => setPickBOpen(true)}>
             <span className={styles.pickerBtnInner}>
-              <img
+              <Image
                 src={b?.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"}
                 alt=""
+                width={28}
+                height={28}
                 className={styles.pickerAvatar}
               />
               <span className={styles.pickerBtnText}>{b?.username || "Select hunter..."}</span>

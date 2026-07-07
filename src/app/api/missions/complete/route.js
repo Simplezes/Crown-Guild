@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import db from "@/lib/db";
 import { auth } from "@/auth";
-import { pusherServer } from "@/lib/pusher";
+import { pusherServer, notifyUsers } from "@/lib/pusher";
 import { checkRateLimit } from "@/lib/ratelimit";
 import { logServerError } from "@/lib/logger";
 
@@ -52,25 +52,23 @@ export async function POST(request) {
         args: [userId, mission.group_id]
       });
 
-      const pendingRes = await db.execute({
-        sql: "SELECT COUNT(*) as count FROM active_missions WHERE group_id = ? AND hunter_confirmed = 0",
+      const groupRes = await db.execute({
+        sql: "SELECT * FROM active_missions WHERE group_id = ?",
         args: [mission.group_id]
       });
+      const groupMissions = groupRes.rows;
+      const groupRecipients = [...new Set([groupMissions[0]?.host_id, ...groupMissions.map(m => m.requester_id)])];
 
-      if (Number(pendingRes.rows[0].count) > 0) {
-        await pusherServer.trigger("public-channel", "mission_update", {
+      const pendingCount = groupMissions.filter(m => !m.hunter_confirmed).length;
+
+      if (pendingCount > 0) {
+        await notifyUsers(groupRecipients, "mission_update", {
           type: "group_confirmed",
           groupId: mission.group_id,
           confirmedUserId: userId
         });
         return NextResponse.json({ success: true, allDone: false });
       }
-
-      const groupRes = await db.execute({
-        sql: "SELECT * FROM active_missions WHERE group_id = ?",
-        args: [mission.group_id]
-      });
-      const groupMissions = groupRes.rows;
 
       for (const m of groupMissions) {
         await db.execute({ sql: "INSERT OR IGNORE INTO users(id) VALUES (?)", args: [m.requester_id] });
@@ -117,7 +115,7 @@ export async function POST(request) {
       }
 
       await db.execute({ sql: "DELETE FROM active_missions WHERE group_id = ?", args: [mission.group_id] });
-      await pusherServer.trigger("public-channel", "mission_update", { status: "completed", groupId: mission.group_id });
+      await notifyUsers(groupRecipients, "mission_update", { status: "completed", groupId: mission.group_id });
       await pusherServer.trigger("public-channel", "crown_update", {});
       return NextResponse.json({ success: true, allDone: true });
     }
@@ -173,7 +171,7 @@ export async function POST(request) {
       }
     }
 
-    await pusherServer.trigger("public-channel", "mission_update", { status: 'completed', hostId, requesterId });
+    await notifyUsers([hostId, requesterId], "mission_update", { status: 'completed', hostId, requesterId });
     await pusherServer.trigger("public-channel", "crown_update", {});
 
     return NextResponse.json({ success: true });

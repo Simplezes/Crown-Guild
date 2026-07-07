@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import db from "@/lib/db";
 import { auth } from "@/auth";
-import { pusherServer } from "@/lib/pusher";
+import { pusherServer, notifyUsers } from "@/lib/pusher";
 import { logServerError } from "@/lib/logger";
+import { checkRateLimit } from "@/lib/ratelimit";
 
 export async function POST(request, { params }) {
   try {
@@ -11,6 +12,9 @@ export async function POST(request, { params }) {
     if (!session || !session.user || !session.user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const rateLimitRes = await checkRateLimit("mission", session.user.id);
+    if (rateLimitRes) return rateLimitRes;
 
     const beaconRes = await db.execute({
       sql: "SELECT * FROM web_notifications WHERE id = ? AND host_id = ?",
@@ -94,9 +98,10 @@ export async function POST(request, { params }) {
       ]
     });
 
-    await pusherServer.trigger("public-channel", "mission_update", {});
+    await notifyUsers([session.user.id, beacon.user_id], "mission_update", {});
     await pusherServer.trigger("public-channel", "crown_update", {});
-    await pusherServer.trigger("public-channel", "notification_updated", {});
+    // Public: the bot listens on public-channel to poll and sync Discord embeds;
+    // payload carries no personal data.
     await pusherServer.trigger("public-channel", "notification_created", {});
 
     return NextResponse.json({ success: true });
@@ -114,11 +119,23 @@ export async function DELETE(request, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const rateLimitRes = await checkRateLimit("notification", session.user.id);
+    if (rateLimitRes) return rateLimitRes;
+
+    const beaconRes = await db.execute({
+      sql: "SELECT user_id FROM web_notifications WHERE id = ? AND host_id = ?",
+      args: [id, session.user.id]
+    });
+
     await db.execute({
       sql: "UPDATE web_notifications SET status = 'declined' WHERE id = ? AND host_id = ?",
       args: [id, session.user.id]
     });
 
+    const submitterId = beaconRes.rows[0]?.user_id;
+    await notifyUsers([session.user.id, submitterId], "notification_remove", { id: Number(id) });
+    // Public: the bot listens on public-channel to sync the declined status
+    // to the Discord embed; payload carries no personal data.
     await pusherServer.trigger("public-channel", "notification_updated", {});
 
     return NextResponse.json({ success: true });

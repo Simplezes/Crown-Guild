@@ -103,9 +103,11 @@ export default async function Profile({ params }) {
               <div className={styles.titleGroup}>
                 <span className={styles.indicator}>Hunter Profile</span>
                 <div className={styles.identityRow}>
-                  <img
+                  <Image
                     src={user.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"}
                     alt={user.username}
+                    width={76}
+                    height={76}
                     className={styles.profileAvatar}
                   />
                   <div>

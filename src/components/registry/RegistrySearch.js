@@ -130,7 +130,7 @@ export default function RegistrySearch({ initialRegistry }) {
                       <div className={styles.avatarStack}>
                         {monster.smallFinders.slice(0, 4).map((f, i) => (
                           <div key={i} className={styles.avatarWrapper}>
-                            <img src={f.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"} alt={f.username} className={`${styles.stackAvatar} ${f.isFever ? styles.feverAvatar : ''}`} />
+                            <Image src={f.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"} alt={f.username} width={24} height={24} className={`${styles.stackAvatar} ${f.isFever ? styles.feverAvatar : ''}`} />
                             {QUEST_SYSTEM_ENABLED && f.isFever && (
                               <div className={styles.feverGlow} title="GUILD FEVER! (3x Points)">
                                 <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
@@ -169,7 +169,7 @@ export default function RegistrySearch({ initialRegistry }) {
                       <div className={styles.avatarStack}>
                         {monster.largeFinders.slice(0, 4).map((f, i) => (
                           <div key={i} className={styles.avatarWrapper}>
-                            <img src={f.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"} alt={f.username} className={`${styles.stackAvatar} ${f.isFever ? styles.feverAvatar : ''}`} />
+                            <Image src={f.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"} alt={f.username} width={24} height={24} className={`${styles.stackAvatar} ${f.isFever ? styles.feverAvatar : ''}`} />
                             {QUEST_SYSTEM_ENABLED && f.isFever && (
                               <div className={styles.feverGlow} title="GUILD FEVER! (3x Points)">
                                 <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">

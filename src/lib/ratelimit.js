@@ -23,10 +23,15 @@ function getLimiter(key) {
 
   if (!ratelimiters[key]) {
     const limits = {
-      crown:   { requests: 20, window: "1 m" },
-      beacon:  { requests: 5,  window: "1 m" },
-      mission: { requests: 10, window: "1 m" },
-      status:  { requests: 10, window: "1 m" },
+      crown:        { requests: 20, window: "1 m" },
+      beacon:       { requests: 5,  window: "1 m" },
+      mission:      { requests: 10, window: "1 m" },
+      status:       { requests: 10, window: "1 m" },
+      settings:     { requests: 10, window: "1 m" },
+      flare:        { requests: 10, window: "1 m" },
+      collection:   { requests: 20, window: "1 m" },
+      wishlist:     { requests: 20, window: "1 m" },
+      notification: { requests: 20, window: "1 m" },
     };
     const { requests, window } = limits[key];
     ratelimiters[key] = new Ratelimit({

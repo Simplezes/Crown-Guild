@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import ContactButton from "../beacon/ContactButton";
 import styles from "@/app/monster/[name]/monster.module.css";
 
@@ -45,16 +46,18 @@ export default function HunterItem({ crown, linkedCrown = null, monsterName, mon
     <div className={`${styles.hunterItem} ${isHighlighted ? styles.highlighted : ''}`} id={`crown-${crownId}`}>
       {ghostImageName && (
         <div className={styles.primaryQuestGhost}>
-          <img src={`/monsters/${ghostImageName}`} alt="" className={`${styles.primaryQuestGhostImage} pixel-art`} />
+          <Image src={`/monsters/${ghostImageName}`} alt="" fill sizes="120px" className={`${styles.primaryQuestGhostImage} pixel-art`} />
         </div>
       )}
 
       <Link href={`/profile/${user_id}`} className={styles.hunterMain}>
         <div className={styles.social}>
           <div className={styles.avatarWrap}>
-            <img
+            <Image
               src={avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"}
               alt=""
+              width={66}
+              height={66}
               className={styles.avatar}
             />
             <span className={styles.mobileName}>{username}</span>

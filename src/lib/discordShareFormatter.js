@@ -99,7 +99,6 @@ export function formatEmojiGrid(data, useEmojis = true) {
 
   const rawCrowns = Array.isArray(data?.crowns) ? data.crowns : [];
 
-  // Deduplicate into small and large lists preserving order
   const smallCrowns = [];
   const largeCrowns = [];
   const seenSmall = new Set();
@@ -141,7 +140,6 @@ export function formatEmojiGrid(data, useEmojis = true) {
   const sLine = formatAvailLine('S', smallCrowns);
   const lLine = formatAvailLine('L', largeCrowns);
 
-  // Build Multi-Quest pairs from pair_id
   const pairMap = new Map();
   for (const crown of rawCrowns) {
     if (!crown?.pair_id) continue;

@@ -163,9 +163,11 @@ export default async function ComparePage({ searchParams }) {
             <section className={styles.accountCompareGrid}>
               <article className={styles.accountPanel}>
                 <header className={styles.accountHeader}>
-                  <img
+                  <Image
                     src={data.userA.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"}
                     alt=""
+                    width={44}
+                    height={44}
                     className={styles.accountAvatar}
                   />
                   <div>
@@ -185,9 +187,11 @@ export default async function ComparePage({ searchParams }) {
 
               <article className={styles.accountPanel}>
                 <header className={styles.accountHeader}>
-                  <img
+                  <Image
                     src={data.userB.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"}
                     alt=""
+                    width={44}
+                    height={44}
                     className={styles.accountAvatar}
                   />
                   <div>
