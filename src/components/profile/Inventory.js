@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from 'react';
-import styles from './CompletionTracker.module.css';
+import styles from './Inventory.module.css';
 import CrownSummary from '../crowns/CrownSummary';
+import ProfileCrowns from '../crowns/ProfileCrowns';
 import { useToast } from '@/app/UIProvider';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
-export default function CompletionTracker({
+export default function Inventory({
   initialCrowns,
   initialCollection,
   initialWishlist,
@@ -16,7 +17,6 @@ export default function CompletionTracker({
   userId
 }) {
   const [activeTab, setActiveTab] = useState('host');
-  const [isCollapsed, setIsCollapsed] = useState(true);
   const [collection, setCollection] = useState(initialCollection || []);
   const [wishlist, setWishlist] = useState(initialWishlist || []);
   const toast = useToast();
@@ -78,18 +78,9 @@ export default function CompletionTracker({
     }
   };
 
-  const getTabData = () => {
-    switch (activeTab) {
-      case 'host': return initialCrowns;
-      case 'hunter': return collection;
-      case 'wishlist': return wishlist;
-      default: return [];
-    }
-  };
-
   const getTabInfo = () => {
     switch (activeTab) {
-      case 'host': return "Crowns currently available in this Hunter's records to be shared or hosted with the community.";
+      case 'host': return "Crowns currently in your inventory, ready to be shared or hosted with the community.";
       case 'hunter': return "Specimens secured in your game. Mark these to earn Mastery Points (10 MP per crown, +10 MP for both).";
       case 'wishlist': return "Monsters you are currently tracking. Wishlisted monsters appear in searches to help others find you.";
       default: return "";
@@ -101,16 +92,16 @@ export default function CompletionTracker({
   const wishCount = wishlist.length;
 
   return (
-    <section className={`${styles.container} ${isCollapsed ? styles.collapsed : ''}`}>
-      <header className={styles.header} onClick={() => setIsCollapsed(!isCollapsed)}>
+    <section className={styles.container}>
+      <header className={styles.header}>
         <div className={styles.titleArea}>
-          <h3 className="mh-title">Progress Tracker</h3>
+          <h3 className="mh-title">Inventory</h3>
           <p>Specimen Collection & Wishlist Status</p>
         </div>
 
         <div className={styles.headerStats}>
           <div className={styles.statItem}>
-            <label>Hosts</label>
+            <label>Crowns</label>
             <span>{hostCount}</span>
           </div>
           <div className={styles.statItem}>
@@ -122,12 +113,6 @@ export default function CompletionTracker({
             <span>{wishCount}</span>
           </div>
         </div>
-
-        <div className={styles.toggleIcon}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
       </header>
 
       <div className={styles.content}>
@@ -136,13 +121,13 @@ export default function CompletionTracker({
             className={`${styles.tab} ${activeTab === 'host' ? styles.tabActive : ''}`}
             onClick={() => setActiveTab('host')}
           >
-            Host Crowns
+            Crowns
           </button>
           <button
             className={`${styles.tab} ${activeTab === 'hunter' ? styles.tabActive : ''}`}
             onClick={() => setActiveTab('hunter')}
           >
-            Crowns Collected
+            Collected
           </button>
           <button
             className={`${styles.tab} ${activeTab === 'wishlist' ? styles.tabActive : ''}`}
@@ -168,13 +153,17 @@ export default function CompletionTracker({
           )}
         </div>
 
-        <CrownSummary
-          items={getTabData()}
-          allMonsters={allMonsters}
-          isOwner={isOwner}
-          mode={activeTab}
-          onToggle={activeTab === 'hunter' ? handleToggleCollection : (activeTab === 'wishlist' ? handleToggleWishlist : null)}
-        />
+        {activeTab === 'host' ? (
+          <ProfileCrowns initialCrowns={initialCrowns} isOwner={isOwner} userId={userId} />
+        ) : (
+          <CrownSummary
+            items={activeTab === 'hunter' ? collection : wishlist}
+            allMonsters={allMonsters}
+            isOwner={isOwner}
+            mode={activeTab}
+            onToggle={activeTab === 'hunter' ? handleToggleCollection : handleToggleWishlist}
+          />
+        )}
       </div>
     </section>
   );

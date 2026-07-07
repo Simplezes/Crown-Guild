@@ -12,13 +12,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  cursor: pointer;
   background: linear-gradient(to right, rgba(181, 154, 93, 0.05), transparent);
   border-bottom: 1px solid rgba(181, 154, 93, 0.05);
-}
-
-.header:hover {
-  background: linear-gradient(to right, rgba(181, 154, 93, 0.08), transparent);
 }
 
 .headerStats {
@@ -60,27 +55,8 @@
   letter-spacing: 0.05em;
 }
 
-.toggleIcon {
-  color: var(--mh-gold);
-  transition: transform 0.3s ease;
-}
-
-.collapsed .toggleIcon {
-  transform: rotate(-90deg);
-}
-
 .content {
   padding: 30px;
-  max-height: 100%;
-  opacity: 1;
-  transition: all 0.4s ease;
-}
-
-.collapsed .content {
-  max-height: 0;
-  padding: 0;
-  opacity: 0;
-  pointer-events: none;
 }
 
 .tabs {
@@ -164,18 +140,12 @@
     gap: 15px;
     padding: 20px;
   }
-  
+
   .headerStats {
     margin: 0;
     width: 100%;
     justify-content: space-between;
     gap: 10px;
-  }
-
-  .toggleIcon {
-    position: absolute;
-    right: 20px;
-    top: 20px;
   }
 
   .content {
