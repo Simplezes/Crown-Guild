@@ -10,6 +10,8 @@
   --mh-tan-dark: #a1937a;
   --mh-gold: #b59a5d;
   --mh-gold-bright: #e0cc96;
+  --mh-gold-dim: rgba(181, 154, 93, 0.45);
+  --mh-gold-glow: rgba(181, 154, 93, 0.6);
   --mh-red: #8b2e2e;
   --mh-red-bright: #c44545;
   --mh-border: rgba(61, 52, 45, 0.6);

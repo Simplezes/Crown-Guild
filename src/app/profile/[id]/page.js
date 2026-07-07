@@ -4,12 +4,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { auth } from "@/auth";
-import ProfileCrowns from "@/components/crowns/ProfileCrowns";
 import ProfileSettings from "@/components/profile/ProfileSettings";
 import { getProfileData, getRankProgress } from "@/lib/profile";
 import DiscordShare from "@/components/ui/DiscordShare";
 import { getAllMonsters } from "@/lib/monsters";
-import CompletionTracker from "@/components/profile/CompletionTracker";
+import Inventory from "@/components/profile/Inventory";
 import MasteryInfo from "@/components/profile/MasteryInfo";
 import CompareWithButton from "@/components/profile/CompareWithButton";
 
@@ -204,32 +203,14 @@ export default async function Profile({ params }) {
         )}
 
         <section className={styles.ledgerSection}>
-          <header className={styles.ledgerHeader}>
-            <div className={styles.ledgerTitle}>
-              <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={24} height={24} alt="" className="pixel-art" />
-              <h2 className="mh-title">Crown Collection</h2>
-            </div>
-          </header>
-
-          <div className={styles.summarySection}>
-            <CompletionTracker
-              initialCrowns={crowns}
-              initialCollection={data.collection}
-              initialWishlist={data.wishlist}
-              allMonsters={allMonsters}
-              isOwner={isOwner}
-              userId={user.id}
-            />
-          </div>
-
-          <div className={styles.galleryHeader} style={{ marginTop: '60px' }}>
-            <h2 className="mh-title">My Crowns</h2>
-            <div className={styles.recordCount}>
-              <span>{crowns.length} Crowns</span>
-            </div>
-          </div>
-
-          <ProfileCrowns initialCrowns={crowns} isOwner={isOwner} userId={user.id} />
+          <Inventory
+            initialCrowns={crowns}
+            initialCollection={data.collection}
+            initialWishlist={data.wishlist}
+            allMonsters={allMonsters}
+            isOwner={isOwner}
+            userId={user.id}
+          />
         </section>
 
         <div className={styles.footer}>

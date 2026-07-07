@@ -321,61 +321,6 @@
   animation-delay: 0.12s;
 }
 
-.ledgerHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 32px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid rgba(181, 154, 93, 0.12);
-}
-
-.ledgerTitle {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.ledgerTitle h2 {
-  margin: 0;
-}
-
-.ledgerMeta {
-  display: flex;
-  align-items: center;
-}
-
-.summarySection {
-  margin-bottom: 40px;
-}
-
-.galleryHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid rgba(181, 154, 93, 0.12);
-}
-
-.galleryHeader h2 {
-  margin: 0;
-}
-
-.recordCount {
-  background: rgba(181, 154, 93, 0.12);
-  border: 1px solid rgba(181, 154, 93, 0.28);
-  color: var(--mh-gold-bright);
-  padding: 6px 14px;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 700;
-  font-family: 'Marcellus', serif;
-}
-
 .footer {
   text-align: center;
   margin-top: 40px;
@@ -445,18 +390,6 @@
     padding: 18px;
   }
 
-  .ledgerHeader {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .galleryHeader {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
   .lobbySection {
     padding: 18px;
   }
@@ -511,12 +444,24 @@
     linear-gradient(140deg, rgba(181, 154, 93, 0.07), transparent 45%),
     var(--mh-glass);
   border: 1px solid var(--mh-border);
+  outline: 1px solid rgba(0, 0, 0, 0.4);
+  outline-offset: -4px;
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
   transition: var(--transition-mh);
   animation: cardEnter 0.32s ease both;
+}
+
+.crownCardTempered {
+  border-color: rgba(163, 53, 238, 0.45);
+  box-shadow: 0 0 16px var(--mh-purple-glow);
+}
+
+.crownCardTempered:hover {
+  border-color: rgba(163, 53, 238, 0.7);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45), 0 0 20px var(--mh-purple-glow);
 }
 
 .crownCard:nth-child(2n) { animation-delay: 0.03s; }

@@ -118,7 +118,7 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
 
     const cardId = crown.id;
     return (
-      <div className={styles.crownCard}>
+      <div className={`${styles.crownCard} ${crown.tempered ? styles.crownCardTempered : ''}`}>
         {renderPrimaryQuestGhost(crown)}
 
         <div className={styles.cardTop}>
@@ -195,7 +195,7 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
 
     const cardId = first.pair_id || first.investigation_id || first.id;
     return (
-      <div className={styles.crownCard}>
+      <div className={`${styles.crownCard} ${anyTempered ? styles.crownCardTempered : ''}`}>
         {renderPrimaryQuestGhost(first)}
 
         <div className={styles.cardTop}>
@@ -265,9 +265,10 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
     const questLabel = quest === "Investigation Quests"
       ? `Investigation${first.remaining_uses != null ? ` · ${first.remaining_uses}` : ''}`
       : quest;
+    const anyTempered = group.some(c => c.tempered);
 
     return (
-      <div className={`${styles.crownCard} ${styles.crownCardDual} ${isQuad ? styles.crownCardQuad : ""}`}>
+      <div className={`${styles.crownCard} ${styles.crownCardDual} ${isQuad ? styles.crownCardQuad : ""} ${anyTempered ? styles.crownCardTempered : ''}`}>
         {renderPrimaryQuestGhost(first, hostDiffers && first.inv_monster_name ? `${titleCase(first.inv_monster_name)} quest` : null)}
 
         <div className={styles.cardTop}>
