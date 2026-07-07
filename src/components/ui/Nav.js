@@ -121,9 +121,11 @@ export default function Nav() {
               aria-label="User menu"
             >
               {session.user.image && (
-                <img
+                <Image
                   src={session.user.image}
                   alt={session.user.name}
+                  width={28}
+                  height={28}
                   className={"pixel-art " + styles.userAvatar}
                 />
               )}

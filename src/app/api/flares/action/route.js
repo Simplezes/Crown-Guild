@@ -1,10 +1,11 @@
 import db from "@/lib/db";
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
-import { pusherServer } from "@/lib/pusher";
+import { pusherServer, notifyUsers } from "@/lib/pusher";
 import { randomUUID } from "crypto";
 import { SOS_DISABLED_MESSAGE, SOS_FEATURE_ENABLED } from '@/lib/sos';
 import { logServerError } from "@/lib/logger";
+import { checkRateLimit } from "@/lib/ratelimit";
 
 export async function POST(req) {
   if (!SOS_FEATURE_ENABLED) {
@@ -16,6 +17,9 @@ export async function POST(req) {
     if (!session?.user) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
+
+    const rateLimitRes = await checkRateLimit("flare", session.user.id);
+    if (rateLimitRes) return rateLimitRes;
 
     const { action, flareId } = await req.json();
     const userId = session.user.id;
@@ -115,7 +119,7 @@ export async function POST(req) {
                 VALUES (?, ?, ?, 'hunt_accepted', ?, (SELECT id FROM crowns WHERE user_id = ? AND monster_id = ? AND type = ? LIMIT 1), 'pending')`,
           args: [hunterId, userId, hunterId, flare.monster_id, userId, flare.monster_id, flare.type]
         });
-        await pusherServer.trigger("public-channel", "notification", {
+        await notifyUsers([hunterId], "notification", {
           type: 'hunt_accepted',
           recipient_id: hunterId
         });
@@ -135,7 +139,9 @@ export async function POST(req) {
         hostName: flare.host_name,
         hunters: queueRes.rows.map(r => r.username),
       });
-      await pusherServer.trigger("public-channel", "mission_update", {});
+      await notifyUsers([userId, ...queueRes.rows.map(r => r.user_id)], "mission_update", {});
+      // Public: the bot listens on public-channel to sync accepted/declined
+      // web notifications back to Discord embeds; payload carries no personal data.
       await pusherServer.trigger("public-channel", "notification_updated", {});
       return NextResponse.json({ success: true });
     }

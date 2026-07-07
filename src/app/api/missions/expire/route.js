@@ -1,8 +1,9 @@
 import db from "@/lib/db";
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
-import { pusherServer } from "@/lib/pusher";
+import { notifyUsers } from "@/lib/pusher";
 import { logServerError } from "@/lib/logger";
+import { checkRateLimit } from "@/lib/ratelimit";
 
 export async function POST() {
   try {
@@ -10,6 +11,9 @@ export async function POST() {
     if (!session?.user) return new NextResponse("Unauthorized", { status: 401 });
 
     const userId = session.user.id;
+
+    const rateLimitRes = await checkRateLimit("mission", userId);
+    if (rateLimitRes) return rateLimitRes;
 
     const missionRes = await db.execute({
       sql: "SELECT * FROM active_missions WHERE requester_id = ?",
@@ -22,7 +26,7 @@ export async function POST() {
 
     const mission = missionRes.rows[0];
     await db.execute({ sql: "DELETE FROM active_missions WHERE id = ?", args: [mission.id] });
-    await pusherServer.trigger("public-channel", "mission_update", { status: 'expired', requesterId: userId });
+    await notifyUsers([userId, mission.host_id], "mission_update", { status: 'expired', requesterId: userId });
 
     return NextResponse.json({ success: true });
   } catch (e) {

@@ -207,14 +207,14 @@ export default async function Home() {
                     </div>
                     <div className={styles.opParty}>
                       <div className={styles.opHunter}>
-                        <img src={mission.host_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" className={styles.opAvatar} />
+                        <Image src={mission.host_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" width={26} height={26} className={styles.opAvatar} />
                         <Link href={`/profile/${mission.host_id}`}>{mission.host_name}</Link>
                       </div>
                       {mission.isGroup ? (
                         <div className={styles.opGroupHunters}>
                           {mission.hunters.map(h => (
                             <div key={h.requester_id} className={styles.opHunter}>
-                              <img src={h.requester_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" className={styles.opAvatar} />
+                              <Image src={h.requester_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" width={26} height={26} className={styles.opAvatar} />
                               <Link href={`/profile/${h.requester_id}`}>{h.requester_name}</Link>
                             </div>
                           ))}
@@ -225,7 +225,7 @@ export default async function Home() {
                             <Image src="/icons/MHWilds-Squad_Information_Counter_Icon.png" width={30} height={30} alt="" className="pixel-art" />
                           </div>
                           <div className={styles.opHunter}>
-                            <img src={mission.requester_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" className={styles.opAvatar} />
+                            <Image src={mission.requester_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" width={26} height={26} className={styles.opAvatar} />
                             <Link href={`/profile/${mission.requester_id}`}>{mission.requester_name}</Link>
                           </div>
                         </>
@@ -310,7 +310,7 @@ export default async function Home() {
               {topRenown.map((u, i) => (
                 <Link href={`/profile/${u.id}`} key={u.id} className={styles.listItem}>
                   <div className={styles.itemIcon}>
-                    <img src={u.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"} width={40} height={40} alt="" className={styles.roundAvatar} />
+                    <Image src={u.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"} width={40} height={40} alt="" className={styles.roundAvatar} />
                   </div>
                   <div className={styles.itemInfo}>
                     <span className={styles.itemName}>{u.username}</span>

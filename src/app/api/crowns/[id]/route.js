@@ -3,12 +3,16 @@ import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import { pusherServer } from "@/lib/pusher";
 import { logServerError } from "@/lib/logger";
+import { checkRateLimit } from "@/lib/ratelimit";
 
 export async function PATCH(req, { params }) {
   const session = await auth();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const rateLimitRes = await checkRateLimit("crown", session.user.id);
+  if (rateLimitRes) return rateLimitRes;
 
   const { id } = await params;
 
@@ -46,7 +50,6 @@ export async function PATCH(req, { params }) {
         ? mission_host_enabled
         : (investigation_monster_id !== undefined ? investigation_monster_id !== null && investigation_monster_id !== "" : oldInvestigationId !== null);
 
-    // Investigation quests always need an investigation record to track remaining uses.
     const hostEnabled = quest === "Investigation Quests" ? true : requestedHostEnabled;
 
     if (!hostEnabled) {
@@ -136,6 +139,9 @@ export async function DELETE(req, { params }) {
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const rateLimitRes = await checkRateLimit("crown", session.user.id);
+  if (rateLimitRes) return rateLimitRes;
 
   const { id } = await params;
 

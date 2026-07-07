@@ -35,6 +35,12 @@ const nextConfig = {
   turbopack: {
     root: webRoot,
   },
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "cdn.discordapp.com" },
+      { protocol: "https", hostname: "media.discordapp.net" },
+    ],
+  },
   async headers() {
     return [
       {

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import db from "@/lib/db";
 import { auth } from "@/auth";
 import { logServerError } from "@/lib/logger";
+import { checkRateLimit } from "@/lib/ratelimit";
 
 export async function POST(request) {
   try {
@@ -9,6 +10,9 @@ export async function POST(request) {
     if (!session || !session.user || !session.user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const rateLimitRes = await checkRateLimit("notification", session.user.id);
+    if (rateLimitRes) return rateLimitRes;
 
     const { type } = await request.json();
 

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import db from "@/lib/db";
 import { auth } from "@/auth";
 import { logServerError } from "@/lib/logger";
+import { checkRateLimit } from "@/lib/ratelimit";
 
 export async function POST(request, { params }) {
   try {
@@ -10,6 +11,9 @@ export async function POST(request, { params }) {
     if (!session || !session.user || !session.user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const rateLimitRes = await checkRateLimit("notification", session.user.id);
+    if (rateLimitRes) return rateLimitRes;
 
     await db.execute({
       sql: "UPDATE web_notifications SET status = 'read' WHERE id = ? AND recipient_id = ?",

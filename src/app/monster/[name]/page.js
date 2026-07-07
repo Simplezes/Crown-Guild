@@ -558,7 +558,7 @@ export default async function MonsterDetail({ params, searchParams }) {
                     {wishlist.length > 0 ? pagedSeeking.items.map((entry) => (
                       <Link href={`/profile/${entry.user_id}`} key={entry.id || entry.user_id} className={styles.wishlistUser}>
                         <div className={styles.userLeft}>
-                          {entry.avatar_url && <img src={entry.avatar_url} alt="" className={styles.userAvatar} />}
+                          {entry.avatar_url && <Image src={entry.avatar_url} alt="" width={40} height={40} className={styles.userAvatar} />}
                           <div className={styles.userInfo}>
                             <span className={styles.userName}>{entry.username}</span>
                             <span className={styles.userStatus}>{entry.status_message || "Active Hunter"}</span>

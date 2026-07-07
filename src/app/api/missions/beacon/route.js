@@ -70,6 +70,8 @@ export async function POST(request) {
       args: [session.user.id, host_id, host_id, mId, cId]
     });
 
+    // Public: the bot listens on public-channel to poll and DM the host;
+    // payload carries no personal data.
     await pusherServer.trigger("public-channel", "notification_created", {});
     
     return NextResponse.json({ success: true });

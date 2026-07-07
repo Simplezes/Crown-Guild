@@ -6,8 +6,11 @@ import Image from 'next/image';
 import styles from './find.module.css';
 import MonsterIcon from '@/components/ui/MonsterIcon';
 
+const HOST_PREVIEW_COUNT = 6;
+
 export default function FindSearch({ initialHosts }) {
   const [search, setSearch] = useState('');
+  const [expandedGroups, setExpandedGroups] = useState({});
 
   const filteredHosts = useMemo(() => {
     if (!search.trim()) return initialHosts;
@@ -61,21 +64,29 @@ export default function FindSearch({ initialHosts }) {
 
       <div className={styles.resultsGrid}>
         {groupedHosts.length > 0 ? (
-          groupedHosts.map((group) => (
+          groupedHosts.map((group) => {
+            const isExpanded = !!expandedGroups[group.name];
+            const visibleHosts = isExpanded ? group.hosts : group.hosts.slice(0, HOST_PREVIEW_COUNT);
+            const remaining = group.hosts.length - visibleHosts.length;
+
+            return (
             <div key={group.name} className={styles.monsterGroup}>
               <div className={styles.groupHeader}>
                 <MonsterIcon imageName={group.image} name={group.name} size={48} />
                 <h2>{group.name}</h2>
+                <span className={styles.groupCount}>{group.hosts.length}</span>
               </div>
 
               <div className={styles.hostsList}>
-                {group.hosts.map((host) => (
+                {visibleHosts.map((host) => (
                   <div key={host.id} className={styles.hostCard}>
                     <div className={styles.hostMain}>
                       <div className={styles.hunterInfo}>
-                        <img
+                        <Image
                           src={host.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"}
                           alt=""
+                          width={44}
+                          height={44}
                           className={styles.avatar}
                         />
                         <div className={styles.hunterText}>
@@ -143,8 +154,18 @@ export default function FindSearch({ initialHosts }) {
                   </div>
                 ))}
               </div>
+
+              {remaining > 0 && (
+                <button
+                  className={styles.showMoreBtn}
+                  onClick={() => setExpandedGroups(prev => ({ ...prev, [group.name]: true }))}
+                >
+                  Show {remaining} more host{remaining === 1 ? '' : 's'}
+                </button>
+              )}
             </div>
-          ))
+            );
+          })
         ) : (
           <div className={styles.noResults}>
             <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={64} height={64} alt="" className="pixel-art grayscale" />

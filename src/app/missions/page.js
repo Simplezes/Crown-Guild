@@ -235,14 +235,14 @@ export default function MissionsPage() {
 
                 <div className={styles.partyList}>
                   <div className={styles.partyMember}>
-                    <img src={currentMission.host_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" className={styles.memberAvatar} />
+                    <Image src={currentMission.host_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" width={32} height={32} className={styles.memberAvatar} />
                     <div className={styles.memberInfo}>
                       <span className={styles.roleLabel}>Quest owner</span>
                       <span className={styles.memberName}>{currentMission.host_name}</span>
                     </div>
                   </div>
                   <div className={styles.partyMember}>
-                    <img src={currentMission.requester_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" className={styles.memberAvatar} />
+                    <Image src={currentMission.requester_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" width={32} height={32} className={styles.memberAvatar} />
                     <div className={styles.memberInfo}>
                       <span className={styles.roleLabel}>Requester</span>
                       <span className={styles.memberName}>{currentMission.requester_name}</span>

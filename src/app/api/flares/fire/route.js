@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { pusherServer } from "@/lib/pusher";
 import { SOS_DISABLED_MESSAGE, SOS_FEATURE_ENABLED } from '@/lib/sos';
 import { logServerError } from "@/lib/logger";
+import { checkRateLimit } from "@/lib/ratelimit";
 
 export async function POST(req) {
   if (!SOS_FEATURE_ENABLED) {
@@ -15,6 +16,9 @@ export async function POST(req) {
     if (!session?.user) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
+
+    const rateLimitRes = await checkRateLimit("flare", session.user.id);
+    if (rateLimitRes) return rateLimitRes;
 
     const { monsterId, crownId } = await req.json();
     const userId = session.user.id;

@@ -63,10 +63,12 @@ export default function BeaconCenter() {
             {unreadNotifications.length > 0 ? unreadNotifications.map((n) => (
               <div key={n.id} className={styles.item}>
                 <div className={styles.requester}>
-                  <img 
-                    src={(n.type === 'hunt_accepted' ? n.host_avatar : n.requester_avatar) || "/icons/MHWilds-Quest_Members_Icon.png"} 
-                    className={styles.avatar} 
-                    alt="" 
+                  <Image
+                    src={(n.type === 'hunt_accepted' ? n.host_avatar : n.requester_avatar) || "/icons/MHWilds-Quest_Members_Icon.png"}
+                    width={32}
+                    height={32}
+                    className={styles.avatar}
+                    alt=""
                   />
                   <div className={styles.reqInfo}>
                     <span className={styles.name}>{n.type === 'hunt_accepted' ? n.host_name : n.requester_name}</span>

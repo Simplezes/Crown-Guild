@@ -125,10 +125,38 @@
   margin: 0;
 }
 
+.groupCount {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: var(--mh-tan-dark);
+  border: 1px solid var(--mh-border);
+  padding: 4px 10px;
+  border-radius: 3px;
+}
+
 .hostsList {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
   gap: 20px;
+}
+
+.showMoreBtn {
+  align-self: center;
+  background: none;
+  border: 1px solid var(--mh-border);
+  color: var(--mh-gold);
+  padding: 10px 24px;
+  font-family: 'Marcellus', serif;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: var(--transition-mh);
+}
+
+.showMoreBtn:hover {
+  border-color: var(--mh-gold);
+  background: rgba(181, 154, 93, 0.08);
 }
 
 .hostCard {
