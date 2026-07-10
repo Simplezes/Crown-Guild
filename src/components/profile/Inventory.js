@@ -104,17 +104,17 @@ export default function Inventory({
           <p className="font-body text-sm text-mist-dim">Specimen Collection & Wishlist Status</p>
         </div>
 
-        <div className="flex w-full gap-2 rounded-lg border border-white/10 bg-void p-1 sm:w-auto">
+        <div className="grid grid-cols-3 w-full gap-1 rounded-lg border border-white/10 bg-void p-1 sm:flex sm:w-auto sm:gap-2">
           {tabs.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 font-display text-xs uppercase tracking-widest transition-colors sm:flex-none sm:justify-start sm:px-4 ${
+              className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 rounded-md px-1 py-1.5 sm:px-4 sm:py-2 font-display text-[9px] sm:text-xs uppercase tracking-widest transition-colors ${
                 activeTab === tab.key ? 'bg-ember text-void' : 'text-mist hover:text-ember-bright'
               }`}
             >
-              {tab.label}
-              <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${activeTab === tab.key ? 'bg-void/20' : 'bg-white/5 text-mist-dim'}`}>{tab.count}</span>
+              <span className="truncate max-w-full">{tab.label}</span>
+              <span className={`rounded-full px-1.5 py-0.5 text-[9px] sm:text-[10px] leading-none ${activeTab === tab.key ? 'bg-void/20' : 'bg-white/5 text-mist-dim'}`}>{tab.count}</span>
             </button>
           ))}
         </div>
