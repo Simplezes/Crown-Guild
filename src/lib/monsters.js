@@ -83,26 +83,6 @@ export function getMonsterCount() {
   return monstersData.monsters.length;
 }
 
-export function getWeeklyBounties(monsters) {
-  if (!monsters || monsters.length === 0) return [];
-
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  const diff = now - start;
-  const oneDay = 1000 * 60 * 60 * 24;
-  const day = Math.floor(diff / oneDay);
-  const week = Math.floor(day / 7);
-
-  const seed = week + now.getFullYear();
-  const largeMonsters = monsters.filter(m => m.is_large);
-
-  const b1 = largeMonsters[seed % largeMonsters.length];
-  const b2 = largeMonsters[(seed * 13) % largeMonsters.length];
-  const b3 = largeMonsters[(seed * 31) % largeMonsters.length];
-
-  return [b1.id, b2.id, b3.id];
-}
-
 export async function getMonsterStats(monsterId) {
   try {
     const res = await db.execute({

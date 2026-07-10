@@ -33,14 +33,6 @@
 
 body {
   background-color: var(--mh-black);
-  background-image:
-    linear-gradient(to bottom, rgba(12, 10, 9, 0.7), rgba(12, 10, 9, 0.9)),
-    url('../app/assets/bg.png');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-
   color: var(--mh-tan);
   font-family: 'Montserrat', sans-serif;
   min-height: 100vh;
@@ -58,17 +50,30 @@ html {
   max-width: 100vw;
 }
 
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background-color: var(--mh-black);
+  background-image:
+    linear-gradient(to bottom, rgba(12, 10, 9, 0.7), rgba(12, 10, 9, 0.9)),
+    url('../app/assets/bg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+
 body::after {
   content: "";
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
-  opacity: 0.04;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.045;
   pointer-events: none;
-  z-index: 9999;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 h1,
@@ -80,153 +85,6 @@ h3,
   letter-spacing: 0.12em;
   color: var(--mh-gold);
   font-weight: 400;
-}
-
-.premium-container {
-  max-width: 1300px;
-  margin: 0 auto;
-  padding: 0 40px;
-}
-
-@media (max-width: 768px) {
-  .premium-container {
-    padding: 0 20px;
-  }
-}
-
-.mh-card {
-  background: var(--mh-glass);
-  backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--mh-border);
-  position: relative;
-  transition: var(--transition-mh);
-  box-shadow: var(--premium-shadow);
-  box-shadow: var(--inner-glow);
-}
-
-.mh-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 2px;
-  background: linear-gradient(to bottom, var(--mh-red), transparent);
-  opacity: 0.8;
-}
-
-.mh-card:hover {
-  border-color: rgba(181, 154, 93, 0.4);
-  background: rgba(26, 22, 20, 0.85);
-  transform: translateY(-2px);
-}
-
-.gold-text {
-  color: var(--mh-gold);
-  background: linear-gradient(135deg, var(--mh-gold) 0%, var(--mh-gold-bright) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 10px rgba(181, 154, 93, 0.2));
-}
-
-.mh-button {
-  background: var(--mh-gold);
-  color: #0c0a09;
-  padding: 12px 32px;
-  font-family: 'Marcellus', serif;
-  font-weight: 500;
-  border: 1px solid transparent;
-  cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  transition: var(--transition-mh);
-  position: relative;
-  overflow: hidden;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.85rem;
-}
-
-.mh-button::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  transition: 0.6s;
-}
-
-.mh-button:hover::after {
-  left: 100%;
-}
-
-.mh-button:hover {
-  background: var(--mh-gold-bright);
-  box-shadow: 0 0 20px rgba(181, 154, 93, 0.25), inset 0 0 10px rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
-}
-
-.mh-button-outline {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 32px;
-  background: transparent;
-  border: 1px solid var(--mh-gold);
-  color: var(--mh-gold);
-  font-family: 'Marcellus', serif;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  text-decoration: none;
-  transition: var(--transition-mh);
-  cursor: pointer;
-}
-
-.mh-button-outline:hover {
-  background: rgba(181, 154, 93, 0.1);
-  border-color: var(--mh-gold);
-  color: #fff;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(181, 154, 93, 0.2);
-}
-
-.mh-button:active {
-  transform: translateY(0);
-}
-
-.nav-link {
-  color: var(--mh-tan-dark);
-  font-family: 'Marcellus', serif;
-  text-transform: uppercase;
-  font-size: 0.8rem;
-  letter-spacing: 0.15em;
-  padding: 10px 0;
-  position: relative;
-  transition: var(--transition-mh);
-}
-
-.nav-link::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 0;
-  height: 1px;
-  background: var(--mh-gold);
-  transition: var(--transition-mh);
-  transform: translateX(-50%);
-}
-
-.nav-link:hover {
-  color: var(--mh-gold);
-}
-
-.nav-link:hover::after {
-  width: 100%;
 }
 
 .pixel-art {

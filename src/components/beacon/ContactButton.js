@@ -1,172 +1,55 @@
 'use client';
 
-import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import styles from './ContactButton.module.css';
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { SOS_FEATURE_ENABLED } from '@/lib/sos';
 
 export default function ContactButton({ hostId, monsterId, monsterName, crownId, discordId, quest, canDeploy = false }) {
   const { data: session } = useSession();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [dropUp, setDropUp] = useState(false);
   const [status, setStatus] = useState('idle');
   const [errorMsg, setErrorMsg] = useState('');
   const [confirmingDeploy, setConfirmingDeploy] = useState(false);
   const wrapperRef = useRef(null);
-  const triggerRef = useRef(null);
-  const popupRef = useRef(null);
-  const [menuStyle, setMenuStyle] = useState({
-    top: 0,
-    left: 0,
-    maxWidth: '320px',
-    maxHeight: 'calc(100vh - 24px)',
-    visibility: 'hidden',
-  });
 
   const buildShareNonce = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
   const isOwnCrown = session?.user?.id === hostId;
-
-  const updateMenuPosition = useCallback(() => {
-    if (!isOpen || !triggerRef.current || !popupRef.current || typeof window === 'undefined') return;
-
-    const rect = triggerRef.current.getBoundingClientRect();
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    const margin = 12;
-    const gap = 8;
-    const maxWidth = Math.min(320, viewportWidth - margin * 2);
-    const maxHeight = viewportHeight - margin * 2;
-    const popupWidth = Math.min(popupRef.current.offsetWidth || maxWidth, maxWidth);
-    const popupHeight = Math.min(popupRef.current.offsetHeight || maxHeight, maxHeight);
-    const availableBelow = viewportHeight - rect.bottom - gap - margin;
-    const availableAbove = rect.top - gap - margin;
-    const nextDropUp = availableBelow < Math.min(popupHeight, 220) && availableAbove > availableBelow;
-
-    let left = rect.right - popupWidth;
-    left = Math.min(Math.max(margin, left), viewportWidth - margin - popupWidth);
-
-    let top = nextDropUp ? rect.top - popupHeight - gap : rect.bottom + gap;
-    top = Math.min(Math.max(margin, top), viewportHeight - margin - popupHeight);
-
-    setDropUp(nextDropUp);
-    setMenuStyle({
-      top,
-      left,
-      maxWidth: `${maxWidth}px`,
-      maxHeight: `${maxHeight}px`,
-      visibility: 'visible',
-    });
-  }, [isOpen]);
 
   const toggleMenu = () => {
     setIsOpen((current) => !current);
   };
 
   useEffect(() => {
-    if (!isOpen) return undefined;
-
-    function handleClickOutside(event) {
-      const target = event.target;
-      if (wrapperRef.current?.contains(target) || popupRef.current?.contains(target)) {
-        return;
-      }
-
-      if (isOpen) {
-        setIsOpen(false);
-      }
-    }
+    if (!isOpen && !confirmingDeploy) return;
 
     function handleEscape(event) {
       if (event.key === 'Escape') {
         setIsOpen(false);
+        setConfirmingDeploy(false);
       }
     }
-
-    updateMenuPosition();
-    window.addEventListener('resize', updateMenuPosition);
-    window.addEventListener('scroll', updateMenuPosition, true);
-    document.addEventListener('mousedown', handleClickOutside);
+    
+    
+    document.body.style.overflow = 'hidden';
     document.addEventListener('keydown', handleEscape);
 
     return () => {
-      window.removeEventListener('resize', updateMenuPosition);
-      window.removeEventListener('scroll', updateMenuPosition, true);
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.body.style.overflow = '';
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [isOpen, updateMenuPosition]);
-
-  useLayoutEffect(() => {
-    if (isOpen) {
-      updateMenuPosition();
-    }
-  }, [isOpen, status, errorMsg, updateMenuPosition]);
+  }, [isOpen, confirmingDeploy]);
 
   const handleCopyTag = () => {
     navigator.clipboard.writeText(discordId || hostId);
     setStatus('copied');
-    setTimeout(() => setStatus('idle'), 2000);
-  };
-
-  const handleRequestSOS = async () => {
-    setStatus('loading');
-    try {
-      const res = await fetch('/api/missions/beacon', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ host_id: hostId, monster_id: monsterId, crown_id: crownId }),
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        setStatus('success');
-        setTimeout(() => {
-          setStatus('idle');
-          setIsOpen(false);
-        }, 3000);
-      } else {
-        setStatus('error');
-        setErrorMsg(data.error || 'Failed to send beacon');
-        setTimeout(() => setStatus('idle'), 3000);
-      }
-    } catch (err) {
-      setStatus('error');
-      setErrorMsg('Network error');
-      setTimeout(() => setStatus('idle'), 3000);
-    }
-  };
-
-  const handleBroadcastSOS = async () => {
-    setStatus('loading');
-    try {
-      const res = await fetch('/api/flares/fire', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ monsterId, crownId }),
-      });
-
-      if (res.ok) {
-        setStatus('broadcast');
-        setTimeout(() => {
-          setStatus('idle');
-          setIsOpen(false);
-        }, 3000);
-      } else {
-        const err = await res.text();
-        setStatus('error');
-        setErrorMsg(err || 'Failed to broadcast');
-        setTimeout(() => setStatus('idle'), 3000);
-      }
-    } catch (err) {
-      setStatus('error');
-      setErrorMsg('Network error');
-      setTimeout(() => setStatus('idle'), 3000);
-    }
+    setTimeout(() => {
+      setStatus('idle');
+      setIsOpen(false);
+    }, 1500);
   };
 
   const handleDeployCrown = async () => {
@@ -185,7 +68,7 @@ export default function ContactButton({ hostId, monsterId, monsterName, crownId,
         setStatus('deployed');
         setTimeout(() => {
           setStatus('idle');
-          setIsOpen(false);
+          setConfirmingDeploy(false);
           router.refresh();
         }, 1200);
       } else {
@@ -202,118 +85,111 @@ export default function ContactButton({ hostId, monsterId, monsterName, crownId,
 
   const showOwnerDeployButton = isOwnCrown && canDeploy;
 
-  const menu = isOpen ? createPortal(
-    <div
-      ref={popupRef}
-      className={`${styles.menu} ${dropUp ? styles.dropUp : ''} animate-mh-fade`}
-      style={menuStyle}
+  const triggerClass = "inline-flex items-center gap-2 rounded-lg border border-white/10 bg-void-raised px-4 py-2 font-display text-xs uppercase tracking-widest text-mist transition-colors hover:border-ember/40 hover:bg-ember hover:text-void disabled:cursor-not-allowed disabled:opacity-60";
+  const deployTriggerClass = "inline-flex items-center gap-2 rounded-lg border border-amber-500/50 bg-amber-500/15 px-4 py-2 font-display text-xs uppercase tracking-widest text-amber-200 transition-colors hover:border-amber-500 hover:bg-amber-500 hover:text-void disabled:cursor-not-allowed disabled:opacity-60";
+  const optionClass = "flex w-full items-center gap-4 rounded-xl border border-white/5 bg-white/5 px-4 py-3.5 text-left font-body text-mist transition-colors hover:border-ember hover:bg-ember/10";
+
+  const menu = isOpen && typeof window !== 'undefined' ? createPortal(
+    <div 
+      className="fixed inset-0 z-[5000] flex items-center justify-center bg-black/80 p-4 animate-mh-fade"
+      onClick={() => setIsOpen(false)}
     >
-      <div className={styles.header}>
-        <span className="mh-title">Contact Options</span>
-      </div>
-
-      {SOS_FEATURE_ENABLED && isOwnCrown && (
-        <button className={styles.option + ' ' + styles.sos} onClick={handleBroadcastSOS}>
-          <div className={styles.optionIcon}>
-            <Image src="/icons/MHWilds-Link_Party_Icon.png" width={18} height={18} alt="" className="pixel-art" />
-          </div>
-          <div className={styles.optionText}>
-            <span className={styles.label}>
-              {status === 'broadcast' ? '📡 Flare Active!' : 'Broadcast Global SOS'}
-            </span>
-            <span className={styles.desc}>Open this hunt on the Live Radar</span>
-          </div>
-        </button>
-      )}
-
-      {!isOwnCrown && (
-        <>
-          <a
-            href={`https://discord.com/users/${hostId}`}
-            target="_blank"
-            className={styles.option}
+      <div 
+        className="flex w-full max-w-sm flex-col rounded-2xl border border-ember bg-void-panel shadow-2xl overflow-hidden" 
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b border-white/10 bg-void px-5 py-4">
+          <span className="font-display text-base uppercase tracking-widest text-ember-bright">Contact Options</span>
+          <button 
             onClick={() => setIsOpen(false)}
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-xl leading-none text-mist-dim transition-colors hover:border-white/30 hover:text-mist"
+            aria-label="Close"
           >
-            <div className={styles.optionIcon}>
-              <Image src="/icons/MHWilds-Communication_Menu_Icon.png" width={18} height={18} alt="" className="pixel-art" />
-            </div>
-            <div className={styles.optionText}>
-              <span className={styles.label}>Discord Profile</span>
-              <span className={styles.desc}>Open external app</span>
-            </div>
-          </a>
-
-          <button className={styles.option} onClick={handleCopyTag}>
-            <div className={styles.optionIcon}>
-              <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={18} height={18} alt="" className="pixel-art" />
-            </div>
-            <div className={styles.optionText}>
-              <span className={styles.label}>{status === 'copied' ? 'Copied!' : 'Copy Discord ID'}</span>
-              <span className={styles.desc}>Manual add on Discord</span>
-            </div>
+            ×
           </button>
-
-          <button
-            className={styles.option}
-            onClick={() => {
-              const url = `${window.location.origin}/monster/${encodeURIComponent(monsterName)}?crownId=${crownId}&user=${hostId}&share=${buildShareNonce()}`;
-              navigator.clipboard.writeText(url);
-              setStatus('shared');
-              setTimeout(() => setStatus('idle'), 2000);
-            }}
-          >
-            <div className={styles.optionIcon}>
-              <Image src="/icons/MHWilds-Link_Party_Icon.png" width={18} height={18} alt="" className="pixel-art" />
-            </div>
-            <div className={styles.optionText}>
-              <span className={styles.label}>{status === 'shared' ? 'Link Copied!' : 'Share Crown'}</span>
-              <span className={styles.desc}>Get shareable link</span>
-            </div>
-          </button>
-
-          {SOS_FEATURE_ENABLED && (
-            <button className={styles.option + ' ' + styles.sos} onClick={handleRequestSOS}>
-              <div className={styles.optionIcon}>
-                <Image src="/icons/MHWilds-Quest_Menu_Icon.png" width={18} height={18} alt="" className="pixel-art" />
-              </div>
-              <div className={styles.optionText}>
-                <span className={styles.label}>
-                  {status === 'success' ? 'Beacon Fired!' : 'Request SOS Assist'}
-                </span>
-                <span className={styles.desc}>Notify host via Bot</span>
-              </div>
-            </button>
-          )}
-        </>
-      )}
-
-      {status === 'error' && (
-        <div className={styles.error}>
-          {errorMsg}
         </div>
-      )}
+
+        <div className="flex flex-col gap-3 p-5">
+          {!isOwnCrown && (
+            <>
+              <a
+                href={`https://discord.com/users/${hostId}`}
+                target="_blank"
+                className={optionClass}
+                onClick={() => setIsOpen(false)}
+              >
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-black/40">
+                  <Image src="/icons/MHWilds-Communication_Menu_Icon.png" width={20} height={20} alt="" className="pixel-art" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-display text-sm font-semibold">Discord Profile</span>
+                  <span className="font-body text-[11px] uppercase tracking-wide text-mist-dim">Open external app</span>
+                </div>
+              </a>
+
+              <button className={optionClass} onClick={handleCopyTag}>
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-black/40">
+                  <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={20} height={20} alt="" className="pixel-art" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-display text-sm font-semibold">{status === 'copied' ? 'Copied!' : 'Copy Discord ID'}</span>
+                  <span className="font-body text-[11px] uppercase tracking-wide text-mist-dim">Manual add on Discord</span>
+                </div>
+              </button>
+
+              <button
+                className={optionClass}
+                onClick={() => {
+                  const url = `${window.location.origin}/monster/${encodeURIComponent(monsterName)}?crownId=${crownId}&user=${hostId}&share=${buildShareNonce()}`;
+                  navigator.clipboard.writeText(url);
+                  setStatus('shared');
+                  setTimeout(() => {
+                    setStatus('idle');
+                    setIsOpen(false);
+                  }, 1500);
+                }}
+              >
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-black/40">
+                  <Image src="/icons/MHWilds-Link_Party_Icon.png" width={20} height={20} alt="" className="pixel-art" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-display text-sm font-semibold">{status === 'shared' ? 'Link Copied!' : 'Share Crown'}</span>
+                  <span className="font-body text-[11px] uppercase tracking-wide text-mist-dim">Get shareable link</span>
+                </div>
+              </button>
+            </>
+          )}
+
+          {status === 'error' && (
+            <div className="mt-2 rounded-xl border border-blood bg-blood/10 p-3 text-center font-body text-xs text-red-300">
+              {errorMsg}
+            </div>
+          )}
+        </div>
+      </div>
     </div>,
     document.body
   ) : null;
 
-  if (!SOS_FEATURE_ENABLED && isOwnCrown && !showOwnerDeployButton) {
+  if (isOwnCrown && !showOwnerDeployButton) {
     return null;
   }
 
-  const confirmModal = confirmingDeploy ? createPortal(
-    <div className={styles.confirmBackdrop} onClick={() => setConfirmingDeploy(false)}>
-      <div className={styles.confirmModal} onClick={e => e.stopPropagation()}>
-        <div className={styles.confirmHeader}>Spend an investigation use?</div>
-        <div className={styles.confirmActions}>
+  const confirmModal = confirmingDeploy && typeof window !== 'undefined' ? createPortal(
+    <div className="fixed inset-0 z-[5000] flex items-center justify-center bg-black/80 p-4 animate-mh-fade" onClick={() => setConfirmingDeploy(false)}>
+      <div className="flex w-full max-w-[calc(100vw-2rem)] flex-col gap-5 rounded-2xl border border-ember bg-void-panel p-6 shadow-2xl sm:min-w-[320px] sm:w-auto" onClick={e => e.stopPropagation()}>
+        <div className="text-center font-display text-base uppercase tracking-wide text-mist">Spend an investigation use?</div>
+        <p className="text-center font-body text-xs text-mist-dim">This will reduce the remaining uses for this crown by 1.</p>
+        <div className="flex justify-center gap-3 mt-2">
           <button
-            className={`${styles.trigger} ${styles.deployTrigger}`}
-            onClick={() => { setConfirmingDeploy(false); handleDeployCrown(); }}
+            className={`${deployTriggerClass} flex-1 min-w-24 justify-center py-3 text-sm`}
+            onClick={() => handleDeployCrown()}
             disabled={status === 'loading'}
           >
             {status === 'loading' ? 'Working...' : 'Yes'}
           </button>
           <button
-            className={styles.trigger}
+            className={`${triggerClass} flex-1 min-w-24 justify-center py-3 text-sm`}
             onClick={() => setConfirmingDeploy(false)}
             disabled={status === 'loading'}
           >
@@ -328,9 +204,9 @@ export default function ContactButton({ hostId, monsterId, monsterName, crownId,
   if (showOwnerDeployButton) {
     return (
       <>
-        <div className={styles.wrapper} ref={wrapperRef}>
+        <div className="relative inline-block" ref={wrapperRef}>
           <button
-            className={`${styles.trigger} ${styles.deployTrigger}`}
+            className={deployTriggerClass}
             onClick={() => setConfirmingDeploy(true)}
             disabled={status === 'loading'}
             title={quest === 'Investigation Quests' ? 'Spend one investigation use and mark as deployed' : 'Deploy crown'}
@@ -338,8 +214,8 @@ export default function ContactButton({ hostId, monsterId, monsterName, crownId,
             <Image src="/icons/MHWilds-Completed_Objective_Icon.png" width={16} height={16} alt="" className="pixel-art" />
             {status === 'deployed' ? 'Deployed!' : 'Deploy Crown'}
           </button>
-          {status === 'error' && (
-            <div className={styles.error}>
+          {status === 'error' && !confirmingDeploy && (
+            <div className="mt-2.5 absolute right-0 w-max rounded-lg border border-blood bg-blood/10 p-2.5 text-center font-body text-xs text-red-300">
               {errorMsg}
             </div>
           )}
@@ -351,18 +227,15 @@ export default function ContactButton({ hostId, monsterId, monsterName, crownId,
 
   return (
     <>
-    <div className={`${styles.wrapper} ${isOpen ? styles.active : ''}`} ref={wrapperRef}>
       <button
-        ref={triggerRef}
-        className={styles.trigger}
+        className={triggerClass}
         onClick={toggleMenu}
         disabled={status === 'loading'}
       >
         <Image src="/icons/MHWilds-Squad_Information_Counter_Icon.png" width={16} height={16} alt="" className="pixel-art" />
         {status === 'loading' ? 'Working...' : 'Contact Hunter'}
       </button>
-    </div>
-    {menu}
+      {menu}
     </>
   );
 }

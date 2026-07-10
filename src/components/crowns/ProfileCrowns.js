@@ -4,17 +4,19 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import MonsterIcon from "@/components/ui/MonsterIcon";
-import UnifiedQuestModal from "./UnifiedQuestModal";
-import styles from "@/app/profile/[id]/profile.module.css";
 import { useRouter } from "next/navigation";
 import { useToast, useConfirm } from "@/app/UIProvider";
 
+const cardBase = "group relative flex flex-col overflow-hidden rounded-lg border border-white/5 bg-void p-2.5 transition-colors hover:border-white/10";
+const cardTempered = "border-tempered/40 shadow-[0_0_16px_-8px_rgba(180,95,240,0.5)]";
+const chipSmall = "inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/5 px-1.25 py-0.5 font-body text-[8px] font-semibold uppercase text-mist";
+const chipLarge = "inline-flex items-center gap-1 rounded-md border border-ember/30 bg-ember/10 px-1.25 py-0.5 font-body text-[8px] font-semibold uppercase text-ember-bright";
+const chipTempered = "rounded-md border border-tempered/40 bg-tempered/10 px-1.25 py-0.5 font-body text-[8px] font-semibold uppercase text-tempered";
+
 export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
-  const CROWNS_PER_PAGE = 15;
+  const CROWNS_PER_PAGE = 24;
   const [crowns, setCrowns] = useState(initialCrowns);
   const [page, setPage] = useState(1);
-  const [editingCrown, setEditingCrown] = useState(null);
-  const [editingGroup, setEditingGroup] = useState(null);
   const [activeCardId, setActiveCardId] = useState(null);
   const router = useRouter();
   const toast = useToast();
@@ -25,24 +27,15 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
     return String(crown.inv_monster_id) !== String(crown.monster_id);
   };
 
-  const hasPrimaryQuestMonster = (crown) => {
-    return hasDifferentHostMonster(crown);
-  };
+  const hasPrimaryQuestMonster = (crown) => hasDifferentHostMonster(crown);
 
   const buildShareNonce = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
   const renderPrimaryQuestGhost = (crown) => {
     if (!hasPrimaryQuestMonster(crown)) return null;
-
     return (
-      <div className={styles.primaryQuestGhost} aria-hidden="true">
-        <Image
-          src={`/monsters/${crown.inv_monster_image}`}
-          alt=""
-          fill
-          sizes="220px"
-          className={styles.primaryQuestGhostImage}
-        />
+      <div className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 opacity-[0.08]" aria-hidden="true">
+        <Image src={`/monsters/${crown.inv_monster_image}`} alt="" fill sizes="112px" className="object-contain pixel-art" />
       </div>
     );
   };
@@ -101,7 +94,34 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
     }
   };
 
-  const renderCard = (crown, hideActions = false) => {
+  const CardActions = ({ cardId, onShare, onEdit, onDelete }) => (
+    <button
+      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-mist-dim hover:bg-white/10 hover:text-mist"
+      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveCardId(prev => prev === cardId ? null : cardId); }}
+      title="Options"
+    >⋮</button>
+  );
+
+  const ActionsMenu = ({ cardId, onShare, onEdit, onDelete, editTitle, deleteTitle }) => (
+    activeCardId === cardId && (
+      <div
+        className="absolute right-2 top-9 z-10 flex gap-1 rounded-lg border border-white/10 bg-void-raised p-1 shadow-lift"
+        onClick={(e) => { e.stopPropagation(); setActiveCardId(null); }}
+      >
+        <button onClick={onShare} className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-white/10" title="Share">
+          <Image src="/icons/MHWilds-Link_Party_Icon.png" width={14} height={14} alt="Share" className="pixel-art" />
+        </button>
+        <button onClick={onEdit} className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-white/10" title={editTitle}>
+          <Image src="/icons/MHWilds-Settings_Icon.png" width={14} height={14} alt="Edit" className="pixel-art" />
+        </button>
+        <button onClick={onDelete} className="flex h-7 w-7 items-center justify-center rounded-md text-blood-bright hover:bg-blood/10" title={deleteTitle}>
+          <Image src="/icons/MHWilds-Notes_X_Icon.png" width={14} height={14} alt="Delete" className="pixel-art" />
+        </button>
+      </div>
+    )
+  );
+
+  const renderCard = (crown) => {
     const titleCase = (str) => str ? str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : "??";
     const hasInvestigation = crown.quest === "Investigation Quests";
     const hostDiffers = hasDifferentHostMonster(crown);
@@ -118,65 +138,49 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
 
     const cardId = crown.id;
     return (
-      <div className={`${styles.crownCard} ${crown.tempered ? styles.crownCardTempered : ''}`}>
+      <div className={`${cardBase} ${crown.tempered ? cardTempered : ''}`}>
         {renderPrimaryQuestGhost(crown)}
 
-        <div className={styles.cardTop}>
-          <div className={styles.cardBadges}>
-            <span className={crown.type === 'small' ? styles.crownChipSmall : styles.crownChipLarge}>
+        <div className="mb-1.5 flex items-start justify-between gap-1.5">
+          <div className="flex flex-wrap gap-1">
+            <span className={crown.type === 'small' ? chipSmall : chipLarge}>
               <Image src={crown.type === 'small' ? "/icons/smallcrown.png" : "/icons/largecrown.png"} width={10} height={10} alt="" className="pixel-art" />
               {crown.type === 'small' ? 'Small' : 'Large'}
             </span>
-            {!!crown.tempered && <span className={styles.crownChipTempered}>Tempered</span>}
+            {!!crown.tempered && <span className={chipTempered}>Tempered</span>}
           </div>
-          {isOwner && !hideActions && (
-            <button
-              className={`${styles.actionsTrigger} ${activeCardId === cardId ? styles.actionsTriggerActive : ''}`}
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveCardId(prev => prev === cardId ? null : cardId); }}
-              title="Options"
-            >⋮</button>
-          )}
+          {isOwner && <CardActions cardId={cardId} />}
         </div>
 
-        <Link href={`/monster/${crown.name}?crownId=${crown.id}&user=${userId}`} className={styles.cardMedia}>
-          <MonsterIcon imageName={crown.image_name} name={crown.name} tempered={crown.tempered} size={72} />
+        <Link href={`/monster/${crown.name}?crownId=${crown.id}&user=${userId}`} className="mx-auto">
+          <MonsterIcon imageName={crown.image_name} name={crown.name} tempered={crown.tempered} size={44} />
         </Link>
 
-        <div className={styles.cardBody}>
-          <Link href={`/monster/${crown.name}?crownId=${crown.id}&user=${userId}`} className={styles.cardNameLink}>
-            <h3 className={styles.crownName}>{crown.name}</h3>
+        <div className="mt-1.5 text-center">
+          <Link href={`/monster/${crown.name}?crownId=${crown.id}&user=${userId}`}>
+            <h3 className="truncate font-display text-[11px] uppercase tracking-wide text-mist hover:text-ember-bright">{crown.name}</h3>
           </Link>
-          <div className={styles.crownMeta}>
-            <span className={styles.crownRating}>{crown.strength_rating}★</span>
-            {investigationLabel && <span className={styles.crownInvestigation}>{investigationLabel}</span>}
+          <div className="mt-1 flex flex-wrap items-center justify-center gap-1 font-body text-[10px] text-mist-dim">
+            <span className="text-ember-bright">{crown.strength_rating}★</span>
+            {investigationLabel && <span className="truncate">{investigationLabel}</span>}
           </div>
         </div>
 
-        {isOwner && !hideActions && (
-          <div
-            className={`${styles.cardActions} ${activeCardId === cardId ? styles.cardActionsActive : ''}`}
-            onClick={(e) => { e.stopPropagation(); setActiveCardId(null); }}
-          >
-            <button onClick={(e) => { e.stopPropagation(); const url = `${window.location.origin}/monster/${encodeURIComponent(crown.name)}?crownId=${crown.id}&user=${userId}&share=${buildShareNonce()}`; navigator.clipboard.writeText(url); toast.info("Link copied to clipboard!"); setActiveCardId(null); }} className={styles.actionBtn} title="Share Crown">
-              <Image src="/icons/MHWilds-Link_Party_Icon.png" width={14} height={14} alt="Share" className="pixel-art" />
-            </button>
-            <button onClick={(e) => { e.stopPropagation(); setEditingCrown(crown); setActiveCardId(null); }} className={styles.actionBtn} title="Edit Crown">
-              <Image src="/icons/MHWilds-Settings_Icon.png" width={14} height={14} alt="Edit" className="pixel-art" />
-            </button>
-            <button onClick={(e) => { e.stopPropagation(); handleDelete(crown.id); setActiveCardId(null); }} className={`${styles.actionBtn} ${styles.deleteBtn}`} title="Delete Crown">
-              <Image src="/icons/MHWilds-Notes_X_Icon.png" width={14} height={14} alt="Delete" className="pixel-art" />
-            </button>
-          </div>
+        {isOwner && (
+          <ActionsMenu
+            cardId={cardId}
+            editTitle="Edit Crown"
+            deleteTitle="Delete Crown"
+            onShare={(e) => { e.stopPropagation(); const url = `${window.location.origin}/monster/${encodeURIComponent(crown.name)}?crownId=${crown.id}&user=${userId}&share=${buildShareNonce()}`; navigator.clipboard.writeText(url); toast.info("Link copied to clipboard!"); setActiveCardId(null); }}
+            onEdit={(e) => { e.stopPropagation(); router.push(`/crowns/log?edit=${crown.id}`); }}
+            onDelete={(e) => { e.stopPropagation(); handleDelete(crown.id); setActiveCardId(null); }}
+          />
         )}
       </div>
     );
   };
 
   const renderGroupCard = (group) => {
-    if (group.length > 1) {
-      return renderMultiMonsterGroupCard(group);
-    }
-
     const first = group[0];
     const titleCase = (str) => str ? str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : "??";
     const hasInvestigation = first.quest === "Investigation Quests";
@@ -195,59 +199,43 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
 
     const cardId = first.pair_id || first.investigation_id || first.id;
     return (
-      <div className={`${styles.crownCard} ${anyTempered ? styles.crownCardTempered : ''}`}>
+      <div className={`${cardBase} ${anyTempered ? cardTempered : ''}`}>
         {renderPrimaryQuestGhost(first)}
 
-        <div className={styles.cardTop}>
-          <div className={styles.cardBadges}>
-            <Image src="/icons/MHWilds-Link_Party_Icon.png" width={10} height={10} alt="" className="pixel-art" style={{opacity:0.5}} />
+        <div className="mb-1.5 flex items-start justify-between gap-1.5">
+          <div className="flex flex-wrap items-center gap-1">
+            <Image src="/icons/MHWilds-Link_Party_Icon.png" width={10} height={10} alt="" className="pixel-art opacity-50" />
             {group.map(c => (
-              <span key={c.id} className={c.type === 'small' ? styles.crownChipSmall : styles.crownChipLarge}>
+              <span key={c.id} className={c.type === 'small' ? chipSmall : chipLarge}>
                 <Image src={c.type === 'small' ? "/icons/smallcrown.png" : "/icons/largecrown.png"} width={10} height={10} alt="" className="pixel-art" />
                 {c.type === 'small' ? 'S' : 'L'} {c.strength_rating}★
-                {!!c.tempered && <span className={styles.crownChipTempered} style={{marginLeft:3}}>T</span>}
+                {!!c.tempered && <span className="ml-0.5 text-tempered">T</span>}
               </span>
             ))}
           </div>
-          {isOwner && (
-            <button
-              className={`${styles.actionsTrigger} ${activeCardId === cardId ? styles.actionsTriggerActive : ''}`}
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveCardId(prev => prev === cardId ? null : cardId); }}
-              title="Options"
-            >⋮</button>
-          )}
+          {isOwner && <CardActions cardId={cardId} />}
         </div>
 
-        <Link href={`/monster/${first.name}?crownId=${first.id}&user=${userId}`} className={styles.cardMedia}>
-          <MonsterIcon imageName={first.image_name} name={first.name} tempered={anyTempered} size={72} />
+        <Link href={`/monster/${first.name}?crownId=${first.id}&user=${userId}`} className="mx-auto">
+          <MonsterIcon imageName={first.image_name} name={first.name} tempered={anyTempered} size={44} />
         </Link>
 
-        <div className={styles.cardBody}>
-          <Link href={`/monster/${first.name}?crownId=${first.id}&user=${userId}`} className={styles.cardNameLink}>
-            <h3 className={styles.crownName}>{first.name}</h3>
+        <div className="mt-1.5 text-center">
+          <Link href={`/monster/${first.name}?crownId=${first.id}&user=${userId}`}>
+            <h3 className="truncate font-display text-[11px] uppercase tracking-wide text-mist hover:text-ember-bright">{first.name}</h3>
           </Link>
-          {investigationLabel && (
-            <div className={styles.crownMeta}>
-              <span className={styles.crownInvestigation}>{investigationLabel}</span>
-            </div>
-          )}
+          {investigationLabel && <p className="mt-1 truncate font-body text-[10px] text-mist-dim">{investigationLabel}</p>}
         </div>
 
         {isOwner && (
-          <div
-            className={`${styles.cardActions} ${activeCardId === cardId ? styles.cardActionsActive : ''}`}
-            onClick={(e) => { e.stopPropagation(); setActiveCardId(null); }}
-          >
-            <button onClick={(e) => { e.stopPropagation(); const url = `${window.location.origin}/monster/${encodeURIComponent(first.name)}?crownId=${first.id}&user=${userId}&share=${buildShareNonce()}`; navigator.clipboard.writeText(url); toast.info("Link copied to clipboard!"); setActiveCardId(null); }} className={styles.actionBtn} title="Share Crown">
-              <Image src="/icons/MHWilds-Link_Party_Icon.png" width={14} height={14} alt="Share" className="pixel-art" />
-            </button>
-            <button onClick={(e) => { e.stopPropagation(); setEditingGroup(group); setActiveCardId(null); }} className={styles.actionBtn} title="Edit Linked Crowns">
-              <Image src="/icons/MHWilds-Settings_Icon.png" width={14} height={14} alt="Edit" className="pixel-art" />
-            </button>
-            <button onClick={(e) => { e.stopPropagation(); handleDeleteGroup(group); setActiveCardId(null); }} className={`${styles.actionBtn} ${styles.deleteBtn}`} title="Delete Linked Crowns">
-              <Image src="/icons/MHWilds-Notes_X_Icon.png" width={14} height={14} alt="Delete" className="pixel-art" />
-            </button>
-          </div>
+          <ActionsMenu
+            cardId={cardId}
+            editTitle="Edit Linked Crowns"
+            deleteTitle="Delete Linked Crowns"
+            onShare={(e) => { e.stopPropagation(); const url = `${window.location.origin}/monster/${encodeURIComponent(first.name)}?crownId=${first.id}&user=${userId}&share=${buildShareNonce()}`; navigator.clipboard.writeText(url); toast.info("Link copied to clipboard!"); setActiveCardId(null); }}
+            onEdit={(e) => { e.stopPropagation(); router.push(`/crowns/log?edit=${group.map(c => c.id).join(',')}`); }}
+            onDelete={(e) => { e.stopPropagation(); handleDeleteGroup(group); setActiveCardId(null); }}
+          />
         )}
       </div>
     );
@@ -256,7 +244,6 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
   const renderMultiMonsterGroupCard = (group) => {
     const first = group[0];
     const titleCase = (str) => str ? str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : "??";
-    const hostDiffers = hasDifferentHostMonster(first);
     const sides = group.map(c => ({ crowns: [c], name: c.name, image_name: c.image_name }));
     const quest = group[0]?.quest;
     const isQuad = sides.length > 2;
@@ -268,63 +255,47 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
     const anyTempered = group.some(c => c.tempered);
 
     return (
-      <div className={`${styles.crownCard} ${styles.crownCardDual} ${isQuad ? styles.crownCardQuad : ""} ${anyTempered ? styles.crownCardTempered : ''}`}>
-        {renderPrimaryQuestGhost(first, hostDiffers && first.inv_monster_name ? `${titleCase(first.inv_monster_name)} quest` : null)}
+      <div className={`${cardBase} col-span-2 ${anyTempered ? cardTempered : ''}`}>
+        {renderPrimaryQuestGhost(first)}
 
-        <div className={styles.cardTop}>
-          <div className={styles.cardBadges}>
+        <div className="mb-1.5 flex items-start justify-between gap-1.5">
+          <div className="flex flex-wrap gap-1">
             {group.map(c => (
-              <span key={c.id} className={c.type === 'small' ? styles.crownChipSmall : styles.crownChipLarge}>
+              <span key={c.id} className={c.type === 'small' ? chipSmall : chipLarge}>
                 <Image src={c.type === 'small' ? "/icons/smallcrown.png" : "/icons/largecrown.png"} width={10} height={10} alt="" className="pixel-art" />
                 {c.type === 'small' ? 'S' : 'L'} {c.strength_rating}★
               </span>
             ))}
           </div>
-          {isOwner && (
-            <button
-              className={`${styles.actionsTrigger} ${activeCardId === cardId ? styles.actionsTriggerActive : ''}`}
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveCardId(prev => prev === cardId ? null : cardId); }}
-              title="Options"
-            >⋮</button>
-          )}
+          {isOwner && <CardActions cardId={cardId} />}
         </div>
 
-        <div className={styles.dualSides}>
+        <div className="flex flex-wrap items-center justify-center gap-2">
           {sides.map((side, idx) => (
             <React.Fragment key={side.crowns[0].id}>
-              <Link href={`/monster/${side.name}?user=${userId}`} className={`${styles.dualSide}`}>
-                <MonsterIcon imageName={side.image_name} name={side.name} tempered={side.crowns.some(c => c.tempered)} size={isQuad ? 48 : 56} />
-                <div className={styles.dualOverlay}>
-                  <span className={styles.dualMonsterName}>{titleCase(side.name)}</span>
-                </div>
+              <Link href={`/monster/${side.name}?user=${userId}`} className="flex flex-col items-center gap-1">
+                <MonsterIcon imageName={side.image_name} name={side.name} tempered={side.crowns.some(c => c.tempered)} size={isQuad ? 36 : 40} />
+                <span className="font-body text-[10px] text-mist-dim">{titleCase(side.name)}</span>
               </Link>
-              {idx < sides.length - 1 && (
-                <div className={styles.dualDivider}>+</div>
-              )}
+              {idx < sides.length - 1 && <span className="font-display text-lg text-mist-faint">+</span>}
             </React.Fragment>
           ))}
         </div>
 
-          {questLabel && (
-            <div className={styles.cardFooter}>{questLabel}</div>
-          )}
+        {questLabel && (
+          <p className="mt-1.5 text-center font-body text-[10px] text-mist-dim">{questLabel}</p>
+        )}
 
-          {isOwner && (
-            <div
-              className={`${styles.cardActions} ${activeCardId === cardId ? styles.cardActionsActive : ''}`}
-              onClick={(e) => { e.stopPropagation(); setActiveCardId(null); }}
-            >
-              <button onClick={(e) => { e.stopPropagation(); const url = `${window.location.origin}/monster/${encodeURIComponent(group[0].name)}?crownId=${group[0].id}&user=${userId}&share=${buildShareNonce()}`; navigator.clipboard.writeText(url); toast.info("Link copied to clipboard!"); setActiveCardId(null); }} className={styles.actionBtn} title="Share Pair">
-                <Image src="/icons/MHWilds-Link_Party_Icon.png" width={14} height={14} alt="Share" className="pixel-art" />
-              </button>
-              <button onClick={(e) => { e.stopPropagation(); setEditingGroup(group); setActiveCardId(null); }} className={styles.actionBtn} title="Edit Quest Pair">
-                <Image src="/icons/MHWilds-Settings_Icon.png" width={14} height={14} alt="Edit" className="pixel-art" />
-              </button>
-              <button onClick={(e) => { e.stopPropagation(); handleDeleteGroup(group); setActiveCardId(null); }} className={`${styles.actionBtn} ${styles.deleteBtn}`} title="Delete Quest Pair">
-                <Image src="/icons/MHWilds-Notes_X_Icon.png" width={14} height={14} alt="Delete" className="pixel-art" />
-              </button>
-            </div>
-          )}
+        {isOwner && (
+          <ActionsMenu
+            cardId={cardId}
+            editTitle="Edit Quest Pair"
+            deleteTitle="Delete Quest Pair"
+            onShare={(e) => { e.stopPropagation(); const url = `${window.location.origin}/monster/${encodeURIComponent(group[0].name)}?crownId=${group[0].id}&user=${userId}&share=${buildShareNonce()}`; navigator.clipboard.writeText(url); toast.info("Link copied to clipboard!"); setActiveCardId(null); }}
+            onEdit={(e) => { e.stopPropagation(); router.push(`/crowns/log?edit=${group.map(c => c.id).join(',')}`); }}
+            onDelete={(e) => { e.stopPropagation(); handleDeleteGroup(group); setActiveCardId(null); }}
+          />
+        )}
       </div>
     );
   };
@@ -333,49 +304,33 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
   const pagedGroups = groupedCrowns.slice((page - 1) * CROWNS_PER_PAGE, page * CROWNS_PER_PAGE);
 
   return (
-    <>
-      <div className={styles.scrollArea}>
-        <div className={styles.crownGrid}>
-          {crowns.length > 0 ? pagedGroups.map((group) => {
-            const key = group[0].pair_id ? `pair-${group[0].pair_id}` : (group[0].investigation_id ? `inv-${group[0].investigation_id}` : `single-${group[0].id}`);
+    <div>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+        {crowns.length > 0 ? pagedGroups.map((group) => {
+          const key = group[0].pair_id ? `pair-${group[0].pair_id}` : (group[0].investigation_id ? `inv-${group[0].investigation_id}` : `single-${group[0].id}`);
 
-            if (group.length === 1) {
-              return <React.Fragment key={key}>{renderCard(group[0])}</React.Fragment>;
-            }
-            return (
-              <React.Fragment key={key}>
-                {renderMultiMonsterGroupCard(group)}
-              </React.Fragment>
-            );
-          }) : (
-            <div className={styles.noRecords}>
-              <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={48} height={48} alt="" className="pixel-art" />
-              <p>No Crowns in stock yet.</p>
-            </div>
-          )}
-        </div>
-        {totalPages > 1 && (
-          <div className={styles.pagination}>
-            <button className={styles.pageBtn} onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} aria-label="Previous page">‹</button>
-            <span className={styles.pageInfo}>Page {page} / {totalPages}</span>
-            <button className={styles.pageBtn} onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} aria-label="Next page">›</button>
+          if (group.length === 1) {
+            return <React.Fragment key={key}>{renderCard(group[0])}</React.Fragment>;
+          }
+          return (
+            <React.Fragment key={key}>
+              {renderMultiMonsterGroupCard(group)}
+            </React.Fragment>
+          );
+        }) : (
+          <div className="col-span-full flex flex-col items-center gap-3 rounded-xl border border-dashed border-white/10 py-12 text-center">
+            <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={40} height={40} alt="" className="pixel-art opacity-50" />
+            <p className="font-body text-sm text-mist-dim">No Crowns in stock yet.</p>
           </div>
         )}
       </div>
-
-      <UnifiedQuestModal
-        isOpen={!!editingCrown}
-        onClose={() => setEditingCrown(null)}
-        initialGroup={editingCrown ? [editingCrown] : null}
-        onUpdated={() => { router.refresh(); }}
-      />
-
-      <UnifiedQuestModal
-        isOpen={!!editingGroup}
-        onClose={() => setEditingGroup(null)}
-        initialGroup={editingGroup}
-        onUpdated={() => { router.refresh(); }}
-      />
-    </>
+      {totalPages > 1 && (
+        <div className="mt-5 flex items-center justify-center gap-4">
+          <button className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 font-display text-lg text-mist disabled:opacity-30" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} aria-label="Previous page">‹</button>
+          <span className="font-display text-xs uppercase tracking-widest text-mist-dim">Page {page} / {totalPages}</span>
+          <button className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 font-display text-lg text-mist disabled:opacity-30" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} aria-label="Next page">›</button>
+        </div>
+      )}
+    </div>
   );
 }

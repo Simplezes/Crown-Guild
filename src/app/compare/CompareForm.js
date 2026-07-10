@@ -2,9 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import Image from "next/image";
 import WishlistUserPickerModal from "@/components/ui/WishlistUserPickerModal";
-import styles from "./compare.module.css";
+import UserAvatar from "@/components/ui/UserAvatar";
 
 export default function CompareForm({ initialA, initialB }) {
   const router = useRouter();
@@ -21,42 +20,32 @@ export default function CompareForm({ initialA, initialB }) {
 
   return (
     <>
-      <form onSubmit={handleSubmit} className={styles.compareForm}>
-        <div className={styles.pickerField + " " + styles.primaryPickerField}>
-          <label>Hunter A</label>
-          <button type="button" className={styles.pickerBtn} onClick={() => setPickAOpen(true)}>
-            <span className={styles.pickerBtnInner}>
-              <Image
-                src={a?.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"}
-                alt=""
-                width={28}
-                height={28}
-                className={styles.pickerAvatar}
-              />
-              <span className={styles.pickerBtnText}>{a?.username || "Select hunter..."}</span>
+      <form onSubmit={handleSubmit} className="flex flex-col items-stretch gap-3 rounded-2xl border border-white/5 bg-void-panel p-5 sm:flex-row sm:items-end">
+        <div className="flex flex-1 flex-col gap-1.5">
+          <label className="font-body text-xs uppercase tracking-wider text-mist-dim">Hunter A</label>
+          <button type="button" onClick={() => setPickAOpen(true)} className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-void px-3.5 py-2.5 text-left transition-colors hover:border-ember/40">
+            <span className="flex min-w-0 items-center gap-2.5">
+              <UserAvatar src={a?.avatar_url} alt={a?.username || "Hunter A"} size={28} className="h-7 w-7 shrink-0 rounded-full object-cover" />
+              <span className="truncate font-body text-sm text-mist">{a?.username || "Select hunter..."}</span>
             </span>
-            <span className={styles.pickerBtnHint}>Pick</span>
+            <span className="shrink-0 font-body text-xs text-ember-dim">Pick</span>
           </button>
         </div>
 
-        <div className={styles.pickerField + " " + styles.primaryPickerField}>
-          <label>Hunter B</label>
-          <button type="button" className={styles.pickerBtn} onClick={() => setPickBOpen(true)}>
-            <span className={styles.pickerBtnInner}>
-              <Image
-                src={b?.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"}
-                alt=""
-                width={28}
-                height={28}
-                className={styles.pickerAvatar}
-              />
-              <span className={styles.pickerBtnText}>{b?.username || "Select hunter..."}</span>
+        <span className="hidden pb-3 font-display text-sm text-mist-faint sm:block">vs</span>
+
+        <div className="flex flex-1 flex-col gap-1.5">
+          <label className="font-body text-xs uppercase tracking-wider text-mist-dim">Hunter B</label>
+          <button type="button" onClick={() => setPickBOpen(true)} className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-void px-3.5 py-2.5 text-left transition-colors hover:border-ember/40">
+            <span className="flex min-w-0 items-center gap-2.5">
+              <UserAvatar src={b?.avatar_url} alt={b?.username || "Hunter B"} size={28} className="h-7 w-7 shrink-0 rounded-full object-cover" />
+              <span className="truncate font-body text-sm text-mist">{b?.username || "Select hunter..."}</span>
             </span>
-            <span className={styles.pickerBtnHint}>Pick</span>
+            <span className="shrink-0 font-body text-xs text-ember-dim">Pick</span>
           </button>
         </div>
 
-        <button type="submit" className={`mh-button ${styles.compareAction}`} disabled={!a?.id || !b?.id}>
+        <button type="submit" disabled={!a?.id || !b?.id} className="rounded-lg bg-ember px-6 py-2.5 font-display text-xs uppercase tracking-widest text-void transition-colors hover:bg-ember-bright disabled:opacity-40">
           Compare
         </button>
       </form>

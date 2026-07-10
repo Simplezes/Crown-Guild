@@ -2,11 +2,12 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { createPortal } from 'react-dom';
-import styles from './ProfileSettings.module.css';
 import Image from 'next/image';
 import { useToast, useConfirm } from '@/app/UIProvider';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { signOut } from 'next-auth/react';
+
+const inputClass = "w-full rounded-lg border border-white/10 bg-void px-3.5 py-2.5 font-body text-sm text-mist placeholder:text-mist-faint focus:border-ember/50 focus:outline-none";
 
 function SettingsContent({ user, isOwner }) {
   const toast = useToast();
@@ -96,88 +97,84 @@ function SettingsContent({ user, isOwner }) {
   };
 
   const modalContent = isEditing && (
-    <div className={styles.overlay} onClick={() => setIsEditing(false)}>
-      <div className={`${styles.modal} animate-mh-slide-down`} onClick={e => e.stopPropagation()}>
-        <header className={styles.header}>
-          <div className={styles.titleGroup}>
-            <Image src="/icons/MHWilds-Settings_Icon.png" width={24} height={24} alt="" className="pixel-art" />
-            <h2 className="mh-title">Hunter Settings</h2>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4" onClick={() => setIsEditing(false)}>
+      <div className="animate-mh-slide-down flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden rounded-2xl border border-white/10 bg-void-raised shadow-lift" onClick={e => e.stopPropagation()}>
+        <header className="flex items-center justify-between border-b border-white/5 px-5 py-4">
+          <div className="flex items-center gap-2.5">
+            <Image src="/icons/MHWilds-Settings_Icon.png" width={22} height={22} alt="" className="pixel-art" />
+            <h2 className="font-display text-sm uppercase tracking-widest text-mist">Hunter Settings</h2>
           </div>
-          <button className={styles.closeBtn} onClick={() => setIsEditing(false)}>×</button>
+          <button onClick={() => setIsEditing(false)} className="flex h-8 w-8 items-center justify-center rounded-lg text-mist-dim hover:bg-white/5 hover:text-mist">×</button>
         </header>
 
-        <div className={styles.content}>
-          <div className={styles.field}>
-            <label>Default Session ID</label>
-            <div className={styles.inputWrapper}>
-              <input
-                type="text"
-                value={formData.lobby_id}
-                onChange={e => setFormData({ ...formData, lobby_id: e.target.value })}
-                placeholder="e.g. 4Y8x h3Wn ZvB2"
-              />
-            </div>
+        <div className="flex flex-col gap-4 overflow-y-auto px-5 py-5">
+          <div className="flex flex-col gap-1.5">
+            <label className="font-body text-xs uppercase tracking-wider text-mist-dim">Default Session ID</label>
+            <input
+              type="text"
+              className={inputClass}
+              value={formData.lobby_id}
+              onChange={e => setFormData({ ...formData, lobby_id: e.target.value })}
+              placeholder="e.g. 4Y8x h3Wn ZvB2"
+            />
           </div>
 
-          <div className={styles.field}>
-            <label>Quest Password</label>
-            <div className={styles.inputWrapper}>
-              <input
-                type="text"
-                value={formData.quest_password}
-                onChange={e => setFormData({ ...formData, quest_password: e.target.value })}
-                placeholder="4-digit password (e.g. 1234)"
-                inputMode="numeric"
-                pattern="\d{4}"
-                maxLength={4}
-              />
-            </div>
-            {validationError && <p className={styles.dangerHint}>{validationError}</p>}
+          <div className="flex flex-col gap-1.5">
+            <label className="font-body text-xs uppercase tracking-wider text-mist-dim">Quest Password</label>
+            <input
+              type="text"
+              className={inputClass}
+              value={formData.quest_password}
+              onChange={e => setFormData({ ...formData, quest_password: e.target.value })}
+              placeholder="4-digit password (e.g. 1234)"
+              inputMode="numeric"
+              pattern="\d{4}"
+              maxLength={4}
+            />
+            {validationError && <p className="font-body text-xs text-blood-bright">{validationError}</p>}
           </div>
 
-          <div className={styles.field}>
-            <label>Status Message</label>
-            <div className={styles.inputWrapper}>
-              <textarea
-                value={formData.status_message}
-                onChange={e => setFormData({ ...formData, status_message: e.target.value })}
-                placeholder="Share a status note with other hunters..."
-                maxLength={100}
-              />
-            </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="font-body text-xs uppercase tracking-wider text-mist-dim">Status Message</label>
+            <textarea
+              className={`${inputClass} min-h-[80px] resize-none`}
+              value={formData.status_message}
+              onChange={e => setFormData({ ...formData, status_message: e.target.value })}
+              placeholder="Share a status note with other hunters..."
+              maxLength={100}
+            />
           </div>
 
-          <div className={styles.field + " " + styles.checkboxField}>
-            <label className={styles.checkboxLabel}>
-              <input
-                type="checkbox"
-                checked={formData.receive_dms}
-                onChange={e => setFormData({ ...formData, receive_dms: e.target.checked })}
-              />
-              <span>Receive Discord DMs for future contact features</span>
-            </label>
-          </div>
+          <label className="flex items-center gap-2.5 font-body text-sm text-mist">
+            <input
+              type="checkbox"
+              className="h-4 w-4 rounded border-white/20 bg-void accent-ember"
+              checked={formData.receive_dms}
+              onChange={e => setFormData({ ...formData, receive_dms: e.target.checked })}
+            />
+            Receive Discord DMs for future contact features
+          </label>
 
-          <div className={styles.dangerZone}>
-            <div className={styles.dangerHeader}>
-              <Image src="/icons/MHWilds-Notes_X_Icon.png" width={18} height={18} alt="" className="pixel-art" />
-              <span>Danger Zone</span>
+          <div className="mt-2 rounded-xl border border-blood/20 bg-blood/5 p-4">
+            <div className="mb-1.5 flex items-center gap-2 font-display text-xs uppercase tracking-widest text-blood-bright">
+              <Image src="/icons/MHWilds-Notes_X_Icon.png" width={16} height={16} alt="" className="pixel-art" />
+              Danger Zone
             </div>
-            <p className={styles.dangerHint}>Permanently remove your data from the Guild Registry.</p>
+            <p className="mb-3 font-body text-xs text-mist-dim">Permanently remove your data from the Guild Registry.</p>
             <button
               type="button"
               onClick={handleDeleteAccount}
-              className={styles.deleteBtn}
               disabled={loading}
+              className="rounded-lg border border-blood/40 px-4 py-2 font-body text-xs font-semibold text-blood-bright transition-colors hover:bg-blood/10 disabled:opacity-50"
             >
               Delete Account
             </button>
           </div>
         </div>
 
-        <footer className={styles.footer}>
-          <button className={styles.cancelBtn} onClick={() => setIsEditing(false)}>Cancel</button>
-          <button className={`mh-button ${styles.saveBtn}`} onClick={handleSave} disabled={loading}>
+        <footer className="flex gap-3 border-t border-white/5 px-5 py-4">
+          <button onClick={() => setIsEditing(false)} className="flex-1 rounded-lg border border-white/10 py-2.5 font-display text-xs uppercase tracking-widest text-mist hover:border-white/20">Cancel</button>
+          <button onClick={handleSave} disabled={loading} className="flex-1 rounded-lg bg-ember py-2.5 font-display text-xs uppercase tracking-widest text-void hover:bg-ember-bright disabled:opacity-50">
             {loading ? 'Saving...' : 'Save Settings'}
           </button>
         </footer>
@@ -186,10 +183,10 @@ function SettingsContent({ user, isOwner }) {
   );
 
   return (
-    <div className={styles.container}>
+    <div>
       <button
-        className={`mh-button ${styles.toggleBtn}`}
         onClick={() => setIsEditing(true)}
+        className="flex items-center gap-2 rounded-lg border border-white/10 px-4 py-2 font-display text-xs uppercase tracking-widest text-mist transition-colors hover:border-ember/40 hover:text-ember-bright"
       >
         <Image src="/icons/MHWilds-Settings_Icon.png" width={16} height={16} alt="" className="pixel-art" />
         <span>Manage Settings</span>

@@ -1,45 +1,36 @@
-import styles from './MasteryInfo.module.css';
-import { MASTERY_RANKS } from '@/lib/profile';
-
 export default function MasteryInfo({ points, rank, nextRank, progress }) {
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <div className={styles.pointsArea}>
-          <span className={styles.pointsLabel}>Guild Standing</span>
-          <h2 className={styles.pointsValue}>{points} <span className={styles.mpSub}>MP</span></h2>
+    <div className="w-72 font-body">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <span className="font-body text-[11px] uppercase tracking-wider text-mist-dim">Guild Standing</span>
+          <h2 className="font-display text-xl text-ember-bright">{points} <span className="text-xs text-mist-dim">MP</span></h2>
         </div>
-        <div className={styles.rankBadge}>{rank}</div>
+        <div className="rounded-full border border-blood/30 bg-blood/20 px-3 py-1 font-display text-[11px] uppercase tracking-wider text-blood-bright">{rank}</div>
       </div>
 
-      <div className={styles.progressSection}>
-        <div className={styles.progressHeader}>
+      <div className="mt-3">
+        <div className="flex items-center justify-between text-xs text-mist-dim">
           <span>Mastery Progress</span>
           <span>{Math.round(progress)}%</span>
         </div>
-        <div className={styles.progressBar}>
-          <div className={styles.progressFill} style={{ width: `${progress}%` }} />
+        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-void">
+          <div className="h-full rounded-full bg-ember" style={{ width: `${progress}%` }} />
         </div>
         {nextRank && (
-          <div className={styles.progressFooter}>
-            {nextRank.minPoints - points} MP to {nextRank.title}
-          </div>
+          <p className="mt-1.5 text-xs text-mist-dim">{nextRank.minPoints - points} MP to {nextRank.title}</p>
         )}
       </div>
 
-      <div className={styles.divider} />
+      <div className="my-3 h-px bg-white/10" />
 
-      <div className={styles.mechanics}>
-        <h4 className={styles.mechTitle}>Mastery Record Guide</h4>
-        <ul className={styles.mechList}>
-          <li><span className={styles.mp}>+10 MP</span> Gold Specimen Crown (S/L)</li>
-          <li><span className={styles.mp}>+10 MP</span> Full Specimen Completion</li>
-          <li><span className={styles.mp}>+25 MP</span> Guild Archive (Discovery)</li>
-          <li><span className={styles.mp}>+15 MP</span> Guild Commendation (Renown)</li>
-          <li><span className={styles.mp}>+5 MP</span> Share Records (Host Crown)</li>
-          <li><span className={styles.mp}>+2 MP</span> Support Hunters (Future co-op features)</li>
+      <div>
+        <h4 className="font-display text-xs uppercase tracking-wider text-mist">Mastery Record Guide</h4>
+        <ul className="mt-2 flex flex-col gap-1.5 text-xs text-mist-dim">
+          <li><span className="text-ember-bright">+10 MP</span> Small or Large Crown Collected</li>
+          <li><span className="text-ember-bright">+30 MP</span> Both Crowns Collected (S + L)</li>
+          <li><span className="text-ember-bright">+25 MP</span> Guild Archive (First Discovery)</li>
         </ul>
-        {/* QUEST_SYSTEM_ENABLED: Guild Fever promo hidden while quest system is on hold */}
       </div>
     </div>
   );

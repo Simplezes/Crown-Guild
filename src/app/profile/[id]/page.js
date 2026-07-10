@@ -1,5 +1,4 @@
 import db from "@/lib/db";
-import styles from "./profile.module.css";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -11,6 +10,8 @@ import { getAllMonsters } from "@/lib/monsters";
 import Inventory from "@/components/profile/Inventory";
 import MasteryInfo from "@/components/profile/MasteryInfo";
 import CompareWithButton from "@/components/profile/CompareWithButton";
+import InfoTrigger from "@/components/ui/InfoTrigger";
+import UserAvatar from "@/components/ui/UserAvatar";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -39,8 +40,6 @@ function buildProfileOgVersion(data) {
     Number(data.stats?.total || 0),
     Number(data.stats?.small || 0),
     Number(data.stats?.large || 0),
-    Number(data.activity?.hosted || 0),
-    Number(data.activity?.joined || 0),
     Number(data.masteryPoints || 0),
     checksum.toString(36),
   ].join("-");
@@ -82,140 +81,138 @@ export async function generateMetadata({ params, searchParams }) {
 
 export default async function Profile({ params }) {
   const { id } = await params;
-  const session = await auth();
+  const [session, data, allMonsters] = await Promise.all([
+    auth(),
+    getProfileData(id),
+    getAllMonsters(true),
+  ]);
   const isOwner = session?.user?.id === id;
-  const data = await getProfileData(id);
 
   if (!data) notFound();
 
-  const { user, crowns, stats, activity, topAssist, masteryPoints } = data;
+  const { user, crowns, stats, masteryPoints } = data;
   const { currentRank, nextRank, progress } = getRankProgress(masteryPoints || 0);
   const userRank = currentRank.title;
-  const allMonsters = await getAllMonsters(true);
 
   return (
-    <main className={styles.main}>
-      <div className="premium-container">
-        <div className={styles.pageHeader}>
-          <div className={styles.heroShell + " animate-mh"}>
-            <div className={styles.heroPanel}>
-              <div className={styles.titleGroup}>
-                <span className={styles.indicator}>Hunter Profile</span>
-                <div className={styles.identityRow}>
-                  <Image
-                    src={user.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"}
-                    alt={user.username}
-                    width={76}
-                    height={76}
-                    className={styles.profileAvatar}
-                  />
-                  <div>
-                    <h1>{user.username}</h1>
-                    <div className={styles.rankBadge}>{userRank}</div>
-                    <p className={styles.memberId}>ID: {user.id}</p>
-                  </div>
+    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
+      
+      <section className="overflow-hidden rounded-3xl border border-white/5 bg-void-panel">
+        <div className="border-b border-white/5 bg-gradient-to-r from-ember/10 via-transparent to-transparent px-5 py-5 sm:px-6 lg:px-7">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+              <UserAvatar
+                src={user.avatar_url}
+                alt={user.username}
+                size={84}
+                className="h-20 w-20 shrink-0 rounded-2xl border border-white/10 object-cover"
+              />
+              <div className="min-w-0">
+                <span className="inline-flex items-center gap-2 font-body text-[10px] uppercase tracking-[0.3em] text-ember-dim">
+                  <Image src="/icons/MHWilds-Communication_Menu_Icon.png" width={16} height={16} alt="" className="pixel-art" />
+                  Hunter Profile
+                </span>
+                <h1 className="mt-1 font-display text-3xl uppercase tracking-wide text-mist sm:text-4xl">{user.username}</h1>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <span className="rounded-full border border-blood/30 bg-blood/20 px-3 py-1 font-display text-xs uppercase tracking-wider text-blood-bright">{userRank}</span>
+                  <span className="font-body text-xs text-mist-faint">ID: {user.id}</span>
                 </div>
-              </div>
-
-              {user.status_message && (
-                <div className={styles.statusMessage}>"{user.status_message}"</div>
-              )}
-
-              <div className={styles.heroActions}>
-                <DiscordShare id={user.id} username={user.username} crowns={crowns} wishlist={data.wishlist} />
               </div>
             </div>
 
-            <div className={styles.snapshotCard}>
-              <div className={styles.snapshotHeader}>
-                <span>Collection Mastery</span>
-                <div className={styles.infoWrapper}>
-                  <button className={styles.infoTrigger}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
-                    </svg>
-                  </button>
-                  <div className={styles.infoPopover}>
-                    <MasteryInfo points={masteryPoints} rank={userRank} nextRank={nextRank} progress={progress} />
-                  </div>
-                </div>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5">
+              <div className="rounded-2xl border border-white/5 bg-void px-2 py-3 sm:px-4 text-center">
+                <p className="font-display text-xl sm:text-2xl text-ember-bright">{stats.total || 0}</p>
+                <p className="mt-1 font-body text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.28em] text-mist-dim truncate">Crowns</p>
               </div>
-              <div className={styles.snapshotGrid}>
-                <div className={styles.snapshotStat}>
-                  <span>Total Crowns</span>
-                  <strong>{stats.total || 0}</strong>
-                </div>
-                <div className={styles.snapshotStat}>
-                  <span>Mastery Points</span>
-                  <strong>{masteryPoints}</strong>
-                </div>
-                <div className={styles.snapshotStat}>
-                  <span>Small Crowns</span>
-                  <strong>{stats.small || 0}</strong>
-                </div>
-                <div className={styles.snapshotStat}>
-                  <span>Large Crowns</span>
-                  <strong>{stats.large || 0}</strong>
-                </div>
+              <div className="rounded-2xl border border-white/5 bg-void px-2 py-3 sm:px-4 text-center">
+                <p className="font-display text-xl sm:text-2xl text-ember-bright">{stats.small || 0}</p>
+                <p className="mt-1 font-body text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.28em] text-mist-dim truncate">Small</p>
               </div>
-              <div className={styles.progressBar}>
-                <div className={styles.progressFill} style={{ width: `${progress}%` }} />
+              <div className="rounded-2xl border border-white/5 bg-void px-2 py-3 sm:px-4 text-center">
+                <p className="font-display text-xl sm:text-2xl text-ember-bright">{stats.large || 0}</p>
+                <p className="mt-1 font-body text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.28em] text-mist-dim truncate">Large</p>
               </div>
-              <div className={styles.progressMeta}>
-                <span>{Math.round(progress)}% Rank Progress</span>
-                {nextRank && <span>{nextRank.minPoints - masteryPoints} to {nextRank.title}</span>}
-              </div>
-              <div className={styles.snapshotActions}>
-                <CompareWithButton baseUserId={user.id} baseUsername={user.username} variant="identity" />
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-white/5 bg-void px-2 py-3 sm:px-4 text-center">
+                <div className="flex items-center gap-1.5">
+                  <p className="font-display text-xl sm:text-2xl text-ember-bright">{masteryPoints}</p>
+                  <InfoTrigger title="Collection Mastery" content={<MasteryInfo points={masteryPoints} rank={userRank} nextRank={nextRank} progress={progress} />} align="right" />
+                </div>
+                <p className="mt-1 font-body text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.28em] text-mist-dim truncate">Mastery</p>
               </div>
             </div>
           </div>
         </div>
 
-        {(user.lobby_id || isOwner) && (
-          <section className={styles.lobbySection}>
-            <div className={styles.sectionTitle}>
-              <Image src="/icons/MHWilds-Lobby_Icon.png" width={16} height={16} alt="" className="pixel-art" />
-              Lobby Info
-            </div>
-            <div className={styles.lobbyContent}>
-              {user.lobby_id ? (
-                <>
-                  <div className={styles.lobbyInfo}>
-                    <span className={styles.lobbyLabel}>Lobby ID</span>
-                    <code className={styles.lobbyCode}>{user.lobby_id}</code>
-                  </div>
-                  {user.quest_password && (
-                    <div className={styles.lobbyInfo}>
-                      <span className={styles.lobbyLabel}>Passcode</span>
-                      <code className={styles.lobbyCode}>{user.quest_password}</code>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <p className={styles.noLobby}>No active lobby — standing by.</p>
-              )}
-              <div style={{ marginLeft: "auto" }}>
-                <ProfileSettings user={user} isOwner={isOwner} />
+        <div className="flex flex-col gap-4 px-5 py-5 sm:px-6 lg:px-7">
+          {user.status_message && (
+            <p className="font-body text-sm italic text-mist-dim border-b border-white/5 pb-4">&quot;{user.status_message}&quot;</p>
+          )}
+          
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex-1 lg:max-w-md">
+              <div className="flex items-center justify-between mb-1.5 font-body text-xs text-mist-dim">
+                <span>{Math.round(progress)}% to {nextRank ? nextRank.title : 'Max'}</span>
+                {nextRank && <span>{nextRank.minPoints - masteryPoints} MP</span>}
+              </div>
+              <div className="h-1.5 overflow-hidden rounded-full bg-void">
+                <div className="h-full rounded-full bg-ember" style={{ width: `${progress}%` }} />
               </div>
             </div>
-          </section>
-        )}
 
-        <section className={styles.ledgerSection}>
-          <Inventory
-            initialCrowns={crowns}
-            initialCollection={data.collection}
-            initialWishlist={data.wishlist}
-            allMonsters={allMonsters}
-            isOwner={isOwner}
-            userId={user.id}
-          />
-        </section>
-
-        <div className={styles.footer}>
-          <Link href="/registry" className={styles.backLink}>← Back to Global Crown List</Link>
+            <div className="flex flex-wrap items-center gap-3">
+              <CompareWithButton baseUserId={user.id} baseUsername={user.username} variant="identity" />
+              <DiscordShare id={user.id} username={user.username} crowns={crowns} wishlist={data.wishlist} />
+            </div>
+          </div>
         </div>
+      </section>
+
+      
+      {(user.lobby_id || isOwner) && (
+        <section className="mt-4 flex flex-wrap items-center gap-4 rounded-2xl border border-white/5 bg-void-panel p-5">
+          <div className="flex items-center gap-2 font-display text-xs uppercase tracking-widest text-mist">
+            <Image src="/icons/MHWilds-Lobby_Icon.png" width={16} height={16} alt="" className="pixel-art" />
+            Lobby Info
+          </div>
+          {user.lobby_id ? (
+            <div className="flex flex-wrap gap-3">
+              <div className="flex items-center gap-2 rounded-lg border border-white/5 bg-void px-3 py-2">
+                <span className="font-body text-xs uppercase tracking-wider text-mist-dim">Lobby ID</span>
+                <code className="font-display text-sm text-ember-bright">{user.lobby_id}</code>
+              </div>
+              {user.quest_password && (
+                <div className="flex items-center gap-2 rounded-lg border border-white/5 bg-void px-3 py-2">
+                  <span className="font-body text-xs uppercase tracking-wider text-mist-dim">Passcode</span>
+                  <code className="font-display text-sm text-ember-bright">{user.quest_password}</code>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="font-body text-sm italic text-mist-dim">No active lobby — standing by.</p>
+          )}
+          <div className="ml-auto">
+            <ProfileSettings user={user} isOwner={isOwner} />
+          </div>
+        </section>
+      )}
+
+      
+      <section className="mt-4">
+        <Inventory
+          initialCrowns={crowns}
+          initialCollection={data.collection}
+          initialWishlist={data.wishlist}
+          allMonsters={allMonsters}
+          isOwner={isOwner}
+          userId={user.id}
+        />
+      </section>
+
+      <div className="mt-6 text-center">
+        <Link href="/registry" className="font-body text-xs text-mist-dim underline decoration-white/20 underline-offset-4 hover:text-ember-bright">
+          ← Back to Global Crown List
+        </Link>
       </div>
     </main>
   );

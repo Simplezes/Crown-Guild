@@ -1,7 +1,6 @@
 import db from "@/lib/db";
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
-import { pusherServer } from "@/lib/pusher";
 import { checkRateLimit } from "@/lib/ratelimit";
 import { logServerError } from "@/lib/logger";
 
@@ -89,8 +88,6 @@ export async function POST(req) {
       sql: "INSERT OR IGNORE INTO guild_archive (user_id, monster_id, type) VALUES (?, ?, ?)",
       args: [session.user.id, monster_id, type]
     });
-
-    await pusherServer.trigger("public-channel", "crown_update", {});
 
     return NextResponse.json({ success: true });
   } catch (error) {
