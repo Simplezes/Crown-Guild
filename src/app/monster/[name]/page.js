@@ -489,12 +489,12 @@ export default async function MonsterDetail({ params, searchParams }) {
               {activeTab === 'hosts' ? 'Host Coverage' : 'Hunt Demand'}
             </span>
             <h2 className="font-display text-lg uppercase tracking-wide text-mist">
-              {activeTab === 'hosts' ? 'Crowns on Record' : 'Hunters Tracking This Monster'}
+              {activeTab === 'hosts' ? 'Crown Hosts' : 'Hunt Demand'}
             </h2>
             <p className="max-w-lg font-body text-sm leading-relaxed text-mist-dim">
               {activeTab === 'hosts'
                 ? 'The ledger is grouped by crown type so active entries are easier to scan and contact.'
-                : 'Open demand is grouped in one place so you can see who still needs this monster and which sizes they are chasing.'}
+                : 'Hunters below are still chasing this monster. Track it yourself to appear here and let hosts find you.'}
             </p>
           </div>
 
@@ -573,14 +573,16 @@ export default async function MonsterDetail({ params, searchParams }) {
             </div>
           ) : (
             <section>
-              <div className="mb-3 flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-void">
-                  <Image src="/icons/MHWilds-Wishlist_Pin_Icon.png" width={22} height={22} alt="" className="pixel-art" />
+              <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-void px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <Image src="/icons/MHWilds-Wishlist_Pin_Icon.png" width={16} height={16} alt="" className="pixel-art" />
+                  <span className="font-body text-[10px] uppercase tracking-[0.25em] text-mist-dim">Track This Monster</span>
                 </div>
-                <div>
-                  <h3 className="font-display text-sm uppercase tracking-wide text-mist">Seeking Board</h3>
-                  <span className="font-body text-xs uppercase tracking-wider text-mist-dim">{wishlist.length} hunters watching</span>
-                </div>
+                <WishlistToggle monsterId={monster.id} initialType={userWishlistType} />
+              </div>
+
+              <div className="mb-3 flex items-center gap-2">
+                <span className="font-body text-xs uppercase tracking-wider text-mist-dim">{wishlist.length} hunters seeking</span>
               </div>
 
               <div className="flex flex-col gap-2.5">
@@ -658,7 +660,7 @@ export default async function MonsterDetail({ params, searchParams }) {
             <div className="border-b border-white/5 bg-white/5 px-5 py-4">
               <div className="flex items-center gap-2 font-body text-[10px] uppercase tracking-[0.3em] text-mist-dim">
                 <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={16} height={16} alt="" className="pixel-art" />
-                <span>Tracking</span>
+                <span>Switch View</span>
               </div>
             </div>
             <div className="p-5">
@@ -668,20 +670,15 @@ export default async function MonsterDetail({ params, searchParams }) {
                   className={`${tabLinkBase} flex-1 text-[11px] ${activeTab === 'hosts' ? 'bg-ember text-void' : 'text-mist hover:text-ember-bright'}`}
                   scroll={false}
                 >
-                  Host Ledger
+                  Crown Hosts
                 </Link>
                 <Link
                   href={buildMonsterPageHref(search, { tab: 'seeking' })}
                   className={`${tabLinkBase} flex-1 text-[11px] ${activeTab === 'seeking' ? 'bg-ember text-void' : 'text-mist hover:text-ember-bright'}`}
                   scroll={false}
                 >
-                  Seeking Board
+                  Hunt Demand
                 </Link>
-              </div>
-
-              <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-void px-3 py-3">
-                <span className="font-body text-[10px] uppercase tracking-[0.25em] text-mist-dim">Track This Monster</span>
-                <WishlistToggle monsterId={monster.id} initialType={userWishlistType} />
               </div>
             </div>
           </div>
@@ -705,18 +702,7 @@ export default async function MonsterDetail({ params, searchParams }) {
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-2xl border border-white/5 bg-void-panel">
-            <div className="border-b border-white/5 bg-white/5 px-5 py-4">
-              <p className="font-body text-[10px] uppercase tracking-[0.3em] text-mist-dim">Pursuit Status</p>
-            </div>
-            <div className="p-5">
-              <p className="font-body text-sm leading-relaxed text-mist-dim">
-                {wishlist.length > 0
-                  ? `${wishlist.length} hunters still need this monster in their collection log.`
-                  : 'No open wishlist demand is currently registered for this monster.'}
-              </p>
-            </div>
-          </div>
+
         </aside>
       </div>
     </main>

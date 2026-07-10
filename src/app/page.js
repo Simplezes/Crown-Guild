@@ -29,7 +29,7 @@ async function getHomeData() {
         JOIN wishlist w ON m.id = w.monster_id
         GROUP BY m.id
         ORDER BY demand DESC
-        LIMIT 5
+        LIMIT 10
       `),
       db.execute(`
         SELECT c.id, c.type, c.strength_rating, m.name as monster_name, m.image_name, u.username, u.id as user_id
@@ -61,11 +61,11 @@ async function getHomeData() {
   }
 }
 
-function RankRow({ href, icon, iconClass = "pixel-art", title, meta, trailing }) {
+function RankRow({ href, icon, iconClass = "pixel-art", title, meta, trailing, className = "" }) {
   const isAvatar = iconClass.includes("rounded-full");
 
   return (
-    <Link href={href} className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-white/5">
+    <Link href={href} className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-white/5 ${className}`}>
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-void">
         {isAvatar ? (
           <UserAvatar src={icon} alt={title} size={40} className={`h-10 w-10 shrink-0 ${iconClass}`} fallbackClassName={iconClass} />
@@ -151,16 +151,24 @@ export default async function Home() {
             tooltip="Monsters most requested by the community on their wishlists. Hunters are actively seeking these crowns."
           />
           <div className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2">
-            {wanted.map((m, i) => (
-              <RankRow
-                key={m.id}
-                href={`/monster/${m.name}?tab=seeking`}
-                icon={`/monsters/${m.image_name}`}
-                title={m.name}
-                meta={`${m.demand} hunters seeking`}
-                trailing={<span className="font-display text-xs text-mist-faint">#{i + 1}</span>}
-              />
-            ))}
+            {wanted.map((m, i) => {
+              const visClass =
+                i < 4 ? "" :
+                i < 6 ? "hidden sm:flex" :
+                i < 8 ? "hidden lg:flex" :
+                "hidden xl:flex";
+              return (
+                <RankRow
+                  key={m.id}
+                  href={`/monster/${m.name}?tab=seeking`}
+                  icon={`/monsters/${m.image_name}`}
+                  title={m.name}
+                  meta={`${m.demand} hunters seeking`}
+                  trailing={<span className="font-display text-xs text-mist-faint">#{i + 1}</span>}
+                  className={visClass}
+                />
+              );
+            })}
           </div>
         </div>
 
