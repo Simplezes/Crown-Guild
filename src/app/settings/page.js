@@ -1,9 +1,7 @@
 import { auth } from "@/auth";
 import db from "@/lib/db";
 import { redirect } from "next/navigation";
-import styles from "./settings.module.css";
 import SettingsForm from "./SettingsForm";
-import Image from "next/image";
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -24,22 +22,15 @@ export default async function SettingsPage() {
   };
 
   return (
-    <main className={styles.main}>
-      <div className="premium-container">
-        <header className={styles.header + " animate-mh"}>
-          <div className={styles.titleGroup}>
-            <div className={styles.indicator}>
-              <Image src="/icons/MHWilds-Notes_Checkmark_Icon.png" width={18} height={18} alt="" className="pixel-art" />
-              <span>Hunter Configuration</span>
-            </div>
-            <h1 className="gold-text">Settings</h1>
-          </div>
-        </header>
-
-        <div className={"animate-mh-slide-down " + styles.formContainer}>
-          <SettingsForm initialData={userData} />
+    <main className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:py-10">
+      <header className="mb-8">
+        <div className="mb-2 font-display text-sm uppercase tracking-[0.15em] text-mist">
+          Hunter Configuration
         </div>
-      </div>
+        <h1 className="font-display text-4xl uppercase tracking-wide text-ember">Settings</h1>
+      </header>
+
+      <SettingsForm initialData={userData} />
     </main>
   );
 }

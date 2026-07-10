@@ -1,7 +1,6 @@
 import db from "@/lib/db";
-import styles from "./find.module.css";
 import Image from "next/image";
-import { getAllMonsters, getQuestIcon } from "@/lib/monsters";
+import { getAllMonsters } from "@/lib/monsters";
 import FindSearch from "./FindSearch";
 
 async function getHostsData() {
@@ -64,25 +63,19 @@ export default async function FindPage() {
   const { hosts } = await getHostsData();
 
   return (
-    <main className={styles.main}>
-      <div className="premium-container">
-        <header className={styles.pageHeader + " animate-mh"}>
-          <div className={styles.titleGroup}>
-            <div className={styles.indicator}>
-              <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={18} height={18} alt="" className="pixel-art" />
-              <span>Quest Registry</span>
-            </div>
-            <h1 className="gold-text">Find a Host</h1>
-          </div>
-          <p className={styles.subtitle}>
-            Browse available investigations and connect with hunters hosting specific crown specimens.
-          </p>
-        </header>
+    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
+      <section className="mb-8 rounded-2xl border border-white/5 bg-void-panel p-6 lg:p-8">
+        <span className="inline-flex items-center gap-2 font-body text-xs uppercase tracking-[0.3em] text-ember-dim">
+          <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={16} height={16} alt="" className="pixel-art" />
+          Quest Registry
+        </span>
+        <h1 className="mt-2 font-display text-3xl uppercase tracking-wide text-mist sm:text-4xl">Find a Host</h1>
+        <p className="mt-3 max-w-2xl font-body text-sm leading-relaxed text-mist-dim">
+          Browse available investigations and connect with hunters hosting specific crown specimens.
+        </p>
+      </section>
 
-        <div className={styles.content + " animate-mh"}>
-          <FindSearch initialHosts={hosts} />
-        </div>
-      </div>
+      <FindSearch initialHosts={hosts} />
     </main>
   );
 }

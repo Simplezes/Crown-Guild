@@ -1,11 +1,8 @@
 import db from "@/lib/db";
-import styles from "./page.module.css";
 import Link from "next/link";
 import Image from "next/image";
-import LiveRadarWrapper from "@/components/beacon/LiveRadarWrapper";
 import InfoTrigger from "@/components/ui/InfoTrigger";
-import { getAllMonsters, getWeeklyBounties } from "@/lib/monsters";
-import { QUEST_SYSTEM_ENABLED, SOS_FEATURE_ENABLED } from "@/lib/sos";
+import UserAvatar from "@/components/ui/UserAvatar";
 
 export const dynamic = "force-dynamic";
 
@@ -16,337 +13,192 @@ export const metadata = {
 
 function getDiscordBotInviteUrl() {
   const clientId = process.env.DISCORD_CLIENT_ID;
-
-  if (!clientId) {
-    return null;
-  }
-
-  const params = new URLSearchParams({
-    client_id: clientId,
-    scope: "bot applications.commands",
-    permissions: "0",
-  });
-
+  if (!clientId) return null;
+  const params = new URLSearchParams({ client_id: clientId, scope: "bot applications.commands", permissions: "0" });
   return `https://discord.com/oauth2/authorize?${params.toString()}`;
 }
 
 async function getHomeData() {
   try {
-    const huntersRes = await db.execute("SELECT COUNT(*) as count FROM users");
-    const crownsCountRes = await db.execute("SELECT COUNT(*) as count FROM crowns");
-
-    const wantedRes = await db.execute(`
-      SELECT m.id, m.name, m.image_name, m.emoji, COUNT(w.id) as demand
-      FROM monsters m
-      JOIN wishlist w ON m.id = w.monster_id
-      GROUP BY m.id
-      ORDER BY demand DESC
-      LIMIT 4
-    `);
-
-    const recentRes = await db.execute(`
-      SELECT c.id, c.type, c.strength_rating, m.name as monster_name, m.image_name, u.username, u.id as user_id
-      FROM crowns c
-      JOIN monsters m ON c.monster_id = m.id
-      JOIN users u ON c.user_id = u.id
-      ORDER BY c.id DESC
-      LIMIT 4
-    `);
-
-    const activeMissionsRes = await db.execute(`
-      SELECT 
-        am.id, am.type, am.tempered, am.strength_rating, am.group_id,
-        am.host_id, am.requester_id,
-        m.name as monster_name, m.emoji, m.image_name,
-        u_host.username as host_name, u_host.avatar_url as host_avatar,
-        u_req.username as requester_name, u_req.avatar_url as requester_avatar
-      FROM active_missions am
-      JOIN monsters m ON am.monster_id = m.id
-      JOIN users u_host ON am.host_id = u_host.id
-      JOIN users u_req ON am.requester_id = u_req.id
-      ORDER BY am.id DESC
-      LIMIT 20
-    `);
-
-    const monsters = await getAllMonsters();
-    const bountyIds = QUEST_SYSTEM_ENABLED ? getWeeklyBounties(monsters) : [];
-    const bounties = QUEST_SYSTEM_ENABLED ? monsters.filter(m => bountyIds.includes(m.id)) : [];
-
-    const renownRes = await db.execute(`
-      SELECT u.id, u.username, u.avatar_url, COUNT(c.id) as crown_count
-      FROM users u
-      JOIN crowns c ON c.user_id = u.id
-      GROUP BY u.id
-      ORDER BY crown_count DESC
-      LIMIT 4
-    `);
+    const [huntersRes, crownsCountRes, wantedRes, recentRes, renownRes] = await Promise.all([
+      db.execute("SELECT COUNT(*) as count FROM users"),
+      db.execute("SELECT COUNT(*) as count FROM crowns"),
+      db.execute(`
+        SELECT m.id, m.name, m.image_name, m.emoji, COUNT(w.id) as demand
+        FROM monsters m
+        JOIN wishlist w ON m.id = w.monster_id
+        GROUP BY m.id
+        ORDER BY demand DESC
+        LIMIT 5
+      `),
+      db.execute(`
+        SELECT c.id, c.type, c.strength_rating, m.name as monster_name, m.image_name, u.username, u.id as user_id
+        FROM crowns c
+        JOIN monsters m ON c.monster_id = m.id
+        JOIN users u ON c.user_id = u.id
+        ORDER BY c.id DESC
+        LIMIT 5
+      `),
+      db.execute(`
+        SELECT u.id, u.username, u.avatar_url, COUNT(c.id) as crown_count
+        FROM users u
+        JOIN crowns c ON c.user_id = u.id
+        GROUP BY u.id
+        ORDER BY crown_count DESC
+        LIMIT 5
+      `),
+    ]);
 
     return {
-      stats: {
-        hunters: huntersRes.rows[0]?.count || 0,
-        crowns: crownsCountRes.rows[0]?.count || 0,
-      },
+      stats: { hunters: huntersRes.rows[0]?.count || 0, crowns: crownsCountRes.rows[0]?.count || 0 },
       wanted: wantedRes.rows || [],
       recent: recentRes.rows || [],
-      activeMissions: activeMissionsRes.rows || [],
-      bounties,
       topRenown: renownRes.rows || []
     };
   } catch (e) {
     console.error(e);
-    return {
-      stats: { hunters: 0, crowns: 0 },
-      wanted: [],
-      recent: [],
-      activeMissions: [],
-      bounties: [],
-      topRenown: []
-    };
+    return { stats: { hunters: 0, crowns: 0 }, wanted: [], recent: [], topRenown: [] };
   }
 }
 
-export default async function Home() {
-  const { stats, wanted, recent, activeMissions, bounties, topRenown } = await getHomeData();
-  const discordBotInviteUrl = getDiscordBotInviteUrl();
-
-  const displayMissions = [];
-  const seenGroups = new Set();
-  for (const m of activeMissions) {
-    if (m.group_id) {
-      if (seenGroups.has(m.group_id)) continue;
-      seenGroups.add(m.group_id);
-      const hunters = activeMissions.filter(x => x.group_id === m.group_id);
-      displayMissions.push({ ...m, isGroup: true, hunters });
-    } else {
-      displayMissions.push({ ...m, isGroup: false });
-    }
-    if (displayMissions.length >= 6) break;
-  }
+function RankRow({ href, icon, iconClass = "pixel-art", title, meta, trailing }) {
+  const isAvatar = iconClass.includes("rounded-full");
 
   return (
-    <main className={styles.main}>
-      <div className="premium-container">
-        <div className={styles.pageHeader}>
-          <div className={styles.heroShell}>
-            <div className={styles.heroPanel}>
-              <div className={styles.titleGroup}>
-                <h1>Crown Guild</h1>
-                <span className={styles.indicator}>Monster Hunter Wilds Community</span>
-              </div>
-              <p className={styles.description}>
-                The central hub for coordinating crown hunts, tracking legendary catches, and connecting with fellow hunters in the Crown Guild.
+    <Link href={href} className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-white/5">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-void">
+        {isAvatar ? (
+          <UserAvatar src={icon} alt={title} size={40} className={`h-10 w-10 shrink-0 ${iconClass}`} fallbackClassName={iconClass} />
+        ) : (
+          <Image src={icon} width={28} height={28} alt="" unoptimized className={iconClass} />
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-body text-sm font-medium text-mist group-hover:text-ember-bright">{title}</p>
+        <p className="truncate font-body text-xs text-mist-dim">{meta}</p>
+      </div>
+      {trailing}
+    </Link>
+  );
+}
+
+function PanelHeader({ title, tooltip, action }) {
+  return (
+    <div className="mb-1 flex items-center justify-between px-1">
+      <div className="flex items-center gap-2">
+        <h2 className="font-display text-sm uppercase tracking-[0.15em] text-mist">{title}</h2>
+        {tooltip && <InfoTrigger title={title} content={tooltip} align="left" />}
+      </div>
+      {action}
+    </div>
+  );
+}
+
+export default async function Home() {
+  const { stats, wanted, recent, topRenown } = await getHomeData();
+  const discordBotInviteUrl = getDiscordBotInviteUrl();
+
+  return (
+    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
+      
+      
+      <section className="mb-8 overflow-hidden rounded-3xl border border-white/5 bg-void-panel">
+        <div className="border-b border-white/5 bg-gradient-to-r from-ember/10 via-transparent to-transparent px-5 py-5 sm:px-6 lg:px-7">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-xl">
+              <span className="inline-flex items-center gap-2 font-body text-[10px] uppercase tracking-[0.3em] text-ember-dim">
+                <Image src="/icons/MHWilds-Camp_Icon.png" width={16} height={16} alt="" className="pixel-art" />
+                Guild Hub
+              </span>
+              <h1 className="mt-2 font-display text-3xl uppercase tracking-wide text-mist sm:text-4xl">Crown Guild</h1>
+              <p className="mt-3 font-body text-sm leading-relaxed text-mist-dim">
+                Track your crown collection and see what the community is chasing right now.
               </p>
-              <div className={styles.heroActions}>
-                <Link href="/registry" className="mh-button">View Crowns</Link>
-                <Link href="/investigation" className="mh-button-outline">Browse Monsters</Link>
-              </div>
-              <div className={styles.heroLinksRow}>
-                <a href="https://discord.gg/mhwilds" target="_blank" rel="noopener noreferrer" className={styles.heroTextLink}>Join Discord</a>
-                {discordBotInviteUrl && (
-                  <a
-                    href={discordBotInviteUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.heroTextLink}
-                  >
-                    Invite Bot
-                  </a>
-                )}
-              </div>
-              {discordBotInviteUrl && (
-                <div className={styles.botCallout}>
-                  <span className={styles.botBadge}>Discord Bot</span>
-                  <p>
-                    Add the Crown Guild bot to your Discord server and use slash commands without leaving chat.
-                  </p>
-                </div>
-              )}
             </div>
-            <div className={styles.snapshotCard}>
-              <div className={styles.snapshotHeader}>
-                <span>Guild Stats</span>
+
+            <div className="grid grid-cols-2 gap-2 sm:gap-2.5 lg:min-w-[16rem]">
+              <div className="rounded-2xl border border-white/5 bg-void px-2 py-3 sm:px-4 text-center">
+                <p className="font-display text-xl sm:text-2xl text-ember-bright">{stats.hunters}</p>
+                <p className="mt-1 font-body text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.28em] text-mist-dim truncate">Hunters</p>
               </div>
-              <div className={styles.snapshotGrid}>
-                <div className={styles.snapshotStat}>
-                  <span>Hunters Enlisted</span>
-                  <strong>{stats.hunters}</strong>
-                </div>
-                <div className={styles.snapshotStat}>
-                  <span>Crowns Registered</span>
-                  <strong>{stats.crowns}</strong>
-                </div>
+              <div className="rounded-2xl border border-white/5 bg-void px-2 py-3 sm:px-4 text-center">
+                <p className="font-display text-xl sm:text-2xl text-ember-bright">{stats.crowns}</p>
+                <p className="mt-1 font-body text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.28em] text-mist-dim truncate">Crowns</p>
               </div>
             </div>
           </div>
         </div>
 
-        <div className={styles.tacticalGrid + " animate-mh"}>
-          <section className={styles.radarWrapper}>
-            <LiveRadarWrapper />
-          </section>
+        <div className="flex flex-col gap-4 px-5 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-7">
+          <div className="flex flex-wrap items-center gap-3">
+            <Link href="/registry" className="rounded-lg bg-ember px-5 py-2.5 font-display text-xs uppercase tracking-widest text-void transition-colors hover:bg-ember-bright">View Crowns</Link>
+            <Link href="/investigation" className="rounded-lg border border-white/10 px-5 py-2.5 font-display text-xs uppercase tracking-widest text-mist transition-colors hover:border-ember/40 hover:text-ember-bright">Browse Monsters</Link>
+          </div>
+          <div className="flex items-center gap-4">
+            <a href="https://discord.gg/mhwilds" target="_blank" rel="noopener noreferrer" className="font-body text-xs text-mist-dim underline decoration-white/20 underline-offset-4 hover:text-ember">Join Discord</a>
+            {discordBotInviteUrl && (
+              <a href={discordBotInviteUrl} target="_blank" rel="noopener noreferrer" className="font-body text-xs text-mist-dim underline decoration-white/20 underline-offset-4 hover:text-ember">Invite Bot</a>
+            )}
+          </div>
+        </div>
+      </section>
 
-          {SOS_FEATURE_ENABLED && (
-          <section className={styles.opsSection}>
-            <header className={styles.sectionHeader}>
-              <div className={styles.liveIndicator}>
-                <span className={styles.dot}></span>
-                LIVE OPERATIONS
-              </div>
-              <h2 className="mh-title">Ongoing Hunts</h2>
-            </header>
-            <div className={styles.opsGrid}>
-              {displayMissions && displayMissions.length > 0 ? (
-                displayMissions.map((mission) => (
-                  <div key={mission.isGroup ? mission.group_id : mission.id} className={styles.opCard}>
-                    <div className={styles.opMonster}>
-                      <Image src={`/monsters/${mission.image_name}`} width={40} height={40} alt="" className="pixel-art" />
-                      <div className={styles.opInfo}>
-                        <span className={styles.opName}>{mission.monster_name}</span>
-                        <span className={styles.opGoal}>{mission.strength_rating}★ {mission.type} Crown{mission.isGroup ? ' · SOS' : ''}</span>
-                      </div>
-                    </div>
-                    <div className={styles.opParty}>
-                      <div className={styles.opHunter}>
-                        <Image src={mission.host_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" width={26} height={26} className={styles.opAvatar} />
-                        <Link href={`/profile/${mission.host_id}`}>{mission.host_name}</Link>
-                      </div>
-                      {mission.isGroup ? (
-                        <div className={styles.opGroupHunters}>
-                          {mission.hunters.map(h => (
-                            <div key={h.requester_id} className={styles.opHunter}>
-                              <Image src={h.requester_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" width={26} height={26} className={styles.opAvatar} />
-                              <Link href={`/profile/${h.requester_id}`}>{h.requester_name}</Link>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <>
-                          <div className={styles.opVs}>
-                            <Image src="/icons/MHWilds-Squad_Information_Counter_Icon.png" width={30} height={30} alt="" className="pixel-art" />
-                          </div>
-                          <div className={styles.opHunter}>
-                            <Image src={mission.requester_avatar || "/icons/MHWilds-Quest_Members_Icon.png"} alt="" width={26} height={26} className={styles.opAvatar} />
-                            <Link href={`/profile/${mission.requester_id}`}>{mission.requester_name}</Link>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className={styles.emptyOps}>
-                  <p>No active operations in progress.</p>
-                </div>
-              )}
-            </div>
-          </section>
-          )}
+      
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div className="rounded-2xl border border-white/5 bg-void-panel p-5 lg:col-span-2">
+          <PanelHeader
+            title="Community Demand"
+            tooltip="Monsters most requested by the community on their wishlists. Hunters are actively seeking these crowns."
+          />
+          <div className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2">
+            {wanted.map((m, i) => (
+              <RankRow
+                key={m.id}
+                href={`/monster/${m.name}?tab=seeking`}
+                icon={`/monsters/${m.image_name}`}
+                title={m.name}
+                meta={`${m.demand} hunters seeking`}
+                trailing={<span className="font-display text-xs text-mist-faint">#{i + 1}</span>}
+              />
+            ))}
+          </div>
         </div>
 
-        <div className={styles.intelGrid + " animate-mh"}>
-          <section className={styles.intelCard}>
-            <header className={styles.cardHeader}>
-              <Image src="/icons/MHWilds-Wishlist_Pin_Icon.png" width={20} height={20} alt="" className="pixel-art" />
-              <h2 className="mh-title">Community Demand</h2>
-              <InfoTrigger 
-                title="Community Demand" 
-                content="Monsters that are most requested by the community on their wishlists. Hunters are actively seeking these crowns." 
-                align="left"
+        <div className="rounded-2xl border border-white/5 bg-void-panel p-5">
+          <PanelHeader title="Latest Crowns" />
+          <div className="mt-2 flex flex-col gap-1">
+            {recent.map((c) => (
+              <RankRow
+                key={c.id}
+                href={`/monster/${c.monster_name}?crownId=${c.id}&user=${c.user_id}`}
+                icon={`/monsters/${c.image_name}`}
+                title={c.monster_name}
+                meta={`Secured by ${c.username}`}
+                trailing={
+                  <Image src={c.type === "small" ? "/icons/smallcrown.png" : "/icons/largecrown.png"} width={16} height={16} alt="" className="pixel-art" />
+                }
               />
-            </header>
-            <div className={styles.list}>
-              {wanted.map((m, i) => (
-                <Link href={`/monster/${m.name}?tab=seeking`} key={m.id} className={styles.listItem}>
-                  <div className={styles.itemIcon}>
-                    <Image src={`/monsters/${m.image_name}`} width={40} height={40} alt="" className="pixel-art" />
-                  </div>
-                  <div className={styles.itemInfo}>
-                    <span className={styles.itemName}>{m.name}</span>
-                    <span className={styles.itemMeta}>{m.demand} Hunters Seeking</span>
-                  </div>
-                  <div className={styles.itemRank}>#{i + 1}</div>
-                </Link>
-              ))}
-            </div>
-          </section>
-
-          <section className={styles.intelCard}>
-            <header className={styles.cardHeader}>
-              <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={20} height={20} alt="" className="pixel-art" />
-              <h2 className="mh-title">Latest Crowns</h2>
-            </header>
-            <div className={styles.list}>
-              {recent.map((c) => (
-                <Link href={`/monster/${c.monster_name}?crownId=${c.id}&user=${c.user_id}`} key={c.id} className={styles.listItem}>
-                  <div className={styles.itemIcon}>
-                    <Image src={`/monsters/${c.image_name}`} width={40} height={40} alt="" className="pixel-art" />
-                  </div>
-                  <div className={styles.itemInfo}>
-                    <span className={styles.itemName}>{c.monster_name}</span>
-                    <span className={styles.itemMeta}>Secured by {c.username}</span>
-                  </div>
-                  <div className={styles.itemCrown}>
-                    <Image
-                      src={c.type === 'small' ? "/icons/smallcrown.png" : "/icons/largecrown.png"}
-                      width={16} height={16} alt="" className="pixel-art"
-                    />
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-
-          <section className={styles.intelCard}>
-            <header className={styles.cardHeader}>
-              <Image src="/icons/MHWilds-Quest_Members_Icon.png" width={20} height={20} alt="" className="pixel-art" />
-              <h2 className="mh-title">Guild Legends</h2>
-              <InfoTrigger 
-                title="Guild Legends" 
-                content="The top crown hunters in the community, ranked by total crowns contributed to the Guild registry." 
-                align="left"
-              />
-            </header>
-            <div className={styles.list}>
-              {topRenown.map((u, i) => (
-                <Link href={`/profile/${u.id}`} key={u.id} className={styles.listItem}>
-                  <div className={styles.itemIcon}>
-                    <Image src={u.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"} width={40} height={40} alt="" className={styles.roundAvatar} />
-                  </div>
-                  <div className={styles.itemInfo}>
-                    <span className={styles.itemName}>{u.username}</span>
-                    <span className={styles.itemMeta}>{u.crown_count} Crowns</span>
-                  </div>
-                  <div className={styles.itemRank}>#{i + 1}</div>
-                </Link>
-              ))}
-            </div>
-          </section>
+            ))}
+          </div>
         </div>
 
-        {QUEST_SYSTEM_ENABLED && (
-          <section className={styles.bountySection + " animate-mh"}>
-            <div className={styles.bountyHeader}>
-              <Image src="/icons/MHWilds-Completed_Objective_Icon.png" width={24} height={24} alt="" className="pixel-art" />
-              <h2 className="mh-title">Weekly Bounties</h2>
-              <InfoTrigger 
-                title="Weekly Bounties" 
-                content="Specific monsters designated by the Guild. Securing crowns for these monsters grants double Mastery Points." 
-                position="bottom"
-                align="left"
+        <div className="rounded-2xl border border-white/5 bg-void-panel p-5 lg:col-span-3">
+          <PanelHeader title="Guild Legends" tooltip="The top crown hunters in the community, ranked by total crowns contributed to the registry." />
+          <div className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2 lg:grid-cols-5">
+            {topRenown.map((u, i) => (
+              <RankRow
+                key={u.id}
+                href={`/profile/${u.id}`}
+                icon={u.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"}
+                iconClass="rounded-full object-cover"
+                title={u.username}
+                meta={`${u.crown_count} crowns`}
+                trailing={<span className="font-display text-xs text-mist-faint">#{i + 1}</span>}
               />
-              <span className={styles.bountyMeta}>2x Mastery Points Rewards</span>
-            </div>
-            <div className={styles.bountyGrid}>
-              {bounties.map(m => (
-                <Link href={`/monster/${m.name}`} key={m.id} className={styles.bountyCard}>
-                  <Image src={`/monsters/${m.image_name}`} width={48} height={48} alt={m.name} className="pixel-art" />
-                  <span className={styles.bountyName}>{m.name}</span>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
-      </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

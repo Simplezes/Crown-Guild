@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import db from "@/lib/db";
 import { auth } from "@/auth";
 import { checkRateLimit } from "@/lib/ratelimit";
-import { pusherServer } from "@/lib/pusher";
 import { logServerError } from "@/lib/logger";
 
 export async function POST(request) {
@@ -141,8 +140,6 @@ export async function POST(request) {
         });
       }
     }
-
-    await pusherServer.trigger("public-channel", "crown_update", {});
 
     return NextResponse.json({ success: true, mode: isHostDeploy ? "host" : "hunter" });
   } catch (error) {

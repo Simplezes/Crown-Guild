@@ -1,10 +1,7 @@
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
-import Nav from "@/components/ui/Nav";
-import ToastManager from "@/components/ui/ToastManager";
-import MissionControl from "@/components/missions/MissionControl";
-import { SOS_FEATURE_ENABLED } from "@/lib/sos";
+import Sidebar from "@/components/ui/Sidebar";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
@@ -28,12 +25,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${outfit.variable}`}>
+      <body className={`${inter.variable} ${outfit.variable} font-body`}>
         <Providers>
-          <Nav />
-          <ToastManager />
-          {SOS_FEATURE_ENABLED && <MissionControl />}
-          {children}
+          <Sidebar />
+          <div className="pt-16 pb-16 lg:pt-0 lg:pb-0 lg:pl-20">{children}</div>
         </Providers>
       </body>
     </html>

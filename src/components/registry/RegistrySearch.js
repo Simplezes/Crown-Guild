@@ -1,212 +1,172 @@
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import styles from './RegistrySearch.module.css';
-import WishlistToggle from '../wishlist/WishlistToggle';
-import InfoTrigger from '../ui/InfoTrigger';
-import { QUEST_SYSTEM_ENABLED } from '@/lib/sos';
+import MonsterIcon from '@/components/ui/MonsterIcon';
+import UserAvatar from '@/components/ui/UserAvatar';
 
-export default function RegistrySearch({ initialRegistry }) {
+function AvatarStack({ finders }) {
+  if (!finders?.length) return null;
+
+  return (
+    <div className="flex items-center">
+      {finders.slice(0, 4).map((finder, index) => (
+        <UserAvatar
+          key={`${finder.username}-${index}`}
+          src={finder.avatar_url}
+          alt={finder.username}
+          size={24}
+          className={`shrink-0 rounded-full border border-ember/40 bg-void ${index > 0 ? '-ml-2' : ''}`}
+        />
+      ))}
+      {finders.length > 4 ? (
+        <div className="-ml-2 flex h-6 w-6 items-center justify-center rounded-full border border-ember/40 bg-ember/20 font-body text-[9px] font-semibold text-ember-bright">
+          +{finders.length - 4}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function CrownRow({ iconSrc, label, finders }) {
+  const hasFinders = finders.length > 0;
+
+  return (
+    <div className={`flex items-center gap-2.5 rounded-2xl border px-3 py-2.5 ${hasFinders ? 'border-ember/20 bg-ember/10' : 'border-white/10 bg-void/60'}`}>
+      <Image src={iconSrc} width={14} height={14} alt="" className={`pixel-art ${hasFinders ? '' : 'grayscale opacity-35'}`} />
+      <div className="min-w-0 flex-1">
+        <p className="font-body text-[10px] uppercase tracking-[0.24em] text-mist-dim">{label}</p>
+        {hasFinders ? (
+          <div className="mt-1 flex items-center justify-between gap-2">
+            <AvatarStack finders={finders} />
+            <span className="font-display text-sm text-ember-bright">{finders.length}</span>
+          </div>
+        ) : (
+          <p className="mt-1 font-body text-xs italic text-mist-dim">Not recorded</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const PAGE_SIZE = 12;
+
+export default function RegistrySearch({ initialRegistry, headerContent }) {
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+
+  const handleSearchChange = (value) => {
+    setSearch(value);
+    setPage(1);
+  };
 
   const filteredRegistry = useMemo(() => {
     if (!search.trim()) return initialRegistry;
     const term = search.toLowerCase();
-    return initialRegistry.filter(m => {
-      const isBountyMatch = QUEST_SYSTEM_ENABLED && m.isBounty && term === 'bounty';
-      return m.name.toLowerCase().includes(term) ||
-        (m.extraInfo?.type && m.extraInfo.type.toLowerCase().includes(term)) ||
-        isBountyMatch;
-    });
+    return initialRegistry.filter((monster) =>
+      monster.name.toLowerCase().includes(term) ||
+      (monster.extraInfo?.type && monster.extraInfo.type.toLowerCase().includes(term))
+    );
   }, [search, initialRegistry]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredRegistry.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pagedRegistry = filteredRegistry.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
   return (
-    <div className={styles.container}>
-      <div className={styles.searchWrapper}>
-        <div className={styles.searchInner}>
-          <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={24} height={24} alt="" className="pixel-art" />
-          <input
-            type="text"
-            placeholder="Search Registry by Monster Name..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className={styles.searchInput}
-          />
-          {search && (
-            <button className={styles.clearBtn} onClick={() => setSearch('')}>×</button>
-          )}
+    <div className="space-y-6">
+      <section className="overflow-hidden rounded-3xl border border-white/5 bg-void-panel">
+        {headerContent}
+        <div className="flex flex-col gap-3 px-5 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-7">
+          <div className="flex flex-1 items-center gap-3 rounded-3xl border border-white/5 bg-void-panel px-4 py-3">
+            <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={20} height={20} alt="" className="pixel-art" />
+            <input
+              type="text"
+              placeholder="Search registry by monster or type"
+              value={search}
+              onChange={(event) => handleSearchChange(event.target.value)}
+              className="w-full bg-transparent font-body text-sm text-mist outline-none placeholder:text-mist-dim"
+            />
+            {search ? (
+              <button onClick={() => handleSearchChange('')} className="rounded px-1.5 text-lg leading-none text-mist-dim hover:text-ember-bright">
+                ×
+              </button>
+            ) : null}
+          </div>
         </div>
-        <div className={styles.searchStats}>
-          Showing {filteredRegistry.length} Specimens
-          {QUEST_SYSTEM_ENABLED && (
-            <div className={styles.legend}>
-              <div className={styles.legendItem}>
-                <div className={styles.feverDot}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                  </svg>
-                </div>
-                <span>Guild Fever</span>
-                <InfoTrigger
-                  title="Guild Fever"
-                  content="A rare temporary status. Contributing to investigations while in Fever grants 3x Mastery Points."
-                  align="right"
-                />
-              </div>
-              <div className={styles.legendItem}>
-                <div className={styles.resonanceDot}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.256 1.1-3.1z"></path>
-                  </svg>
-                </div>
-                <span>Resonance</span>
-                <InfoTrigger
-                  title="Resonance"
-                  content="Indicates how often this crown has been shared with others. Higher resonance means more community contribution."
-                  align="right"
-                />
-              </div>
-            </div>
-          )}
-        </div>
+      </section>
+
+      <div className="flex items-center justify-between rounded-2xl border border-white/5 bg-void-panel px-5 py-3 sm:px-6 font-body text-[10px] uppercase tracking-[0.24em] text-mist-dim">
+        Showing {filteredRegistry.length} specimens
       </div>
 
-      <div className={styles.ledgerGrid}>
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         {filteredRegistry.length > 0 ? (
-          filteredRegistry.map((monster) => (
+          pagedRegistry.map((monster) => (
             <Link
               key={monster.id}
               href={`/monster/${monster.name}`}
-              className={`${styles.monsterCard} ${QUEST_SYSTEM_ENABLED && monster.isBounty ? styles.bountyCard : ''}`}
+              className="group overflow-hidden rounded-2xl border border-white/5 bg-void-panel p-3 transition-colors hover:border-ember/35"
             >
-              {QUEST_SYSTEM_ENABLED && monster.isBounty && (
-                <div className={styles.bountyRibbon}>
-                  <span>BOUNTY</span>
-                </div>
-              )}
-              <div className={styles.cardTop}>
-                <div className={styles.monsterIcon}>
-                  {monster.image_name ? (
-                    <Image
-                      src={`/monsters/${monster.image_name}`}
-                      alt={monster.name}
-                      width={52}
-                      height={52}
-                      className="pixel-art"
-                    />
-                  ) : (
-                    <Image src="/icons/MHWilds-Hunt_Icon.png" width={32} height={32} alt="" className="pixel-art" />
-                  )}
-                </div>
-                <div className={styles.cardMeta}>
-                  <div className={styles.nameRow}>
-                    <h3>{monster.name}</h3>
-                    <div className={styles.badgeGroup}>
-                      {monster.demand > 0 && (
-                        <div className={styles.demandBadge} title={`${monster.demand} hunters have this on their wishlist`}>
-                          <Image src="/icons/MHWilds-Wishlist_Pin_Icon.png" width={16} height={16} alt="" className="pixel-art" />
-                          <span>{monster.demand}</span>
-                        </div>
-                      )}
-                    </div>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <MonsterIcon imageName={monster.image_name} name={monster.name} size={48} className="shrink-0 rounded-2xl border border-white/5 bg-void" />
+                  <div className="min-w-0">
+                    <h3 className="truncate font-display text-base uppercase tracking-wide text-mist transition-colors group-hover:text-ember-bright">
+                      {monster.name}
+                    </h3>
+                    {monster.extraInfo?.type ? (
+                      <p className="mt-1 font-body text-[10px] uppercase tracking-[0.24em] text-mist-dim">{monster.extraInfo.type}</p>
+                    ) : null}
+                    {monster.smallFinders?.length > 0 || monster.largeFinders?.length > 0 ? (
+                      <p className="mt-2 font-body text-[9px] uppercase tracking-[0.2em] text-mist-dim">
+                        {monster.smallFinders?.length > 0 && `${monster.smallFinders.length} Small`}
+                        {monster.smallFinders?.length > 0 && monster.largeFinders?.length > 0 && ' / '}
+                        {monster.largeFinders?.length > 0 && `${monster.largeFinders.length} Large`}
+                      </p>
+                    ) : null}
                   </div>
-                  {monster.extraInfo?.type && (
-                    <span className={styles.monsterType}>{monster.extraInfo.type}</span>
-                  )}
                 </div>
-              </div>
-
-              <div className={styles.crownRows}>
-                <div className={`${styles.crownRow} ${monster.smallFinders.length > 0 ? styles.crownRowFound : ''}`}>
-                  <Image
-                    src="/icons/smallcrown.png"
-                    width={13} height={13} alt="S"
-                    className={`pixel-art ${monster.smallFinders.length === 0 ? styles.grayscale : ''}`}
-                  />
-                  {monster.smallFinders.length > 0 ? (
-                    <>
-                      <div className={styles.avatarStack}>
-                        {monster.smallFinders.slice(0, 4).map((f, i) => (
-                          <div key={i} className={styles.avatarWrapper}>
-                            <Image src={f.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"} alt={f.username} width={24} height={24} className={`${styles.stackAvatar} ${f.isFever ? styles.feverAvatar : ''}`} />
-                            {QUEST_SYSTEM_ENABLED && f.isFever && (
-                              <div className={styles.feverGlow} title="GUILD FEVER! (3x Points)">
-                                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-                                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                </svg>
-                              </div>
-                            )}
-                            {QUEST_SYSTEM_ENABLED && f.resonance >= 3 && (
-                              <div className={styles.resonanceFlame} title={`Resonance Lvl ${f.resonance}`}>
-                                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-                                  <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.256 1.1-3.1z"></path>
-                                </svg>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                        {monster.smallFinders.length > 4 && (
-                          <div className={styles.moreCount}>+{monster.smallFinders.length - 4}</div>
-                        )}
-                      </div>
-                      <span className={styles.hunterCount}>{monster.smallFinders.length}</span>
-                    </>
-                  ) : (
-                    <span className={styles.pending}>Not Recorded</span>
-                  )}
-                </div>
-
-                <div className={`${styles.crownRow} ${monster.largeFinders.length > 0 ? styles.crownRowFound : ''}`}>
-                  <Image
-                    src="/icons/largecrown.png"
-                    width={15} height={15} alt="L"
-                    className={`pixel-art ${monster.largeFinders.length === 0 ? styles.grayscale : ''}`}
-                  />
-                  {monster.largeFinders.length > 0 ? (
-                    <>
-                      <div className={styles.avatarStack}>
-                        {monster.largeFinders.slice(0, 4).map((f, i) => (
-                          <div key={i} className={styles.avatarWrapper}>
-                            <Image src={f.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"} alt={f.username} width={24} height={24} className={`${styles.stackAvatar} ${f.isFever ? styles.feverAvatar : ''}`} />
-                            {QUEST_SYSTEM_ENABLED && f.isFever && (
-                              <div className={styles.feverGlow} title="GUILD FEVER! (3x Points)">
-                                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-                                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                </svg>
-                              </div>
-                            )}
-                            {QUEST_SYSTEM_ENABLED && f.resonance >= 3 && (
-                              <div className={styles.resonanceFlame} title={`Resonance Lvl ${f.resonance}`}>
-                                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-                                  <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.256 1.1-3.1z"></path>
-                                </svg>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                        {monster.largeFinders.length > 4 && (
-                          <div className={styles.moreCount}>+{monster.largeFinders.length - 4}</div>
-                        )}
-                      </div>
-                      <span className={styles.hunterCount}>{monster.largeFinders.length}</span>
-                    </>
-                  ) : (
-                    <span className={styles.pending}>Not Recorded</span>
-                  )}
-                </div>
+                {monster.demand > 0 ? (
+                  <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-blood/30 bg-blood/10 px-2.5 py-1 font-body text-[9px] font-semibold uppercase tracking-[0.2em] text-blood-bright">
+                    <Image src="/icons/MHWilds-Wishlist_Pin_Icon.png" width={12} height={12} alt="" className="pixel-art" />
+                    {monster.demand}
+                  </div>
+                ) : null}
               </div>
             </Link>
           ))
         ) : (
-          <div className={styles.noResults}>
+          <div className="col-span-full flex flex-col items-center gap-4 rounded-3xl border border-dashed border-white/10 bg-void-panel px-8 py-16 text-center">
             <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={48} height={48} alt="" className="pixel-art grayscale" />
-            <p>No specimens match your search criteria.</p>
-            <span>Try searching for a different monster or category.</span>
+            <p className="font-display text-xl uppercase tracking-wide text-mist">No specimens match the current search.</p>
+            <span className="font-body text-sm text-mist-dim">Try broadening the term or clearing the filter.</span>
           </div>
         )}
       </div>
+
+      {totalPages > 1 ? (
+        <div className="flex items-center justify-center gap-4">
+          <button
+            onClick={() => setPage((value) => Math.max(1, value - 1))}
+            disabled={safePage === 1}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 font-display text-lg text-mist disabled:opacity-30"
+            aria-label="Previous page"
+          >
+            ‹
+          </button>
+          <span className="font-display text-xs uppercase tracking-[0.3em] text-mist-dim">Page {safePage} of {totalPages}</span>
+          <button
+            onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
+            disabled={safePage === totalPages}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 font-display text-lg text-mist disabled:opacity-30"
+            aria-label="Next page"
+          >
+            ›
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

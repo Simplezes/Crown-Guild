@@ -2,8 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import Image from "next/image";
-import styles from "./WishlistUserPickerModal.module.css";
+import UserAvatar from "@/components/ui/UserAvatar";
 
 const PAGE_SIZE = 12;
 
@@ -98,75 +97,69 @@ export default function WishlistUserPickerModal({
   if (!isOpen || !mounted) return null;
 
   const modal = (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={`${styles.modal} animate-mh-slide-down`} onClick={(e) => e.stopPropagation()}>
-        <header className={styles.header}>
-          <h2 className={styles.title}>{title || "Select Hunter"}</h2>
-          <button className={styles.closeBtn} type="button" onClick={onClose} aria-label="Close picker">
-            ×
-          </button>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4" onClick={onClose}>
+      <div className="animate-mh-slide-down flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden rounded-2xl border border-white/10 bg-void-raised shadow-lift" onClick={(e) => e.stopPropagation()}>
+        <header className="flex items-center justify-between border-b border-white/5 px-5 py-4">
+          <h2 className="font-display text-sm uppercase tracking-widest text-mist">{title || "Select Hunter"}</h2>
+          <button type="button" onClick={onClose} aria-label="Close picker" className="flex h-8 w-8 items-center justify-center rounded-lg text-mist-dim hover:bg-white/5 hover:text-mist">×</button>
         </header>
 
-        <div className={styles.body}>
-          <div className={styles.searchRow}>
-            <input
-              className={styles.searchInput}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search all hunters..."
-            />
-          </div>
+        <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-5 py-4">
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search all hunters..."
+            className="w-full rounded-lg border border-white/10 bg-void px-3.5 py-2.5 font-body text-sm text-mist placeholder:text-mist-faint focus:border-ember/50 focus:outline-none"
+          />
 
-          <p className={styles.meta}>
+          <p className="font-body text-xs text-mist-dim">
             {loading ? "Loading hunters..." : `${total} hunters found`}
           </p>
 
           {users.length === 0 && !loading ? (
-            <p className={styles.empty}>No matching hunters found.</p>
+            <p className="py-8 text-center font-body text-sm text-mist-dim">No matching hunters found.</p>
           ) : (
-            <div className={styles.list}>
+            <div className="flex flex-col gap-1.5">
               {users.map((user) => (
                 <button
                   key={user.id}
                   type="button"
-                  className={styles.userCard}
                   onClick={() => {
                     onSelect(user);
                     onClose();
                   }}
+                  className="flex items-center justify-between gap-3 rounded-lg border border-white/5 bg-void px-3 py-2.5 text-left transition-colors hover:border-ember/30 hover:bg-white/5"
                 >
-                  <span className={styles.userMain}>
-                    <Image
-                      src={user.avatar_url || "/icons/MHWilds-Quest_Members_Icon.png"}
-                      alt=""
-                      width={36}
-                      height={36}
-                      className={styles.avatar}
+                  <span className="flex min-w-0 items-center gap-2.5">
+                    <UserAvatar
+                      src={user.avatar_url}
+                      alt={user.username || `Hunter ${String(user.id).slice(0, 4)}`}
+                      size={36}
+                      className="h-9 w-9 shrink-0 rounded-full object-cover"
                     />
-                    <span className={styles.userInfo}>
-                      <span className={styles.username}>{user.username || `Hunter ${String(user.id).slice(0, 4)}`}</span>
-                      <span className={styles.count}>{user.crown_count || 0} crowns • {user.wishlist_count || 0} wishlist</span>
+                    <span className="min-w-0">
+                      <span className="block truncate font-body text-sm font-medium text-mist">{user.username || `Hunter ${String(user.id).slice(0, 4)}`}</span>
+                      <span className="block truncate font-body text-xs text-mist-dim">{user.crown_count || 0} crowns • {user.wishlist_count || 0} wishlist</span>
                     </span>
                   </span>
-                  <span className={styles.pickTag}>Pick</span>
+                  <span className="shrink-0 font-body text-xs text-ember-dim">Pick</span>
                 </button>
               ))}
             </div>
           )}
         </div>
 
-        <footer className={styles.footer}>
-          <span className={styles.pageLabel}>Page {page} of {totalPages}</span>
-          <div className={styles.pager}>
-            <button type="button" onClick={() => setPage((p) => p - 1)} disabled={!canPrev || loading}>
+        <footer className="flex items-center justify-between gap-3 border-t border-white/5 px-5 py-4">
+          <span className="font-body text-xs text-mist-dim">Page {page} of {totalPages}</span>
+          <div className="flex gap-2">
+            <button type="button" onClick={() => setPage((p) => p - 1)} disabled={!canPrev || loading} className="rounded-lg border border-white/10 px-3 py-1.5 font-body text-xs text-mist disabled:opacity-30">
               Previous
             </button>
-            <button type="button" onClick={() => setPage((p) => p + 1)} disabled={!canNext || loading}>
+            <button type="button" onClick={() => setPage((p) => p + 1)} disabled={!canNext || loading} className="rounded-lg border border-white/10 px-3 py-1.5 font-body text-xs text-mist disabled:opacity-30">
               Next
             </button>
           </div>
         </footer>
-
       </div>
     </div>
   );

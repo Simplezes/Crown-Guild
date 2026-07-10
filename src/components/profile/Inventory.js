@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from 'react';
-import styles from './Inventory.module.css';
 import CrownSummary from '../crowns/CrownSummary';
 import ProfileCrowns from '../crowns/ProfileCrowns';
 import { useToast } from '@/app/UIProvider';
@@ -91,80 +90,61 @@ export default function Inventory({
   const hunterCount = collection.length;
   const wishCount = wishlist.length;
 
+  const tabs = [
+    { key: 'host', label: 'Crowns', count: hostCount },
+    { key: 'hunter', label: 'Collected', count: hunterCount },
+    { key: 'wishlist', label: 'Wishlist', count: wishCount },
+  ];
+
   return (
-    <section className={styles.container}>
-      <header className={styles.header}>
-        <div className={styles.titleArea}>
-          <h3 className="mh-title">Inventory</h3>
-          <p>Specimen Collection & Wishlist Status</p>
+    <section className="rounded-2xl border border-white/5 bg-void-panel p-5 sm:p-6">
+      <header className="mb-5 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h3 className="font-display text-lg uppercase tracking-wide text-mist">Inventory</h3>
+          <p className="font-body text-sm text-mist-dim">Specimen Collection & Wishlist Status</p>
         </div>
 
-        <div className={styles.headerStats}>
-          <div className={styles.statItem}>
-            <label>Crowns</label>
-            <span>{hostCount}</span>
-          </div>
-          <div className={styles.statItem}>
-            <label>Collected</label>
-            <span>{hunterCount}</span>
-          </div>
-          <div className={styles.statItem}>
-            <label>Wishlist</label>
-            <span>{wishCount}</span>
-          </div>
+        <div className="flex w-full gap-2 rounded-lg border border-white/10 bg-void p-1 sm:w-auto">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 font-display text-xs uppercase tracking-widest transition-colors sm:flex-none sm:justify-start sm:px-4 ${
+                activeTab === tab.key ? 'bg-ember text-void' : 'text-mist hover:text-ember-bright'
+              }`}
+            >
+              {tab.label}
+              <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${activeTab === tab.key ? 'bg-void/20' : 'bg-white/5 text-mist-dim'}`}>{tab.count}</span>
+            </button>
+          ))}
         </div>
       </header>
 
-      <div className={styles.content}>
-        <div className={styles.tabs}>
-          <button
-            className={`${styles.tab} ${activeTab === 'host' ? styles.tabActive : ''}`}
-            onClick={() => setActiveTab('host')}
-          >
-            Crowns
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'hunter' ? styles.tabActive : ''}`}
-            onClick={() => setActiveTab('hunter')}
-          >
-            Collected
-          </button>
-          <button
-            className={`${styles.tab} ${activeTab === 'wishlist' ? styles.tabActive : ''}`}
-            onClick={() => setActiveTab('wishlist')}
-          >
-            Wishlist
-          </button>
-        </div>
-
-        <div className={styles.tabInfo}>
-          <p>{getTabInfo()}</p>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-white/5 pb-4 font-body text-sm text-mist-dim">
+        <p>{getTabInfo()}</p>
+        <div className="flex items-center gap-3">
           {isOwner && activeTab !== 'host' && (
-            <span className={styles.interactiveHint}>
-              Click the S/L icons to toggle collection/tracking status.
-            </span>
+            <span className="font-body text-xs italic text-mist-faint">Click the S/L icons to toggle status.</span>
           )}
           {activeTab === 'hunter' && (
-            <div className={styles.masterySummary}>
-              Earned <span className={styles.goldText}>
-                {collection.reduce((acc, curr) => acc + (curr.type === 'both' ? 30 : 10), 0)} MP
-              </span> from collection
-            </div>
+            <span className="font-body text-xs text-mist-dim">
+              Earned <span className="font-semibold text-ember-bright">{collection.reduce((acc, curr) => acc + (curr.type === 'both' ? 30 : 10), 0)} MP</span>
+            </span>
           )}
         </div>
-
-        {activeTab === 'host' ? (
-          <ProfileCrowns initialCrowns={initialCrowns} isOwner={isOwner} userId={userId} />
-        ) : (
-          <CrownSummary
-            items={activeTab === 'hunter' ? collection : wishlist}
-            allMonsters={allMonsters}
-            isOwner={isOwner}
-            mode={activeTab}
-            onToggle={activeTab === 'hunter' ? handleToggleCollection : handleToggleWishlist}
-          />
-        )}
       </div>
+
+      {activeTab === 'host' ? (
+        <ProfileCrowns initialCrowns={initialCrowns} isOwner={isOwner} userId={userId} />
+      ) : (
+        <CrownSummary
+          items={activeTab === 'hunter' ? collection : wishlist}
+          allMonsters={allMonsters}
+          isOwner={isOwner}
+          mode={activeTab}
+          onToggle={activeTab === 'hunter' ? handleToggleCollection : handleToggleWishlist}
+        />
+      )}
     </section>
   );
 }

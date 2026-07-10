@@ -5,7 +5,7 @@ export default function MonsterIcon({ imageName, name, tempered, size = 64, clas
 
   if (!imageName) {
     return (
-      <div className={iconClass} style={{ width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--mh-umber)', border: '1px solid var(--mh-border)' }}>
+      <div className={`${iconClass} flex items-center justify-center rounded-lg border border-white/10 bg-void-raised`} style={{ width: size, height: size }}>
         <Image src="/icons/MHWilds-Hunt_Icon.png" width={size * 0.6} height={size * 0.6} alt="" className="pixel-art" />
       </div>
     );

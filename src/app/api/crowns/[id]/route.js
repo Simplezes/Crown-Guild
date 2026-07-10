@@ -1,7 +1,6 @@
 import db from "@/lib/db";
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
-import { pusherServer } from "@/lib/pusher";
 import { logServerError } from "@/lib/logger";
 import { checkRateLimit } from "@/lib/ratelimit";
 
@@ -89,7 +88,6 @@ export async function PATCH(req, { params }) {
         sql: "UPDATE crowns SET pair_id = ? WHERE id = ?",
         args: [resolvedPairId, id],
       });
-      await pusherServer.trigger("public-channel", "crown_update", {});
       return NextResponse.json({ success: true });
     }
 
@@ -124,8 +122,6 @@ export async function PATCH(req, { params }) {
         });
       }
     }
-
-    await pusherServer.trigger("public-channel", "crown_update", {});
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -182,8 +178,6 @@ export async function DELETE(req, { params }) {
         });
       }
     }
-
-    await pusherServer.trigger("public-channel", "crown_update", {});
 
     return NextResponse.json({ success: true });
   } catch (error) {
