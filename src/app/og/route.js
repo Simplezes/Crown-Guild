@@ -9,7 +9,7 @@ async function urlToDataUrl(url, fallbackMime = 'image/png') {
   const parsedUrl = new URL(url);
   const isLocal = parsedUrl.hostname === 'localhost' || parsedUrl.hostname === '127.0.0.1';
   if (isLocal) {
-    const bytes = new Uint8Array(await readFile(path.join(process.cwd(), 'public', parsedUrl.pathname.replace(/^\
+    const bytes = new Uint8Array(await readFile(path.join(process.cwd(), 'public', parsedUrl.pathname.replace(/^\//, ''))));
     let binary = '';
     for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
     return `data:${fallbackMime};base64,${btoa(binary)}`;

@@ -11,7 +11,7 @@ async function urlToDataUrl(url, fallbackMime = 'image/png') {
   const parsedUrl = new URL(url);
   const isLocalAsset = parsedUrl.hostname === 'localhost' || parsedUrl.hostname === '127.0.0.1';
   if (isLocalAsset) {
-    const bytes = new Uint8Array(await readFile(path.join(process.cwd(), 'public', parsedUrl.pathname.replace(/^\
+    const bytes = new Uint8Array(await readFile(path.join(process.cwd(), 'public', parsedUrl.pathname.replace(/^\//, ''))));
     let binary = '';
 
     for (let offset = 0; offset < bytes.length; offset += 0x8000) {
