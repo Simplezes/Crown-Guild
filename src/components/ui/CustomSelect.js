@@ -17,27 +17,52 @@ export default function CustomSelect({ options, value, onChange, placeholder = "
     opt.label.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const calcPosition = () => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const vp = window.visualViewport || { height: window.innerHeight, width: window.innerWidth };
+    const vpHeight = vp.height;
+    const dropdownHeight = 260;
+    const spaceBelow = vpHeight - rect.bottom;
+    const openUpward = spaceBelow < dropdownHeight && rect.top > dropdownHeight;
+    setDropdownStyle({
+      position: "fixed",
+      left: rect.left,
+      width: rect.width,
+      zIndex: 9999,
+      ...(openUpward
+        ? { bottom: vpHeight - rect.top + 4, top: "auto" }
+        : { top: rect.bottom + 4 }),
+    });
+  };
+
   useEffect(() => {
     if (isOpen) {
-      if (inputRef.current) inputRef.current.focus();
-      if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        const spaceBelow = window.innerHeight - rect.bottom;
-        const dropdownHeight = 260;
-        const openUpward = spaceBelow < dropdownHeight && rect.top > dropdownHeight;
-        setDropdownStyle({
-          position: "fixed",
-          left: rect.left,
-          width: rect.width,
-          zIndex: 9999,
-          ...(openUpward
-            ? { bottom: window.innerHeight - rect.top + 4, top: "auto" }
-            : { top: rect.bottom + 4 }),
-        });
+      calcPosition();
+
+      const vp = window.visualViewport;
+      if (vp) {
+        vp.addEventListener("resize", calcPosition);
+        vp.addEventListener("scroll", calcPosition);
+      }
+      window.addEventListener("scroll", calcPosition, true);
+
+      const isTouchDevice = window.matchMedia("(hover: none)").matches;
+      if (!isTouchDevice && inputRef.current) {
+        inputRef.current.focus();
       }
     } else {
       setSearchTerm("");
     }
+
+    return () => {
+      const vp = window.visualViewport;
+      if (vp) {
+        vp.removeEventListener("resize", calcPosition);
+        vp.removeEventListener("scroll", calcPosition);
+      }
+      window.removeEventListener("scroll", calcPosition, true);
+    };
   }, [isOpen]);
 
   useEffect(() => {
