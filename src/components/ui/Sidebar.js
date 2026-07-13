@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
+import CrownLogModal from "@/components/crowns/CrownLogModal";
 
 const LINKS = [
   { href: "/", label: "Hub", icon: "/icons/MHWilds-Lobby_Icon.png" },
@@ -22,6 +23,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -66,13 +68,13 @@ export default function Sidebar() {
 
         <div className="flex flex-col items-center gap-3">
           {session && (
-            <Link
-              href="/crowns/log"
+            <button
+              onClick={() => setCreateOpen(true)}
               title="Create Crown"
               className="flex h-11 w-11 items-center justify-center rounded-xl bg-ember text-void transition-transform hover:scale-105 hover:bg-ember-bright"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
-            </Link>
+            </button>
           )}
           {session ? (
             <div className="relative" ref={dropdownRef}>
@@ -123,7 +125,7 @@ export default function Sidebar() {
           <div className="mt-3 flex items-center gap-2 border-t border-white/5 pt-3">
             {session ? (
               <>
-                <Link href="/crowns/log" onClick={() => setMobileOpen(false)} className="flex-1 rounded-lg bg-ember py-2.5 text-center text-sm font-display uppercase tracking-wider text-void">Create Crown</Link>
+                <button onClick={() => { setMobileOpen(false); setCreateOpen(true); }} className="flex-1 rounded-lg bg-ember py-2.5 text-center text-sm font-display uppercase tracking-wider text-void">Create Crown</button>
                 <Link href={`/profile/${session.user.id}`} onClick={() => setMobileOpen(false)}>
                   {session.user.image && <Image src={session.user.image} alt="" width={36} height={36} unoptimized className="pixel-art rounded-lg" />}
                 </Link>
@@ -148,6 +150,8 @@ export default function Sidebar() {
           );
         })}
       </nav>
+
+      <CrownLogModal isOpen={createOpen} onClose={() => setCreateOpen(false)} />
     </>
   );
 }

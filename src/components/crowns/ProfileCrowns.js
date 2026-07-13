@@ -6,6 +6,7 @@ import Link from "next/link";
 import MonsterIcon from "@/components/ui/MonsterIcon";
 import { useRouter } from "next/navigation";
 import { useToast, useConfirm } from "@/app/UIProvider";
+import CrownLogModal from "@/components/crowns/CrownLogModal";
 
 const cardBase = "group relative flex flex-col overflow-hidden rounded-lg border border-white/5 bg-void p-2.5 transition-colors hover:border-white/10";
 const cardTempered = "border-tempered/40 shadow-[0_0_16px_-8px_rgba(180,95,240,0.5)]";
@@ -18,6 +19,7 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
   const [crowns, setCrowns] = useState(initialCrowns);
   const [page, setPage] = useState(1);
   const [activeCardId, setActiveCardId] = useState(null);
+  const [editGroup, setEditGroup] = useState(null);
   const router = useRouter();
   const toast = useToast();
   const confirm = useConfirm();
@@ -172,7 +174,7 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
             editTitle="Edit Crown"
             deleteTitle="Delete Crown"
             onShare={(e) => { e.stopPropagation(); const url = `${window.location.origin}/monster/${encodeURIComponent(crown.name)}?crownId=${crown.id}&user=${userId}&share=${buildShareNonce()}`; navigator.clipboard.writeText(url); toast.info("Link copied to clipboard!"); setActiveCardId(null); }}
-            onEdit={(e) => { e.stopPropagation(); router.push(`/crowns/log?edit=${crown.id}`); }}
+            onEdit={(e) => { e.stopPropagation(); setEditGroup([crown]); }}
             onDelete={(e) => { e.stopPropagation(); handleDelete(crown.id); setActiveCardId(null); }}
           />
         )}
@@ -233,7 +235,7 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
             editTitle="Edit Linked Crowns"
             deleteTitle="Delete Linked Crowns"
             onShare={(e) => { e.stopPropagation(); const url = `${window.location.origin}/monster/${encodeURIComponent(first.name)}?crownId=${first.id}&user=${userId}&share=${buildShareNonce()}`; navigator.clipboard.writeText(url); toast.info("Link copied to clipboard!"); setActiveCardId(null); }}
-            onEdit={(e) => { e.stopPropagation(); router.push(`/crowns/log?edit=${group.map(c => c.id).join(',')}`); }}
+            onEdit={(e) => { e.stopPropagation(); setEditGroup(group); }}
             onDelete={(e) => { e.stopPropagation(); handleDeleteGroup(group); setActiveCardId(null); }}
           />
         )}
@@ -292,7 +294,7 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
             editTitle="Edit Quest Pair"
             deleteTitle="Delete Quest Pair"
             onShare={(e) => { e.stopPropagation(); const url = `${window.location.origin}/monster/${encodeURIComponent(group[0].name)}?crownId=${group[0].id}&user=${userId}&share=${buildShareNonce()}`; navigator.clipboard.writeText(url); toast.info("Link copied to clipboard!"); setActiveCardId(null); }}
-            onEdit={(e) => { e.stopPropagation(); router.push(`/crowns/log?edit=${group.map(c => c.id).join(',')}`); }}
+            onEdit={(e) => { e.stopPropagation(); setEditGroup(group); }}
             onDelete={(e) => { e.stopPropagation(); handleDeleteGroup(group); setActiveCardId(null); }}
           />
         )}
@@ -331,6 +333,7 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
           <button className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 font-display text-lg text-mist disabled:opacity-30" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} aria-label="Next page">›</button>
         </div>
       )}
+      <CrownLogModal isOpen={!!editGroup} onClose={() => setEditGroup(null)} initialGroup={editGroup} />
     </div>
   );
 }
