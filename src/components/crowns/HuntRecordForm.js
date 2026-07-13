@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
-import Link from "next/link";
 import Image from "next/image";
 import MonsterIcon from "../ui/MonsterIcon";
 import CustomSelect from "../ui/CustomSelect";
@@ -34,9 +32,8 @@ const segmentBtnBase = "flex h-9 items-center justify-center rounded-lg border f
 const segmentBtnOn = "border-ember bg-ember text-void";
 const segmentBtnOff = "border-white/10 text-mist hover:border-white/20";
 
-export default function HuntRecordForm({ initialGroup }) {
+export default function HuntRecordForm({ initialGroup, onClose }) {
   const router = useRouter();
-  const { data: session } = useSession();
   const toast = useToast();
 
   const [monsters, setMonsters] = useState([]);
@@ -163,7 +160,7 @@ export default function HuntRecordForm({ initialGroup }) {
         setSuccess(true);
         toast.success(initialGroup ? "Hunt record updated!" : "Hunt record logged!");
         setTimeout(() => {
-          router.push(session?.user?.id ? `/profile/${session.user.id}` : "/registry");
+          onClose();
           router.refresh();
         }, 900);
       }
@@ -178,13 +175,12 @@ export default function HuntRecordForm({ initialGroup }) {
   const monsterOptions = monsters.map(m => ({ label: m.name, value: m.id }));
   const questOptions = QUEST_TYPES.map(q => ({ label: q.label, value: q.value }));
   const isEditing = !!initialGroup;
-  const backHref = session?.user?.id ? `/profile/${session.user.id}` : "/registry";
 
   return (
     <div className="flex flex-col gap-6">
-      <Link href={backHref} className="inline-flex w-fit items-center gap-2 font-display text-xs uppercase tracking-[0.25em] text-mist-dim transition-colors hover:text-ember-bright">
+      <button onClick={onClose} className="inline-flex w-fit items-center gap-2 font-display text-xs uppercase tracking-[0.25em] text-mist-dim transition-colors hover:text-ember-bright">
         ← Back
-      </Link>
+      </button>
 
       <header>
         <span className="font-body text-xs uppercase tracking-[0.25em] text-ember-dim">Crown Ledger</span>
@@ -378,9 +374,9 @@ export default function HuntRecordForm({ initialGroup }) {
       
       <section className="flex flex-col gap-3 border-t border-white/5 pt-6 sm:flex-row sm:items-center sm:justify-end">
         <div className="flex flex-col gap-3 sm:flex-row">
-          <Link href={backHref} className="whitespace-nowrap rounded-lg border border-white/10 px-5 py-2.5 text-center font-display text-xs uppercase tracking-widest text-mist hover:border-white/20">
+          <button type="button" onClick={onClose} className="whitespace-nowrap rounded-lg border border-white/10 px-5 py-2.5 text-center font-display text-xs uppercase tracking-widest text-mist hover:border-white/20">
             Cancel
-          </Link>
+          </button>
           <button
             onClick={handleSubmit}
             disabled={loading || success}
