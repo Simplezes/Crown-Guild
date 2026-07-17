@@ -190,7 +190,7 @@ export default async function Home() {
             </span>
             <h1 className="mt-2 font-display text-3xl uppercase tracking-wide text-mist sm:text-4xl">Crown Guild</h1>
             <p className="mt-3 max-w-md font-body text-sm leading-relaxed text-mist-dim">
-              Every crown someone bragged about, every hunt someone rage-quit &mdash; it&apos;s all logged here.
+              Best place to log and register your current Crown quests for everyone to see.
             </p>
           </div>
 
