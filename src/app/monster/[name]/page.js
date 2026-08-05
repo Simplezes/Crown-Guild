@@ -361,15 +361,14 @@ export default async function MonsterDetail({ params, searchParams }) {
       icon: '/icons/largecrown.png',
       items: pairedGroups.length > 0
         ? pagedPairs.items.map((group) => {
-            const smallCrown = group.find((crown) => crown.type === 'small');
-            const largeCrown = group.find((crown) => crown.type === 'large');
-            const isHighlighted = group.some((crown) => String(crown.id) === String(highlightCrownId));
+            const [crown, linkedCrown = null] = group;
+            const isHighlighted = group.some((c) => String(c.id) === String(highlightCrownId));
 
             return (
               <HunterItem
-                key={smallCrown.id}
-                crown={smallCrown}
-                linkedCrown={largeCrown}
+                key={crown.id}
+                crown={crown}
+                linkedCrown={linkedCrown}
                 monsterName={monster.name}
                 monsterImageName={monster.image_name}
                 isHighlighted={isHighlighted}
