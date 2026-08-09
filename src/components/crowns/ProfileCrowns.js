@@ -20,6 +20,8 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
   const [page, setPage] = useState(1);
   const [activeCardId, setActiveCardId] = useState(null);
   const [editGroup, setEditGroup] = useState(null);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selected, setSelected] = useState(new Set());
   const router = useRouter();
   const toast = useToast();
   const confirm = useConfirm();
@@ -96,6 +98,51 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
     }
   };
 
+  const groupKeyOf = (group) => group[0].pair_id
+    ? `pair-${group[0].pair_id}`
+    : (group[0].investigation_id ? `inv-${group[0].investigation_id}` : `single-${group[0].id}`);
+
+  const groupsByKey = new Map(groupedCrowns.map((g) => [groupKeyOf(g), g]));
+
+  const toggleSelect = (key) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  };
+
+  const handleSelectAll = () => setSelected(new Set(groupedCrowns.map(groupKeyOf)));
+  const handleUnselectAll = () => setSelected(new Set());
+
+  const exitSelectMode = () => {
+    setSelectMode(false);
+    setSelected(new Set());
+  };
+
+  const handleBulkDelete = async () => {
+    const ids = [...selected].flatMap((key) => (groupsByKey.get(key) || []).map((c) => c.id));
+    if (ids.length === 0) return;
+
+    const ok = await confirm(
+      `Delete ${selected.size} selected crown${selected.size === 1 ? '' : 's'}? This cannot be undone.`,
+      { title: "Delete Selected Crowns", danger: true, confirmLabel: "Delete All" }
+    );
+    if (!ok) return;
+
+    try {
+      await Promise.all(ids.map((id) => fetch(`/api/crowns/${id}`, { method: "DELETE" })));
+      const idSet = new Set(ids);
+      setCrowns((prev) => prev.filter((c) => !idSet.has(c.id)));
+      toast.success(`Deleted ${ids.length} crown${ids.length === 1 ? '' : 's'}.`);
+      exitSelectMode();
+      router.refresh();
+    } catch (err) {
+      console.error("Bulk delete error:", err);
+      toast.error("Failed to delete selected crowns.");
+    }
+  };
+
   const CardActions = ({ cardId, onShare, onEdit, onDelete }) => (
     <button
       className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-mist-dim hover:bg-white/10 hover:text-mist"
@@ -123,7 +170,7 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
     )
   );
 
-  const renderCard = (crown) => {
+  const renderCard = (crown, selectKey) => {
     const titleCase = (str) => str ? str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : "??";
     const hasInvestigation = crown.quest === "Investigation Quests";
     const hostDiffers = hasDifferentHostMonster(crown);
@@ -139,8 +186,23 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
     }
 
     const cardId = crown.id;
+    const isSelected = selected.has(selectKey);
     return (
-      <div className={`${cardBase} ${crown.tempered ? cardTempered : ''}`}>
+      <div className={`${cardBase} ${crown.tempered ? cardTempered : ''} ${isSelected ? 'border-ember ring-2 ring-ember/50' : ''}`}>
+        {selectMode && isOwner && (
+          <>
+            <button
+              type="button"
+              onClick={() => toggleSelect(selectKey)}
+              className="absolute inset-0 z-20 cursor-pointer"
+              aria-label={isSelected ? "Deselect crown" : "Select crown"}
+            />
+            <span className={`absolute left-2 top-2 z-30 flex h-5 w-5 items-center justify-center rounded-md border font-display text-[10px] ${isSelected ? 'border-ember bg-ember text-void' : 'border-white/20 bg-void/80 text-transparent'}`}>
+              ✓
+            </span>
+          </>
+        )}
+
         {renderPrimaryQuestGhost(crown)}
 
         <div className="mb-1.5 flex items-start justify-between gap-1.5">
@@ -151,7 +213,7 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
             </span>
             {!!crown.tempered && <span className={chipTempered}>Tempered</span>}
           </div>
-          {isOwner && <CardActions cardId={cardId} />}
+          {isOwner && !selectMode && <CardActions cardId={cardId} />}
         </div>
 
         <Link href={`/monster/${crown.name}?crownId=${crown.id}&user=${userId}`} className="mx-auto">
@@ -243,7 +305,7 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
     );
   };
 
-  const renderMultiMonsterGroupCard = (group) => {
+  const renderMultiMonsterGroupCard = (group, selectKey) => {
     const first = group[0];
     const titleCase = (str) => str ? str.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : "??";
     const sides = group.map(c => ({ crowns: [c], name: c.name, image_name: c.image_name }));
@@ -255,9 +317,24 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
       ? `Investigation${first.remaining_uses != null ? ` · ${first.remaining_uses}` : ''}`
       : quest;
     const anyTempered = group.some(c => c.tempered);
+    const isSelected = selected.has(selectKey);
 
     return (
-      <div className={`${cardBase} col-span-2 ${anyTempered ? cardTempered : ''}`}>
+      <div className={`${cardBase} col-span-2 ${anyTempered ? cardTempered : ''} ${isSelected ? 'border-ember ring-2 ring-ember/50' : ''}`}>
+        {selectMode && isOwner && (
+          <>
+            <button
+              type="button"
+              onClick={() => toggleSelect(selectKey)}
+              className="absolute inset-0 z-20 cursor-pointer"
+              aria-label={isSelected ? "Deselect crowns" : "Select crowns"}
+            />
+            <span className={`absolute left-2 top-2 z-30 flex h-5 w-5 items-center justify-center rounded-md border font-display text-[10px] ${isSelected ? 'border-ember bg-ember text-void' : 'border-white/20 bg-void/80 text-transparent'}`}>
+              ✓
+            </span>
+          </>
+        )}
+
         {renderPrimaryQuestGhost(first)}
 
         <div className="mb-1.5 flex items-start justify-between gap-1.5">
@@ -269,7 +346,7 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
               </span>
             ))}
           </div>
-          {isOwner && <CardActions cardId={cardId} />}
+          {isOwner && !selectMode && <CardActions cardId={cardId} />}
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-2">
@@ -307,16 +384,54 @@ export default function ProfileCrowns({ initialCrowns, isOwner, userId }) {
 
   return (
     <div>
+      {isOwner && crowns.length > 0 && (
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          {selectMode ? (
+            <>
+              <div className="flex flex-wrap items-center gap-2">
+                <button onClick={handleSelectAll} className="inline-flex items-center rounded-lg border border-white/10 bg-void-raised px-3 py-1.5 font-display text-[11px] uppercase tracking-widest text-mist transition-colors hover:border-ember/40 hover:bg-ember hover:text-void">
+                  Select All
+                </button>
+                <button onClick={handleUnselectAll} className="inline-flex items-center rounded-lg border border-white/10 bg-void-raised px-3 py-1.5 font-display text-[11px] uppercase tracking-widest text-mist transition-colors hover:border-ember/40 hover:bg-ember hover:text-void">
+                  Unselect All
+                </button>
+                <span className="font-body text-xs text-mist-dim">{selected.size} selected</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleBulkDelete}
+                  disabled={selected.size === 0}
+                  className="inline-flex items-center gap-2 rounded-lg border border-blood/50 bg-blood/10 px-3 py-1.5 font-display text-[11px] uppercase tracking-widest text-blood-bright transition-colors hover:border-blood hover:bg-blood hover:text-void disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Delete{selected.size > 0 ? ` ${selected.size}` : ''} Selected
+                </button>
+                <button onClick={exitSelectMode} className="inline-flex items-center rounded-lg border border-white/10 bg-void-raised px-3 py-1.5 font-display text-[11px] uppercase tracking-widest text-mist transition-colors hover:border-ember/40 hover:bg-ember hover:text-void">
+                  Done
+                </button>
+              </div>
+            </>
+          ) : (
+            <button
+              onClick={() => setSelectMode(true)}
+              className="ml-auto inline-flex items-center gap-2 rounded-lg border border-white/10 bg-void-raised px-3 py-1.5 font-display text-[11px] uppercase tracking-widest text-mist transition-colors hover:border-ember/40 hover:bg-ember hover:text-void"
+            >
+              <Image src="/icons/MHWilds-Settings_Icon.png" width={12} height={12} alt="" className="pixel-art" />
+              Edit
+            </button>
+          )}
+        </div>
+      )}
+
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
         {crowns.length > 0 ? pagedGroups.map((group) => {
-          const key = group[0].pair_id ? `pair-${group[0].pair_id}` : (group[0].investigation_id ? `inv-${group[0].investigation_id}` : `single-${group[0].id}`);
+          const key = groupKeyOf(group);
 
           if (group.length === 1) {
-            return <React.Fragment key={key}>{renderCard(group[0])}</React.Fragment>;
+            return <React.Fragment key={key}>{renderCard(group[0], key)}</React.Fragment>;
           }
           return (
             <React.Fragment key={key}>
-              {renderMultiMonsterGroupCard(group)}
+              {renderMultiMonsterGroupCard(group, key)}
             </React.Fragment>
           );
         }) : (
