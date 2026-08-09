@@ -421,7 +421,7 @@ export default async function MonsterDetail({ params, searchParams }) {
     ? hostSections 
     : hostSections.filter((s) => s.key === crownTypeFilter);
 
-  const tabLinkBase = "inline-flex flex-1 items-center justify-center rounded-lg px-4 py-2.5 font-display text-xs uppercase tracking-widest transition-colors";
+  const tabLinkBase = "inline-flex flex-1 items-center justify-center rounded-lg py-2.5 font-display text-xs uppercase tracking-widest transition-colors";
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
@@ -482,27 +482,50 @@ export default async function MonsterDetail({ params, searchParams }) {
 
       
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(280px,0.95fr)] lg:items-start">
-        <section className="min-w-0 rounded-2xl border border-white/5 bg-void-panel p-5 sm:p-6">
-          <div className="mb-6 flex flex-col gap-2 border-b border-white/5 pb-5">
-            <span className="font-body text-xs uppercase tracking-[0.2em] text-ember-dim">
-              {activeTab === 'hosts' ? 'Host Coverage' : 'Hunt Demand'}
-            </span>
-            <h2 className="font-display text-lg uppercase tracking-wide text-mist">
-              {activeTab === 'hosts' ? 'Crown Hosts' : 'Hunt Demand'}
-            </h2>
-            <p className="max-w-lg font-body text-sm leading-relaxed text-mist-dim">
-              {activeTab === 'hosts'
-                ? 'The ledger is grouped by crown type so active entries are easier to scan and contact.'
-                : 'Hunters below are still chasing this monster. Track it yourself to appear here and let hosts find you.'}
-            </p>
+        <section className="min-w-0 overflow-hidden rounded-2xl border border-white/5 bg-void-panel">
+          <div className="relative overflow-hidden border-b border-white/5 bg-gradient-to-r from-ember/10 via-white/[0.03] to-transparent px-4 py-5 sm:px-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex flex-col gap-2 min-w-0">
+                <span className="flex items-center gap-2 font-body text-xs uppercase tracking-[0.2em] text-ember-dim">
+                  <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={14} height={14} alt="" className="pixel-art" />
+                  {activeTab === 'hosts' ? 'Host Coverage' : 'Hunt Demand'}
+                </span>
+                <h2 className="font-display text-lg uppercase tracking-wide text-mist">
+                  {activeTab === 'hosts' ? 'Crown Hosts' : 'Hunt Demand'}
+                </h2>
+                <p className="max-w-lg font-body text-sm leading-relaxed text-mist-dim">
+                  {activeTab === 'hosts'
+                    ? 'The ledger is grouped by crown type so active entries are easier to scan and contact.'
+                    : 'Hunters below are still chasing this monster. Track it yourself to appear here and let hosts find you.'}
+                </p>
+              </div>
+
+              <div className="flex shrink-0 gap-2 self-start rounded-lg border border-white/10 bg-void p-1">
+                <Link
+                  href={buildMonsterPageHref(search, { tab: 'hosts' })}
+                  className={`${tabLinkBase} px-4 text-[11px] ${activeTab === 'hosts' ? 'bg-ember text-void' : 'text-mist hover:text-ember-bright'}`}
+                  scroll={false}
+                >
+                  Hosts
+                </Link>
+                <Link
+                  href={buildMonsterPageHref(search, { tab: 'seeking' })}
+                  className={`${tabLinkBase} px-4 text-[11px] ${activeTab === 'seeking' ? 'bg-ember text-void' : 'text-mist hover:text-ember-bright'}`}
+                  scroll={false}
+                >
+                  Seeking
+                </Link>
+              </div>
+            </div>
           </div>
 
+          <div className="p-4 sm:p-6">
           {activeTab === 'hosts' ? (
-            <div className="flex flex-col gap-6">
-              <div className="flex gap-2 rounded-lg border border-white/10 bg-void p-1">
+            <div className="flex flex-col gap-5">
+              <div className="grid grid-cols-2 gap-2 rounded-lg border border-white/10 bg-void p-1 sm:flex">
                 <Link
                   href={buildMonsterPageHref(search, { crownType: 'all' })}
-                  className={`flex flex-1 items-center justify-center rounded-md px-3 py-2 text-center font-display text-[11px] sm:text-xs uppercase tracking-widest transition-colors ${
+                  className={`flex items-center justify-center gap-1.5 rounded-md px-2 py-2 text-center font-display text-[11px] uppercase tracking-widest transition-colors sm:flex-1 ${
                     crownTypeFilter === 'all' ? 'bg-ember text-void' : 'text-mist hover:text-ember-bright'
                   }`}
                   scroll={false}
@@ -512,61 +535,66 @@ export default async function MonsterDetail({ params, searchParams }) {
                 {pairedGroups.length > 0 && (
                   <Link
                     href={buildMonsterPageHref(search, { crownType: 'pairs' })}
-                    className={`flex flex-1 items-center justify-center rounded-md px-3 py-2 text-center font-display text-[11px] sm:text-xs uppercase tracking-widest transition-colors ${
+                    className={`flex items-center justify-center gap-1.5 rounded-md px-2 py-2 text-center font-display text-[11px] uppercase tracking-widest transition-colors sm:flex-1 ${
                       crownTypeFilter === 'pairs' ? 'bg-ember text-void' : 'text-mist hover:text-ember-bright'
                     }`}
                     scroll={false}
                   >
+                    <Image src="/icons/largecrown.png" width={12} height={12} alt="" className="pixel-art shrink-0" />
                     Pairs
                   </Link>
                 )}
                 <Link
                   href={buildMonsterPageHref(search, { crownType: 'large' })}
-                  className={`flex flex-1 items-center justify-center rounded-md px-3 py-2 text-center font-display text-[11px] sm:text-xs uppercase tracking-widest transition-colors ${
+                  className={`flex items-center justify-center gap-1.5 rounded-md px-2 py-2 text-center font-display text-[11px] uppercase tracking-widest transition-colors sm:flex-1 ${
                     crownTypeFilter === 'large' ? 'bg-ember text-void' : 'text-mist hover:text-ember-bright'
                   }`}
                   scroll={false}
                 >
+                  <Image src="/icons/largecrown.png" width={12} height={12} alt="" className="pixel-art shrink-0" />
                   Large
                 </Link>
                 <Link
                   href={buildMonsterPageHref(search, { crownType: 'small' })}
-                  className={`flex flex-1 items-center justify-center rounded-md px-3 py-2 text-center font-display text-[11px] sm:text-xs uppercase tracking-widest transition-colors ${
+                  className={`flex items-center justify-center gap-1.5 rounded-md px-2 py-2 text-center font-display text-[11px] uppercase tracking-widest transition-colors sm:flex-1 ${
                     crownTypeFilter === 'small' ? 'bg-ember text-void' : 'text-mist hover:text-ember-bright'
                   }`}
                   scroll={false}
                 >
+                  <Image src="/icons/smallcrown.png" width={12} height={12} alt="" className="pixel-art shrink-0" />
                   Small
                 </Link>
               </div>
 
               {filteredSections.map((section) => (
-                <section key={section.key}>
-                  <div className="mb-4 flex items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-void">
-                      <Image src={section.icon} width={22} height={22} alt="" className="pixel-art" />
+                <section key={section.key} className="overflow-hidden rounded-xl border border-white/5 bg-void/60">
+                  <div className="flex items-center gap-3 border-b border-white/5 bg-white/[0.03] px-4 py-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-void">
+                      <Image src={section.icon} width={20} height={20} alt="" className="pixel-art" />
                     </div>
-                    <div>
-                      <h3 className="font-display text-sm uppercase tracking-wide text-mist">{section.title}</h3>
-                      <span className="font-body text-xs uppercase tracking-wider text-mist-dim">{section.count} entries</span>
-                    </div>
+                    <h3 className="font-display text-sm uppercase tracking-wide text-mist">{section.title}</h3>
+                    <span className="ml-auto rounded-full border border-ember/30 bg-ember/10 px-2.5 py-0.5 font-display text-xs text-ember-bright">
+                      {section.count}
+                    </span>
                   </div>
 
-                  <div className="flex flex-col gap-2.5">
-                    {section.items || (
-                      <p className="rounded-xl border border-dashed border-white/10 py-8 text-center font-body text-sm italic text-mist-dim">
-                        {section.empty}
-                      </p>
-                    )}
-                  </div>
+                  <div className="p-3 sm:p-4">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                      {section.items || (
+                        <p className="col-span-full rounded-xl border border-dashed border-white/10 py-8 text-center font-body text-sm italic text-mist-dim">
+                          {section.empty}
+                        </p>
+                      )}
+                    </div>
 
-                  <Pagination
-                    page={section.pagination.page}
-                    totalPages={section.pagination.totalPages}
-                    search={search}
-                    pageKey={section.pagination.pageKey}
-                    activeTab="hosts"
-                  />
+                    <Pagination
+                      page={section.pagination.page}
+                      totalPages={section.pagination.totalPages}
+                      search={search}
+                      pageKey={section.pagination.pageKey}
+                      activeTab="hosts"
+                    />
+                  </div>
                 </section>
               ))}
             </div>
@@ -627,6 +655,7 @@ export default async function MonsterDetail({ params, searchParams }) {
               />
             </section>
           )}
+          </div>
         </section>
 
         <aside className="flex min-w-0 flex-col gap-3 lg:sticky lg:top-6">
@@ -651,33 +680,6 @@ export default async function MonsterDetail({ params, searchParams }) {
                   <p className="mb-2 font-body text-[10px] uppercase tracking-[0.25em] text-mist-dim">Ailments</p>
                   <TagList values={extraInfo?.ailments} tone="red" fallback="None" />
                 </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="overflow-hidden rounded-2xl border border-white/5 bg-void-panel">
-            <div className="border-b border-white/5 bg-white/5 px-5 py-4">
-              <div className="flex items-center gap-2 font-body text-[10px] uppercase tracking-[0.3em] text-mist-dim">
-                <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={16} height={16} alt="" className="pixel-art" />
-                <span>Switch View</span>
-              </div>
-            </div>
-            <div className="p-5">
-              <div className="flex gap-2 rounded-lg border border-white/10 bg-void p-1">
-                <Link
-                  href={buildMonsterPageHref(search, { tab: 'hosts' })}
-                  className={`${tabLinkBase} flex-1 text-[11px] ${activeTab === 'hosts' ? 'bg-ember text-void' : 'text-mist hover:text-ember-bright'}`}
-                  scroll={false}
-                >
-                  Crown Hosts
-                </Link>
-                <Link
-                  href={buildMonsterPageHref(search, { tab: 'seeking' })}
-                  className={`${tabLinkBase} flex-1 text-[11px] ${activeTab === 'seeking' ? 'bg-ember text-void' : 'text-mist hover:text-ember-bright'}`}
-                  scroll={false}
-                >
-                  Hunt Demand
-                </Link>
               </div>
             </div>
           </div>

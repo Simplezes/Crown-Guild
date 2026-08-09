@@ -29,9 +29,9 @@ export default function HunterItem({ crown, linkedCrown = null, monsterName, mon
   const smallC = linkedCrown ? (crown.type === 'small' ? crown : linkedCrown) : crown.type === 'small' ? crown : null;
   const largeC = linkedCrown ? (crown.type === 'large' ? crown : linkedCrown) : crown.type === 'large' ? crown : null;
   const crownTypeLabel = linkedCrown ? 'Crown Pair' : crown.type === 'small' ? 'Small Crown' : 'Large Crown';
-  const ratingLabel = linkedCrown
-    ? `S ${smallC?.strength_rating ?? '-'}★ • L ${largeC?.strength_rating ?? '-'}★`
-    : `${strength_rating}★`;
+  const crownIcon = linkedCrown
+    ? '/icons/largecrown.png'
+    : crown.type === 'small' ? '/icons/smallcrown.png' : '/icons/largecrown.png';
   const hasTempered = linkedCrown
     ? Boolean(smallC?.tempered || largeC?.tempered)
     : Boolean(tempered);
@@ -45,67 +45,83 @@ export default function HunterItem({ crown, linkedCrown = null, monsterName, mon
   return (
     <div
       id={`crown-${crownId}`}
-      className={`group relative flex flex-col gap-2.5 overflow-hidden rounded-xl border bg-void px-3 py-2.5 transition-colors sm:flex-row sm:items-center sm:justify-between ${
-        isHighlighted ? 'border-ember bg-ember/5 shadow-[0_0_0_1px_rgba(201,162,74,0.4),0_0_24px_rgba(201,162,74,0.3)]' : 'border-white/5 hover:border-ember/30'
+      className={`group relative flex flex-col overflow-hidden rounded-2xl border bg-void transition-all ${
+        isHighlighted ? 'border-ember shadow-[0_0_0_1px_rgba(201,162,74,0.4),0_0_28px_rgba(201,162,74,0.3)]' : 'border-white/5 hover:-translate-y-0.5 hover:border-ember/30 hover:shadow-lift'
       }`}
     >
       {isHighlighted && (
-        <span className="absolute right-4 top-3.5 z-10 rounded bg-ember px-2 py-0.5 font-display text-[10px] uppercase tracking-wide text-void">
+        <span className="absolute right-3 top-3 z-10 rounded bg-ember px-2 py-0.5 font-display text-[10px] uppercase tracking-wide text-void">
           Featured
         </span>
       )}
 
-      {ghostImageName && (
-        <div className="pointer-events-none absolute inset-y-2 right-2 w-24 overflow-hidden opacity-15 sm:w-32">
-          <Image src={`/monsters/${ghostImageName}`} alt="" fill sizes="120px" className="scale-125 object-contain grayscale pixel-art" />
-        </div>
-      )}
-
-      <Link href={`/profile/${user_id}`} className="relative z-[1] flex min-w-0 flex-1 items-center gap-3">
-        <UserAvatar
-          src={avatar_url}
-          alt={username}
-          size={44}
-          className={`h-11 w-11 shrink-0 rounded-lg border bg-black object-cover transition-colors ${
-            hasTempered ? 'tempered-monster-icon border-tempered/60' : 'border-white/10 group-hover:border-ember/40'
-          }`}
-        />
-        <div className="min-w-0">
-          <p className="truncate font-display text-sm tracking-wide text-ember-bright">{username}</p>
-          <p className="mt-0.5 truncate font-body text-[11px] italic text-mist-dim">&ldquo;{noteText}&rdquo;</p>
-
-          <div className="mt-1.5 flex flex-wrap items-center gap-1">
-            <span className="rounded border border-ember/30 bg-ember/10 px-1.5 py-0.5 font-body text-[9px] font-bold uppercase tracking-wide text-ember-bright">
-              {crownTypeLabel}
-            </span>
-            <span className="rounded border border-ember/30 bg-ember/10 px-1.5 py-0.5 font-body text-[9px] font-bold text-ember">
-              {ratingLabel}
-            </span>
-            {hasTempered && (
-              <span className="rounded border border-tempered/50 bg-tempered/15 px-1.5 py-0.5 font-body text-[9px] font-bold uppercase tracking-wide text-tempered">
-                Tempered
-              </span>
-            )}
-            <span className="inline-flex items-center rounded border border-white/10 bg-white/5 px-1.5 py-0.5 font-body text-[9px] uppercase tracking-wide text-mist-dim">
-              {questLabel}
-            </span>
-            {showUses && (
-              <span className="inline-flex items-center rounded border border-white/10 bg-white/5 px-1.5 py-0.5 font-body text-[9px] uppercase tracking-wide text-mist-dim">
-                {effectiveUses} left
-              </span>
-            )}
+      <div className="relative h-16 shrink-0 overflow-hidden border-b border-white/5 bg-gradient-to-r from-ember/15 via-white/[0.03] to-transparent">
+        {ghostImageName && (
+          <div className="pointer-events-none absolute -right-3 -top-3 h-24 w-24 opacity-[0.12]">
+            <Image src={`/monsters/${ghostImageName}`} alt="" fill sizes="96px" className="scale-125 object-contain grayscale pixel-art" />
           </div>
+        )}
+        <div className="relative z-[1] flex items-center gap-1.5 px-3.5 pt-3">
+          <Image src={crownIcon} width={14} height={14} alt="" className="pixel-art" />
+          <span className="font-display text-[11px] uppercase tracking-wide text-ember-bright">{crownTypeLabel}</span>
+        </div>
+      </div>
 
-          {hasHost && (
-            <p className="mt-1 font-body text-[9px] uppercase tracking-wide text-mist-faint">
-              Hosted on {hostName} {quest === "Field Survey Quests" ? "Field Survey" : "Investigation"}
-            </p>
+      <Link href={`/profile/${user_id}`} className="relative z-[1] -mt-6 flex min-w-0 flex-1 flex-col gap-3 px-3.5 pb-3.5">
+        <div className="flex items-end gap-3">
+          <UserAvatar
+            src={avatar_url}
+            alt={username}
+            size={52}
+            className={`h-[52px] w-[52px] shrink-0 rounded-xl border-2 bg-black object-cover transition-colors ${
+              hasTempered ? 'tempered-monster-icon border-tempered/70' : 'border-void group-hover:border-ember/50'
+            }`}
+          />
+          <div className="min-w-0 pb-0.5">
+            <p className="truncate font-display text-base tracking-wide text-ember-bright">{username}</p>
+            <p className="truncate font-body text-[11px] italic text-mist-dim">&ldquo;{noteText}&rdquo;</p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-1.5">
+          {linkedCrown ? (
+            <>
+              <span className="rounded border border-ember/30 bg-ember/10 px-1.5 py-0.5 font-body text-[9px] font-bold text-ember">
+                S {smallC?.strength_rating ?? '-'}★
+              </span>
+              <span className="rounded border border-ember/30 bg-ember/10 px-1.5 py-0.5 font-body text-[9px] font-bold text-ember">
+                L {largeC?.strength_rating ?? '-'}★
+              </span>
+            </>
+          ) : (
+            <span className="rounded border border-ember/30 bg-ember/10 px-1.5 py-0.5 font-body text-[9px] font-bold text-ember">
+              {strength_rating}★
+            </span>
+          )}
+          {hasTempered && (
+            <span className="rounded border border-tempered/50 bg-tempered/15 px-1.5 py-0.5 font-body text-[9px] font-bold uppercase tracking-wide text-tempered">
+              Tempered
+            </span>
+          )}
+          <span className="inline-flex items-center rounded border border-white/10 bg-white/5 px-1.5 py-0.5 font-body text-[9px] uppercase tracking-wide text-mist-dim">
+            {questLabel}
+          </span>
+          {showUses && (
+            <span className="inline-flex items-center rounded border border-white/10 bg-white/5 px-1.5 py-0.5 font-body text-[9px] uppercase tracking-wide text-mist-dim">
+              {effectiveUses} left
+            </span>
           )}
         </div>
+
+        {hasHost && (
+          <p className="font-body text-[9px] uppercase tracking-wide text-mist-faint">
+            Hosted on {hostName} {quest === "Field Survey Quests" ? "Field Survey" : "Investigation"}
+          </p>
+        )}
       </Link>
 
-      <div className="relative z-[1] flex shrink-0 justify-end border-t border-white/5 pt-2 sm:border-t-0 sm:pt-0 sm:pl-3">
-        {(effectiveUses > 0 || effectiveUses === null) && (
+      <div className="relative z-[1] border-t border-white/5 px-3.5 py-2.5 [&_button]:w-full [&_button]:justify-center">
+        {(effectiveUses > 0 || effectiveUses === null) ? (
           <ContactButton
             hostId={user_id}
             monsterId={monster_id}
@@ -115,6 +131,8 @@ export default function HunterItem({ crown, linkedCrown = null, monsterName, mon
             quest={quest}
             canDeploy={quest === "Investigation Quests" && effectiveUses > 0}
           />
+        ) : (
+          <span className="block h-9" />
         )}
       </div>
     </div>
