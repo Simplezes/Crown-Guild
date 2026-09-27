@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { hasCrownSize } from "@/lib/db";
 import { logServerError } from "@/lib/logger";
 import { checkRateLimit } from "@/lib/ratelimit";
+import { archiveCrown } from "@/lib/guildArchive";
 
 export async function PATCH(req, { params }) {
   const session = await auth();
@@ -117,6 +118,8 @@ export async function PATCH(req, { params }) {
         id,
       ],
     });
+
+    await archiveCrown(session.user.id, monster_id, type, tempered);
 
     if (oldInvestigationId && oldInvestigationId !== resolvedInvestigationId) {
       const stillLinked = await db.execute({

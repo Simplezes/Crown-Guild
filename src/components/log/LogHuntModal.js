@@ -3,9 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useToast } from "@/app/UIProvider";
+import { useToast, useRankUp } from "@/app/UIProvider";
 import { Icon } from "@/components/shell/Icon";
 import { HuntTile, tilesOf } from "@/components/crowns/HuntTiles";
+import { getSpeciesTier, crownMp } from "@/lib/mastery";
 
 const QUESTS = [
   { label: "Event Quest", value: "Event Quests", icon: "event" },
@@ -26,6 +27,7 @@ const cleanSize = (v) => {
 export default function LogHuntModal({ monsterId, initialGroup, onClose }) {
   const router = useRouter();
   const toast = useToast();
+  const celebrateRankUp = useRankUp();
   const editing = !!initialGroup?.length;
 
   const [monsters, setMonsters] = useState(monstersCache || []);
@@ -105,9 +107,12 @@ export default function LogHuntModal({ monsterId, initialGroup, onClose }) {
         const data = await failed.json().catch(() => ({}));
         toast.error(data.error || "Failed to save the hunt record.");
       } else {
+        const payloads = await Promise.all(results.map((r) => r.json().catch(() => ({}))));
+        const bestRankUp = payloads.reduce((best, p) => (p.rankUp && (!best || p.rankUp.rank > best.rank) ? p.rankUp : best), null);
         toast.success(editing ? "Hunt record updated." : "Hunt record logged.");
         onClose();
         router.refresh();
+        if (bestRankUp) celebrateRankUp(bestRankUp);
       }
     } catch (err) {
       console.error("Save error:", err);
@@ -118,7 +123,7 @@ export default function LogHuntModal({ monsterId, initialGroup, onClose }) {
   };
 
   const tiles = tilesOf(entries.map((e) => ({ name: mon(e.monster_id).name, image: mon(e.monster_id).image_name, type: e.type, tempered: e.tempered, strength: e.strength_rating, size: parseFloat(e.size) || 0 })));
-  const mp = entries.length * 10;
+  const mp = entries.reduce((sum, e) => sum + crownMp(getSpeciesTier(mon(e.monster_id).type), e.type, e.tempered), 0);
   const q2 = pickQ.trim().toLowerCase();
   const pickList = monsters.filter((m) => m.name.toLowerCase().includes(q2));
   const pickCurrent = pick === "p" ? String(primary) : pick !== null ? String(entries[pick]?.monster_id) : "";

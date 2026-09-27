@@ -1,6 +1,8 @@
 import db, { hasCrownSize } from "@/lib/db";
 import { fetchDiscordUser } from "@/lib/discord";
-import { getMonsterCount } from "@/lib/monsters";
+import { getMonsterCount, getMonsterTierMap } from "@/lib/monsters";
+import { masteryPointsFromRows } from "@/lib/guildArchive";
+import { MASTERY_RANKS, getHunterRank, getRankProgress } from "@/lib/mastery";
 
 export async function getProfileData(userId) {
   try {
@@ -50,7 +52,7 @@ export async function getProfileData(userId) {
         args: [userId]
       }),
       db.execute({
-        sql: `SELECT COUNT(*) as archive_count FROM guild_archive WHERE user_id = ?`,
+        sql: `SELECT monster_id, type, tempered FROM guild_archive WHERE user_id = ?`,
         args: [userId]
       }),
       db.execute({
@@ -122,12 +124,11 @@ export async function getProfileData(userId) {
 
     const collection = Object.values(collectionMap);
 
-    let masteryPoints = 0;
-    collection.forEach(item => {
-      if (item.type === 'small' || item.type === 'large') masteryPoints += 10;
-      else if (item.type === 'both') masteryPoints += 30;
-    });
-    masteryPoints += (archiveRes.rows[0].archive_count || 0) * 25;
+    // Mastery Points come only from crowns actually logged in the app
+    // (archived below) - the Collected checklist is a personal tracker,
+    // not an MP source, so it can't be used to fake rank.
+    const tierMap = await getMonsterTierMap();
+    const masteryPoints = masteryPointsFromRows(archiveRes.rows, tierMap);
 
     return {
       user: { ...user },
@@ -198,35 +199,4 @@ export async function getCrownsByIds(ids) {
   }
 }
 
-export const MASTERY_RANKS = [
-  { rank: 1, title: "Fledgling", minPoints: 0 },
-  { rank: 2, title: "Scout", minPoints: 100 },
-  { rank: 3, title: "Tracker", minPoints: 300 },
-  { rank: 4, title: "Hunter", minPoints: 750 },
-  { rank: 5, title: "Veteran", minPoints: 1500 },
-  { rank: 6, title: "Expert", minPoints: 3000 },
-  { rank: 7, title: "Master", minPoints: 5000 },
-  { rank: 8, title: "Legend", minPoints: 8000 },
-];
-
-export function getHunterRank(points) {
-  const rank = [...MASTERY_RANKS].reverse().find(r => points >= r.minPoints);
-  return rank ? rank.title : "Fledgling";
-}
-
-export function getRankProgress(points) {
-  const currentRankIndex = [...MASTERY_RANKS].reverse().findIndex(r => points >= r.minPoints);
-  const currentRank = MASTERY_RANKS[MASTERY_RANKS.length - 1 - currentRankIndex];
-  const nextRank = MASTERY_RANKS[MASTERY_RANKS.length - currentRankIndex];
-
-  if (!nextRank) return { currentRank, nextRank: null, progress: 100 };
-
-  const range = nextRank.minPoints - currentRank.minPoints;
-  const progress = ((points - currentRank.minPoints) / range) * 100;
-
-  return {
-    currentRank,
-    nextRank,
-    progress: Math.min(100, Math.max(0, progress))
-  };
-}
+export { MASTERY_RANKS, getHunterRank, getRankProgress };

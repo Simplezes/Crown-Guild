@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useCallback } from 'react';
-import { Icon } from '@/components/shell/Icon';
+import { Icon, Emblem } from '@/components/shell/Icon';
 
 const ToastContext = createContext(null);
 export const useToast = () => useContext(ToastContext);
@@ -9,11 +9,45 @@ export const useToast = () => useContext(ToastContext);
 const ConfirmContext = createContext(null);
 export const useConfirm = () => useContext(ConfirmContext);
 
+const RankUpContext = createContext(null);
+export const useRankUp = () => useContext(RankUpContext);
+
 let _toastId = 0;
+const CONFETTI = Array.from({ length: 28 }, (_, i) => ({
+  left: Math.round((i * 137.5) % 100),
+  delay: (i % 7) * 0.09,
+  drift: ((i % 5) - 2) * 18,
+  hue: (i * 47) % 360,
+}));
+
+function RankUpOverlay({ rankUp, onClose }) {
+  return (
+    <div className="rupwrap" onClick={onClose}>
+      <div className="rupfx" aria-hidden="true">
+        {CONFETTI.map((c, i) => (
+          <i key={i} style={{ left: `${c.left}%`, animationDelay: `${c.delay}s`, '--drift': `${c.drift}px`, background: `hsl(${c.hue} 80% 60%)` }} />
+        ))}
+      </div>
+      <div className="rupcard" role="alertdialog" aria-label="Rank up" onClick={(e) => e.stopPropagation()}>
+        <span className="rupeyebrow">Rank up</span>
+        <div className="rupbadge"><Emblem rank={rankUp.rank} /></div>
+        <h2>{rankUp.title}</h2>
+        <p>You&apos;ve earned a new Hunter rank.</p>
+        <button className="tbx pri" onClick={onClose}>Nice!</button>
+      </div>
+    </div>
+  );
+}
 
 export function UIProvider({ children }) {
   const [toasts, setToasts] = useState([]);
   const [confirmState, setConfirmState] = useState(null);
+  const [rankUp, setRankUp] = useState(null);
+
+  const celebrateRankUp = useCallback((next) => {
+    if (!next) return;
+    setRankUp(next);
+  }, []);
 
   const addToast = useCallback((message, type) => {
     const id = ++_toastId;
@@ -40,7 +74,10 @@ export function UIProvider({ children }) {
   return (
     <ToastContext.Provider value={toast}>
       <ConfirmContext.Provider value={confirm}>
+        <RankUpContext.Provider value={celebrateRankUp}>
         {children}
+
+        {rankUp && <RankUpOverlay rankUp={rankUp} onClose={() => setRankUp(null)} />}
 
         {toasts.length > 0 && (
           <div className="twrap" aria-live="polite">
@@ -70,6 +107,7 @@ export function UIProvider({ children }) {
             </div>
           </div>
         )}
+        </RankUpContext.Provider>
       </ConfirmContext.Provider>
     </ToastContext.Provider>
   );

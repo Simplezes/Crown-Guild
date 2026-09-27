@@ -4,7 +4,8 @@ import Image from "next/image";
 import { auth } from "@/auth";
 import { getProfileData } from "@/lib/profile";
 import { getMonsterCount } from "@/lib/monsters";
-import { getUserSummary, masteryFromCollection, rankView } from "@/lib/summary";
+import { getUserSummary, masteryFromArchive, rankView } from "@/lib/summary";
+import { getMonsterTierMap } from "@/lib/monsters";
 import { Emblem } from "@/components/shell/Icon";
 import HomeBoard from "@/components/home/HomeBoard";
 import SignInButton from "@/components/home/SignInButton";
@@ -52,7 +53,7 @@ async function getHomeData() {
     const top = wantedRes.rows[0];
     const legendIds = renownRes.rows.map((r) => r.id);
     const marks = legendIds.map(() => "?").join(",");
-    const [seekersRes, legendCol, legendArch] = await Promise.all([
+    const [seekersRes, legendArch, tierMap] = await Promise.all([
       top
         ? db.execute({
             sql: "SELECT u.username, u.avatar_url FROM wishlist w JOIN users u ON u.id = w.user_id WHERE w.monster_id = ? GROUP BY u.id LIMIT 4",
@@ -60,20 +61,17 @@ async function getHomeData() {
           })
         : { rows: [] },
       legendIds.length
-        ? db.execute({ sql: `SELECT user_id, monster_id, type FROM hunter_collection WHERE user_id IN (${marks})`, args: legendIds })
+        ? db.execute({ sql: `SELECT user_id, monster_id, type, tempered FROM guild_archive WHERE user_id IN (${marks})`, args: legendIds })
         : { rows: [] },
-      legendIds.length
-        ? db.execute({ sql: `SELECT user_id, COUNT(*) as c FROM guild_archive WHERE user_id IN (${marks}) GROUP BY user_id`, args: legendIds })
-        : { rows: [] },
+      getMonsterTierMap(),
     ]);
 
     const crowns = Number(crownsRes.rows[0]?.count || 0);
     const tempered = Number(temperedRes.rows[0]?.count || 0);
 
     const legends = renownRes.rows.map((u) => {
-      const rows = legendCol.rows.filter((r) => r.user_id === u.id);
-      const arch = Number(legendArch.rows.find((r) => r.user_id === u.id)?.c || 0);
-      const rv = rankView(masteryFromCollection(rows, arch));
+      const rows = legendArch.rows.filter((r) => r.user_id === u.id);
+      const rv = rankView(masteryFromArchive(rows, tierMap));
       return {
         id: u.id,
         name: u.username || `Hunter ${String(u.id).slice(0, 4)}`,
@@ -128,7 +126,7 @@ function GuildCard({ profile, summary, monsterCount }) {
             <div className="g4bar"><i style={{ width: `${summary.progress}%` }} /></div>
             <div className="g4ne" title={summary.nextTitle}><Emblem rank={nextRank} /></div>
           </div>
-          <p className="g4np"><b>{summary.toNext} MP</b> to reach {summary.nextTitle} <span>&middot; about {Math.ceil(summary.toNext / 10)} crowns</span></p>
+          <p className="g4np"><b>{summary.toNext} MP</b> to reach {summary.nextTitle}</p>
         </div>
       ) : (
         <p className="g4-max">You have reached the highest rank.</p>

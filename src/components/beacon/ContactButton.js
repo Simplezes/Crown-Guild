@@ -5,12 +5,14 @@ import { createPortal } from "react-dom";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/shell/Icon";
+import { useRankUp } from "@/app/UIProvider";
 
 const nonce = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
 export default function ContactButton({ hostId, monsterId, monsterName, crownId, discordId, quest, canDeploy = false, dmsOpen = true }) {
   const { data: session } = useSession();
   const router = useRouter();
+  const celebrateRankUp = useRankUp();
   const [menu, setMenu] = useState(false);
   const [confirm, setConfirm] = useState(false);
   const [status, setStatus] = useState("idle");
@@ -50,7 +52,7 @@ export default function ContactButton({ hostId, monsterId, monsterName, crownId,
       const res = await fetch("/api/crowns/deploy", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ crownId }) });
       const data = await res.json();
       if (res.ok) {
-        flash("deployed", () => { setConfirm(false); router.refresh(); });
+        flash("deployed", () => { setConfirm(false); router.refresh(); if (data.rankUp) celebrateRankUp(data.rankUp); });
       } else {
         setError(data?.error || "Failed to deploy crown");
         flash("error");

@@ -1,5 +1,6 @@
 import db from "./db";
 import monstersData from "@/app/database/monsters.json";
+import { getSpeciesTier } from "./mastery";
 
 export const QUEST_ICONS = {
   "Hunt": "MHWilds-Hunt_Icon.png",
@@ -81,6 +82,25 @@ export async function getMonsterById(id) {
 
 export function getMonsterCount() {
   return monstersData.monsters.length;
+}
+
+let tierMapPromise;
+// getMonsterTierMap: { [monster_id]: "standard"|"advanced"|"apex" }, built by
+// joining the real monsters table (numeric ids) against the species data
+// (matched by name) that mastery.js uses to weight MP.
+export function getMonsterTierMap() {
+  tierMapPromise ??= (async () => {
+    const res = await db.execute("SELECT id, name FROM monsters");
+    const map = {};
+    for (const row of res.rows) {
+      const extra = monstersData.monsters.find(
+        (m) => m.name.toLowerCase() === row.name.toLowerCase()
+      );
+      map[row.id] = getSpeciesTier(extra?.type);
+    }
+    return map;
+  })().catch((e) => { tierMapPromise = undefined; throw e; });
+  return tierMapPromise;
 }
 
 export async function getMonsterStats(monsterId) {

@@ -15,4 +15,16 @@ export function ensureCrownSize() {
 }
 export const hasCrownSize = () => ensureCrownSize().then(() => true, () => false);
 
+let archiveTemperedColumn;
+export function ensureGuildArchiveTempered() {
+  archiveTemperedColumn ??= (async () => {
+    const info = await client.execute("PRAGMA table_info(guild_archive)");
+    if (!info.rows.some((r) => r.name === "tempered")) {
+      await client.execute("ALTER TABLE guild_archive ADD COLUMN tempered INTEGER NOT NULL DEFAULT 0");
+    }
+  })().catch((e) => { archiveTemperedColumn = undefined; throw e; });
+  return archiveTemperedColumn;
+}
+export const hasGuildArchiveTempered = () => ensureGuildArchiveTempered().then(() => true, () => false);
+
 export default client;

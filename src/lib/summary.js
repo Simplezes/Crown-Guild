@@ -1,16 +1,11 @@
 import { cache } from "react";
 import db from "@/lib/db";
-import { MASTERY_RANKS, getRankProgress } from "@/lib/profile";
+import { MASTERY_RANKS, getRankProgress } from "@/lib/mastery";
+import { getArchiveRows, masteryPointsFromRows } from "@/lib/guildArchive";
+import { getMonsterTierMap } from "@/lib/monsters";
 
-export function masteryFromCollection(rows, archiveCount = 0) {
-  const byMonster = {};
-  for (const r of rows) {
-    const cur = byMonster[r.monster_id];
-    byMonster[r.monster_id] = !cur ? r.type : cur === r.type ? cur : "both";
-  }
-  let mp = archiveCount * 25;
-  for (const t of Object.values(byMonster)) mp += t === "both" ? 30 : 10;
-  return mp;
+export function masteryFromArchive(rows, tierMap) {
+  return masteryPointsFromRows(rows, tierMap);
 }
 
 export function rankView(mp) {
@@ -28,9 +23,9 @@ export function rankView(mp) {
 export const getUserSummary = cache(async (userId) => {
   if (!userId) return null;
   try {
-    const [col, arch, st, tg] = await Promise.all([
-      db.execute({ sql: "SELECT monster_id, type FROM hunter_collection WHERE user_id = ?", args: [userId] }),
-      db.execute({ sql: "SELECT COUNT(*) as c FROM guild_archive WHERE user_id = ?", args: [userId] }),
+    const [archiveRows, tierMap, st, tg] = await Promise.all([
+      getArchiveRows(userId),
+      getMonsterTierMap(),
       db.execute({
         sql: `SELECT SUM(CASE WHEN type = 'small' THEN 1 ELSE 0 END) AS s, SUM(CASE WHEN type = 'large' THEN 1 ELSE 0 END) AS l,
                      SUM(CASE WHEN tempered = 1 THEN 1 ELSE 0 END) AS t FROM crowns WHERE user_id = ?`,
@@ -42,7 +37,7 @@ export const getUserSummary = cache(async (userId) => {
       }),
     ]);
     return {
-      ...rankView(masteryFromCollection(col.rows, arch.rows[0]?.c || 0)),
+      ...rankView(masteryFromArchive(archiveRows, tierMap)),
       stats: { s: Number(st.rows[0]?.s || 0), l: Number(st.rows[0]?.l || 0), t: Number(st.rows[0]?.t || 0) },
       targets: tg.rows.map((r) => ({ name: r.name, image: r.image_name })),
     };

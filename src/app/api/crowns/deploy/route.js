@@ -3,6 +3,7 @@ import db from "@/lib/db";
 import { auth } from "@/auth";
 import { checkRateLimit } from "@/lib/ratelimit";
 import { logServerError } from "@/lib/logger";
+import { archiveCrown, getMasteryPoints, diffRankUp } from "@/lib/guildArchive";
 
 export async function POST(request) {
   try {
@@ -50,6 +51,7 @@ export async function POST(request) {
     const source = sourceRes.rows[0];
 
     const isHostDeploy = String(source.host_id) === String(session.user.id);
+    let mpBefore = null;
 
     if (source.quest === "Investigation Quests" && source.effective_uses !== null && Number(source.effective_uses) <= 0) {
       return NextResponse.json({ error: "This investigation is out of uses." }, { status: 400 });
@@ -87,6 +89,8 @@ export async function POST(request) {
         );
       }
 
+      mpBefore = await getMasteryPoints(session.user.id);
+
       await db.execute({
         sql: "INSERT OR IGNORE INTO users(id, username, avatar_url) VALUES (?, ?, ?)",
         args: [session.user.id, session.user.name, session.user.image],
@@ -110,10 +114,7 @@ export async function POST(request) {
         ],
       });
 
-      await db.execute({
-        sql: "INSERT OR IGNORE INTO guild_archive (user_id, monster_id, type) VALUES (?, ?, ?)",
-        args: [session.user.id, source.monster_id, source.type],
-      });
+      await archiveCrown(session.user.id, source.monster_id, source.type, source.tempered);
     }
 
     if (source.quest === "Investigation Quests" && source.effective_uses !== null) {
@@ -141,7 +142,9 @@ export async function POST(request) {
       }
     }
 
-    return NextResponse.json({ success: true, mode: isHostDeploy ? "host" : "hunter" });
+    const rankUp = mpBefore !== null ? diffRankUp(mpBefore, await getMasteryPoints(session.user.id)) : null;
+
+    return NextResponse.json({ success: true, mode: isHostDeploy ? "host" : "hunter", rankUp });
   } catch (error) {
     logServerError("Deploy crown error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

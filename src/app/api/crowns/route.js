@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/ratelimit";
 import { logServerError } from "@/lib/logger";
+import { archiveCrown, getMasteryPoints, diffRankUp } from "@/lib/guildArchive";
 
 export async function POST(req) {
   const session = await auth();
@@ -71,6 +72,8 @@ export async function POST(req) {
     const sizeOk = size_cm !== null && size_cm !== undefined && size_cm !== "" && Number.isFinite(size) && size > 0 && size < 10000;
     const withSize = sizeOk && (await hasCrownSize());
 
+    const mpBefore = await getMasteryPoints(session.user.id);
+
     await db.execute({
       sql: `
         INSERT INTO crowns(user_id, monster_id, type, tempered, strength_rating, quest, remaining_uses, investigation_id, pair_id${withSize ? ", size_cm" : ""})
@@ -90,12 +93,12 @@ export async function POST(req) {
       ],
     });
 
-    await db.execute({
-      sql: "INSERT OR IGNORE INTO guild_archive (user_id, monster_id, type) VALUES (?, ?, ?)",
-      args: [session.user.id, monster_id, type]
-    });
+    await archiveCrown(session.user.id, monster_id, type, tempered);
 
-    return NextResponse.json({ success: true });
+    const mpAfter = await getMasteryPoints(session.user.id);
+    const rankUp = diffRankUp(mpBefore, mpAfter);
+
+    return NextResponse.json({ success: true, mp: mpAfter, rankUp });
   } catch (error) {
     logServerError("Failed to add crown:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

@@ -207,7 +207,7 @@ export default function ProfileView({ user, crowns, stats, mp, rank, collection,
     const have = allMonsters.filter((m) => map[m.id]), lack = allMonsters.filter((m) => !map[m.id]);
     const card = (m) => <SizeCard key={m.id} m={m} type={map[m.id]} isOwner={isOwner} onToggle={toggleSize} noun={noun} />;
     const tip = isOwner
-      ? (noun === "collected" ? "Choose the crown sizes you have collected for each monster. Others use this to see what you can host." : "Choose the crown sizes you are looking for. Hosts can find you in searches.")
+      ? (noun === "collected" ? "Choose the crown sizes you have collected for each monster. Others use this to see what you can host. This is a personal tracker only - Mastery Points come from crowns you log in the Crown Ledger." : "Choose the crown sizes you are looking for. Hosts can find you in searches.")
       : `The crown sizes ${user.username} has ${noun}.`;
     return (
       <>
