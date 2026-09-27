@@ -27,10 +27,17 @@ const c = {
   line: 'rgba(255,255,255,0.07)',
 };
 
+function truncate(str, max) {
+  if (!str || str.length <= max) return str;
+  const cut = str.slice(0, max);
+  const lastSpace = cut.lastIndexOf(' ');
+  return `${cut.slice(0, lastSpace > 0 ? lastSpace : max)}…`;
+}
+
 function CrownRow({ icon, label, n }) {
   const on = n > 0;
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', background: c.void, border: `1px solid ${on ? 'rgba(201,162,74,0.4)' : c.line}`, borderRadius: '16px' }}>
+    <div style={{ display: 'flex', flexShrink: 0, alignItems: 'center', gap: '16px', padding: '16px 20px', background: c.void, border: `1px solid ${on ? 'rgba(201,162,74,0.4)' : c.line}`, borderRadius: '16px' }}>
       <img src={icon} width={30} height={30} style={{ imageRendering: 'pixelated', opacity: on ? 1 : 0.3, filter: on ? 'none' : 'grayscale(1)', display: 'flex' }} />
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
         <span style={{ fontSize: 16, fontWeight: 500, color: c.mist, display: 'flex' }}>{label}</span>
@@ -97,13 +104,13 @@ export default async function Image({ params, searchParams }) {
 
         {/* Right: content */}
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1, padding: '56px 60px', gap: '24px', justifyContent: 'center' }}>
-          <span style={{ fontSize: 11, letterSpacing: '3px', color: c.mistD, textTransform: 'uppercase', display: 'flex' }}>
+          <span style={{ fontSize: 11, letterSpacing: '3px', color: c.mistD, textTransform: 'uppercase', display: 'flex', flexShrink: 0 }}>
             {crown ? 'Crown Record' : 'Monster Ledger'} · Crown Guild
           </span>
 
           {crown ? (
             <>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', background: c.void, border: `1px solid rgba(201,162,74,0.4)`, borderRadius: '16px' }}>
+              <div style={{ display: 'flex', flexShrink: 0, alignItems: 'center', gap: '16px', padding: '16px 20px', background: c.void, border: `1px solid rgba(201,162,74,0.4)`, borderRadius: '16px' }}>
                 <img
                   src={crown.avatar_url || `${baseUrl}/icons/MHWilds-Quest_Members_Icon.png`}
                   width={48} height={48}
@@ -116,7 +123,7 @@ export default async function Image({ params, searchParams }) {
                 <img src={`${baseUrl}/icons/${getQuestIcon(crown.quest)}`} width={26} height={26} style={{ display: 'flex' }} />
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
+              <div style={{ display: 'flex', flexDirection: 'row', gap: '10px', flexShrink: 0 }}>
                 <StatTile label="Rating" value={`${crown.strength_rating}/10`} small />
                 <StatTile label="Size" value={crown.type === 'large' ? 'Large' : 'Small'} />
                 {crown.size_cm != null && <StatTile label="Length" value={`${Math.round(Number(crown.size_cm) * 10) / 10} cm`} small />}
@@ -124,23 +131,23 @@ export default async function Image({ params, searchParams }) {
               </div>
 
               {crown.status_message && (
-                <div style={{ display: 'flex', padding: '14px 18px', background: 'rgba(201,162,74,0.06)', borderLeft: `3px solid ${c.ember}`, borderRadius: '0 12px 12px 0' }}>
-                  <span style={{ fontSize: 15, color: c.mistD, display: 'flex' }}>&quot;{crown.status_message}&quot;</span>
+                <div style={{ display: 'flex', flexShrink: 0, padding: '14px 18px', background: 'rgba(201,162,74,0.06)', borderLeft: `3px solid ${c.ember}`, borderRadius: '0 12px 12px 0' }}>
+                  <span style={{ fontSize: 15, color: c.mistD, display: 'flex' }}>&quot;{truncate(crown.status_message, 140)}&quot;</span>
                 </div>
               )}
             </>
           ) : (
             <>
-              <span style={{ fontSize: 16, lineHeight: '1.5', color: c.mistD, maxWidth: '560px', display: 'flex' }}>
-                {monster.extraInfo?.games?.find(g => g.game === "Monster Hunter Wilds")?.info || 'Information pending from the research commission.'}
+              <span style={{ fontSize: 16, lineHeight: '1.5', color: c.mistD, maxWidth: '560px', display: 'flex', flexShrink: 0 }}>
+                {truncate(monster.extraInfo?.games?.find(g => g.game === "Monster Hunter Wilds")?.info, 170) || 'Information pending from the research commission.'}
               </span>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flexShrink: 0 }}>
                 <CrownRow icon={`${baseUrl}/icons/largecrown.png`} label="Large crown" n={stats.large || 0} />
                 <CrownRow icon={`${baseUrl}/icons/smallcrown.png`} label="Small crown" n={stats.small || 0} />
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flexShrink: 0 }}>
                 <span style={{ fontSize: 10, letterSpacing: '2px', textTransform: 'uppercase', color: c.faint, display: 'flex' }}>Weaknesses</span>
                 <span style={{ fontSize: 16, color: c.mist, display: 'flex' }}>
                   {monster.extraInfo?.weakness?.length ? monster.extraInfo.weakness.join(', ') : 'Unknown'}
