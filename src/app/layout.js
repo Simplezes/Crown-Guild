@@ -1,7 +1,11 @@
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
+import "./template.css";
+import "./port.css";
 import { Providers } from "./providers";
-import Sidebar from "@/components/ui/Sidebar";
+import TopBar from "@/components/shell/TopBar";
+import { auth } from "@/auth";
+import { getUserSummary } from "@/lib/summary";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
@@ -22,13 +26,22 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const session = await auth();
+  const user = session?.user?.id
+    ? { id: session.user.id, name: session.user.name || "Hunter", image: session.user.image || null }
+    : null;
+  const summary = user ? await getUserSummary(user.id) : null;
+
   return (
     <html lang="en">
       <body className={`${inter.variable} ${outfit.variable} font-body`}>
         <Providers>
-          <Sidebar />
-          <div className="pt-16 pb-16 lg:pt-0 lg:pb-0 lg:pl-20">{children}</div>
+          <div className="ghost-monster" aria-hidden="true" />
+          <div className="app">
+            <TopBar user={user} summary={summary} />
+            <div className="main">{children}</div>
+          </div>
         </Providers>
       </body>
     </html>

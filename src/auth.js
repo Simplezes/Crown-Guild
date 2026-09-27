@@ -30,6 +30,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     maxAge: 60 * 60 * 8,
     updateAge: 60 * 60,
   },
+  pages: { signIn: "/signin" },
   providers: [
     DiscordProvider({
       clientId: process.env.DISCORD_CLIENT_ID,

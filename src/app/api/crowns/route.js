@@ -1,4 +1,4 @@
-import db from "@/lib/db";
+import db, { hasCrownSize } from "@/lib/db";
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/ratelimit";
@@ -25,6 +25,7 @@ export async function POST(req) {
       investigation_id,
       investigation_monster_id,
       remaining_uses,
+      size_cm,
     } = await req.json();
 
     if (!monster_id || !type || !quest || !strength_rating) {
@@ -66,10 +67,14 @@ export async function POST(req) {
       resolvedInvestigationId = Number(invRes.lastInsertRowid);
     }
 
+    const size = Number(size_cm);
+    const sizeOk = size_cm !== null && size_cm !== undefined && size_cm !== "" && Number.isFinite(size) && size > 0 && size < 10000;
+    const withSize = sizeOk && (await hasCrownSize());
+
     await db.execute({
       sql: `
-        INSERT INTO crowns(user_id, monster_id, type, tempered, strength_rating, quest, remaining_uses, investigation_id, pair_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO crowns(user_id, monster_id, type, tempered, strength_rating, quest, remaining_uses, investigation_id, pair_id${withSize ? ", size_cm" : ""})
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?${withSize ? ", ?" : ""})
       `,
       args: [
         session.user.id,
@@ -81,6 +86,7 @@ export async function POST(req) {
         null,
         resolvedInvestigationId,
         pair_id || null,
+        ...(withSize ? [Math.round(size * 100) / 100] : []),
       ],
     });
 

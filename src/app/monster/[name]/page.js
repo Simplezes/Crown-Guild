@@ -6,10 +6,13 @@ import { notFound } from "next/navigation";
 import { getCrownById } from "@/lib/profile";
 import { getMonsterByName } from "@/lib/monsters";
 import CrownHighlighter from "@/components/ui/CrownHighlighter";
-import WishlistToggle from "@/components/wishlist/WishlistToggle";
+import LiveRefresh from "@/components/ui/LiveRefresh";
+import TrackPin from "@/components/registry/TrackPin";
+import LogButton from "@/components/log/LogButton";
 import MonsterIcon from "@/components/ui/MonsterIcon";
 import { auth } from "@/auth";
 import UserAvatar from "@/components/ui/UserAvatar";
+import { Icon } from "@/components/shell/Icon";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -56,7 +59,7 @@ async function getMonsterData(name, userId) {
     const [crownsRes, wishlistRes, userWishlistRes] = await Promise.all([
       db.execute({
         sql: `
-          SELECT c.*, u.username, u.avatar_url, u.id as user_id, u.status_message,
+          SELECT c.*, u.username, u.avatar_url, u.id as user_id, u.status_message, u.receive_dms,
                  inv.remaining_uses  AS inv_remaining_uses,
                  inv.monster_id      AS inv_monster_id,
                  inv_m.name          AS inv_monster_name
@@ -98,7 +101,7 @@ async function getMonsterData(name, userId) {
     };
   } catch (error) {
     console.error("Monster fetch error", error);
-    return null;
+    return { error: true };
   }
 }
 
@@ -150,54 +153,22 @@ function buildMonsterPageHref(search, updates) {
 
 function Pagination({ page, totalPages, search, pageKey, activeTab }) {
   if (totalPages <= 1) return null;
-
-  const btnBase = "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 font-display text-lg text-mist transition-colors hover:border-ember/40 hover:text-ember-bright";
-
+  const go = (n) => buildMonsterPageHref(search, { tab: activeTab, [pageKey]: n });
   return (
-    <div className="mt-5 flex items-center justify-center gap-4">
-      <Link
-        href={buildMonsterPageHref(search, { tab: activeTab, [pageKey]: page > 1 ? page - 1 : 1 })}
-        className={`${btnBase} ${page === 1 ? 'pointer-events-none opacity-30' : ''}`}
-        aria-label="Previous page"
-        aria-disabled={page === 1}
-        tabIndex={page === 1 ? -1 : undefined}
-        scroll={false}
-      >
-        ‹
-      </Link>
-      <span className="font-display text-xs uppercase tracking-widest text-mist-dim">Page {page} of {totalPages}</span>
-      <Link
-        href={buildMonsterPageHref(search, { tab: activeTab, [pageKey]: page < totalPages ? page + 1 : totalPages })}
-        className={`${btnBase} ${page === totalPages ? 'pointer-events-none opacity-30' : ''}`}
-        aria-label="Next page"
-        aria-disabled={page === totalPages}
-        tabIndex={page === totalPages ? -1 : undefined}
-        scroll={false}
-      >
-        ›
-      </Link>
+    <div className="pgn">
+      <Link href={go(Math.max(1, page - 1))} className={page === 1 ? "off" : ""} aria-label="Previous page" aria-disabled={page === 1} tabIndex={page === 1 ? -1 : undefined} scroll={false}><Icon name="back" /></Link>
+      <span>Page {page} of {totalPages}</span>
+      <Link href={go(Math.min(totalPages, page + 1))} className={page === totalPages ? "off" : ""} aria-label="Next page" aria-disabled={page === totalPages} tabIndex={page === totalPages ? -1 : undefined} scroll={false}><Icon name="back" className="fw" /></Link>
     </div>
   );
 }
 
-function TagList({ values, tone = 'default', fallback = 'Unknown' }) {
-  if (!values?.length) {
-    return <span className="font-body text-sm italic text-mist-dim">{fallback}</span>;
-  }
-
-  const toneClass = tone === 'gold'
-    ? 'border-ember/40 bg-ember/10 text-ember-bright'
-    : tone === 'red'
-      ? 'border-blood/40 bg-blood/10 text-blood-bright'
-      : 'border-white/10 bg-white/5 text-mist';
-
+function TagList({ values, tone = "default", fallback = "Unknown" }) {
+  if (!values?.length) return <span className="pl">{fallback}</span>;
+  const cls = tone === "gold" ? "pl w" : tone === "red" ? "pl a" : "pl";
   return (
-    <div className="flex flex-wrap gap-2">
-      {values.map((value, index) => (
-        <span key={`${value}-${index}`} className={`rounded-md border px-2.5 py-1 font-body text-xs font-semibold uppercase tracking-wide ${toneClass}`}>
-          {value}
-        </span>
-      ))}
+    <div className="pills2">
+      {values.map((value, index) => <span key={`${value}-${index}`} className={cls}>{value}</span>)}
     </div>
   );
 }
@@ -302,6 +273,18 @@ export default async function MonsterDetail({ params, searchParams }) {
 
   const data = await getMonsterData(name, currentUserId);
   if (!data) notFound();
+  if (data.error) {
+    return (
+      <div className="wrap">
+        <Link className="back" href="/investigation"><Icon name="back" /> Monsters</Link>
+        <div className="m2empty">
+          <b>Couldn&apos;t load this monster</b>
+          <span>The database can&apos;t be reached right now. Check your connection and try again.</span>
+          <Link className="btn sm" style={{ marginTop: 14 }} href={`/monster/${encodeURIComponent(name)}`}>Try again</Link>
+        </div>
+      </div>
+    );
+  }
 
   if (!highlightCrownId && userId) {
     const userCrown = data.crowns.find((crown) => String(crown.user_id) === String(userId));
@@ -366,6 +349,7 @@ export default async function MonsterDetail({ params, searchParams }) {
 
             return (
               <HunterItem
+                viewerId={currentUserId}
                 key={crown.id}
                 crown={crown}
                 linkedCrown={linkedCrown}
@@ -387,6 +371,7 @@ export default async function MonsterDetail({ params, searchParams }) {
       items: largeCrowns.length > 0
         ? pagedLarge.items.map((crown) => (
             <HunterItem
+                viewerId={currentUserId}
               key={crown.id}
               crown={crown}
               monsterName={monster.name}
@@ -406,6 +391,7 @@ export default async function MonsterDetail({ params, searchParams }) {
       items: smallCrowns.length > 0
         ? pagedSmall.items.map((crown) => (
             <HunterItem
+                viewerId={currentUserId}
               key={crown.id}
               crown={crown}
               monsterName={monster.name}
@@ -421,291 +407,105 @@ export default async function MonsterDetail({ params, searchParams }) {
     ? hostSections 
     : hostSections.filter((s) => s.key === crownTypeFilter);
 
-  const tabLinkBase = "inline-flex flex-1 items-center justify-center rounded-lg py-2.5 font-display text-xs uppercase tracking-widest transition-colors";
+  const seg = (label, href, on, icon) => (
+    <Link key={label} href={href} scroll={false} className={on ? "on" : ""} aria-current={on ? "true" : undefined}>{icon}{label}</Link>
+  );
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
+    <div className="wrap">
+      <LiveRefresh />
       {highlightCrownId && <CrownHighlighter crownId={highlightCrownId} />}
 
-      <Link href="/investigation" className="mb-6 inline-flex items-center gap-2 font-display text-xs uppercase tracking-[0.25em] text-mist-dim transition-colors hover:text-ember-bright">
-        ← Ledger
-      </Link>
+      <Link className="back" href="/investigation"><Icon name="back" /> Monsters</Link>
 
-      
-      <section className="mb-6 overflow-hidden rounded-3xl border border-white/5 bg-void-panel">
-        <div className="relative border-b border-white/5 bg-gradient-to-r from-ember/10 via-transparent to-transparent px-5 py-5 sm:px-6 lg:px-7">
-          
-          <div className="relative flex flex-col gap-10 lg:grid lg:grid-cols-[1.3fr_1fr] lg:gap-16 lg:items-center">
-            
-            
-            <div className="flex flex-col min-w-0">
-              <span className="mb-4 inline-flex items-center gap-2 font-body text-[10px] sm:text-xs uppercase tracking-[0.4em] text-ember-dim">
-                <Image src="/icons/MHWilds-Quest_Members_Icon.png" width={16} height={16} alt="" className="pixel-art" />
-                Field Guide
-              </span>
-              
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-8 mb-6 min-w-0">
-                <div className="flex h-24 w-24 sm:h-32 sm:w-32 shrink-0 items-center justify-center rounded-[2rem] border border-ember/20 bg-ember/10 backdrop-blur-sm">
-                  <MonsterIcon imageName={monster.image_name} name={monster.name} size={96} className="shrink-0 drop-shadow-lg" />
-                </div>
-                <div className="flex flex-col min-w-0">
-                  <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl uppercase tracking-wider text-mist drop-shadow-md text-balance leading-[1.1] break-words">
-                    {monster.name}
-                  </h1>
-                </div>
-              </div>
-
-              <div className="border-l-2 border-ember/30 pl-5 lg:pl-6 max-w-2xl">
-                <p className="font-body text-sm sm:text-base leading-relaxed text-mist-dim italic text-balance break-words">
-                  "{gameInfo?.info || "No field guide data currently available for this specimen."}"
-                </p>
-              </div>
-            </div>
-
-            
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-5">
-              {overviewStats.map((stat) => (
-                <div key={stat.label} className="relative overflow-hidden rounded-2xl border border-white/5 bg-void p-5 sm:p-6 transition-transform hover:scale-[1.02]">
-                  <p className={`font-display text-3xl sm:text-4xl drop-shadow-md ${stat.tone === 'alert' ? 'text-blood-bright' : 'text-ember-bright'}`}>
-                    {stat.value}
-                  </p>
-                  <p className="mt-2 font-body text-[10px] sm:text-xs uppercase tracking-[0.2em] sm:tracking-[0.3em] text-mist-dim font-medium">
-                    {stat.label}
-                  </p>
-                </div>
-              ))}
-            </div>
-
+      <section className="p mh">
+        <div>
+          <span className="eyebrow"><Icon name="monsters" />Monster profile</span>
+          <div className="top2">
+            <div className="big"><MonsterIcon imageName={monster.image_name} name={monster.name} size={88} /></div>
+            <h1 className="h1">{monster.name}</h1>
           </div>
+          <p className="quote">&ldquo;{gameInfo?.info || "No field guide data currently available for this specimen."}&rdquo;</p>
+          {currentUserId && (
+            <div className="acts" style={{ marginTop: 20 }}>
+              <LogButton monsterId={monster.id} />
+              <TrackPin trigger="btn-o" monsterId={monster.id} name={monster.name} initialType={userWishlistType} />
+            </div>
+          )}
+        </div>
+        <div className="k4">
+          {overviewStats.map((stat) => (
+            <div key={stat.label} className="tile"><b className={stat.tone === "alert" ? "dm" : ""}>{stat.value}</b><span>{stat.label}</span></div>
+          ))}
         </div>
       </section>
 
-      
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(280px,0.95fr)] lg:items-start">
-        <section className="min-w-0 overflow-hidden rounded-2xl border border-white/5 bg-void-panel">
-          <div className="relative overflow-hidden border-b border-white/5 bg-gradient-to-r from-ember/10 via-white/[0.03] to-transparent px-4 py-5 sm:px-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div className="flex flex-col gap-2 min-w-0">
-                <span className="flex items-center gap-2 font-body text-xs uppercase tracking-[0.2em] text-ember-dim">
-                  <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={14} height={14} alt="" className="pixel-art" />
-                  {activeTab === 'hosts' ? 'Host Coverage' : 'Hunt Demand'}
-                </span>
-                <h2 className="font-display text-lg uppercase tracking-wide text-mist">
-                  {activeTab === 'hosts' ? 'Crown Hosts' : 'Hunt Demand'}
-                </h2>
-                <p className="max-w-lg font-body text-sm leading-relaxed text-mist-dim">
-                  {activeTab === 'hosts'
-                    ? 'The ledger is grouped by crown type so active entries are easier to scan and contact.'
-                    : 'Hunters below are still chasing this monster. Track it yourself to appear here and let hosts find you.'}
-                </p>
-              </div>
-
-              <div className="flex shrink-0 gap-2 self-start rounded-lg border border-white/10 bg-void p-1">
-                <Link
-                  href={buildMonsterPageHref(search, { tab: 'hosts' })}
-                  className={`${tabLinkBase} px-4 text-[11px] ${activeTab === 'hosts' ? 'bg-ember text-void' : 'text-mist hover:text-ember-bright'}`}
-                  scroll={false}
-                >
-                  Hosts
-                </Link>
-                <Link
-                  href={buildMonsterPageHref(search, { tab: 'seeking' })}
-                  className={`${tabLinkBase} px-4 text-[11px] ${activeTab === 'seeking' ? 'bg-ember text-void' : 'text-mist hover:text-ember-bright'}`}
-                  scroll={false}
-                >
-                  Seeking
-                </Link>
-              </div>
+      <section className="mbody">
+        <div className="pp">
+          <div className="sec-h" style={{ alignItems: "center", flexWrap: "wrap" }}>
+            <div><span className="eyebrow">Host coverage</span><h2 style={{ marginTop: 6 }}>{activeTab === "hosts" ? "Crown hosts" : "Hunters seeking"}</h2></div>
+            <div className="seg lk" role="group">
+              {seg("Hosts", buildMonsterPageHref(search, { tab: "hosts" }), activeTab === "hosts")}
+              {seg("Seeking", buildMonsterPageHref(search, { tab: "seeking" }), activeTab !== "hosts")}
             </div>
           </div>
+          <p className="sub">
+            {activeTab === "hosts"
+              ? "Hunters who have this crown and are hosting it. Contact them to join a quest."
+              : "Hunters still chasing this monster. Track it yourself to appear here and let hosts find you."}
+          </p>
 
-          <div className="p-4 sm:p-6">
-          {activeTab === 'hosts' ? (
-            <div className="flex flex-col gap-5">
-              <div className="grid grid-cols-2 gap-2 rounded-lg border border-white/10 bg-void p-1 sm:flex">
-                <Link
-                  href={buildMonsterPageHref(search, { crownType: 'all' })}
-                  className={`flex items-center justify-center gap-1.5 rounded-md px-2 py-2 text-center font-display text-[11px] uppercase tracking-widest transition-colors sm:flex-1 ${
-                    crownTypeFilter === 'all' ? 'bg-ember text-void' : 'text-mist hover:text-ember-bright'
-                  }`}
-                  scroll={false}
-                >
-                  All Types
-                </Link>
-                {pairedGroups.length > 0 && (
-                  <Link
-                    href={buildMonsterPageHref(search, { crownType: 'pairs' })}
-                    className={`flex items-center justify-center gap-1.5 rounded-md px-2 py-2 text-center font-display text-[11px] uppercase tracking-widest transition-colors sm:flex-1 ${
-                      crownTypeFilter === 'pairs' ? 'bg-ember text-void' : 'text-mist hover:text-ember-bright'
-                    }`}
-                    scroll={false}
-                  >
-                    <Image src="/icons/largecrown.png" width={12} height={12} alt="" className="pixel-art shrink-0" />
-                    Pairs
-                  </Link>
-                )}
-                <Link
-                  href={buildMonsterPageHref(search, { crownType: 'large' })}
-                  className={`flex items-center justify-center gap-1.5 rounded-md px-2 py-2 text-center font-display text-[11px] uppercase tracking-widest transition-colors sm:flex-1 ${
-                    crownTypeFilter === 'large' ? 'bg-ember text-void' : 'text-mist hover:text-ember-bright'
-                  }`}
-                  scroll={false}
-                >
-                  <Image src="/icons/largecrown.png" width={12} height={12} alt="" className="pixel-art shrink-0" />
-                  Large
-                </Link>
-                <Link
-                  href={buildMonsterPageHref(search, { crownType: 'small' })}
-                  className={`flex items-center justify-center gap-1.5 rounded-md px-2 py-2 text-center font-display text-[11px] uppercase tracking-widest transition-colors sm:flex-1 ${
-                    crownTypeFilter === 'small' ? 'bg-ember text-void' : 'text-mist hover:text-ember-bright'
-                  }`}
-                  scroll={false}
-                >
-                  <Image src="/icons/smallcrown.png" width={12} height={12} alt="" className="pixel-art shrink-0" />
-                  Small
-                </Link>
+          {activeTab === "hosts" ? (
+            <>
+              <div className="seg lk" role="group" aria-label="Crown type" style={{ marginTop: 14 }}>
+                {seg("All types", buildMonsterPageHref(search, { crownType: "all" }), crownTypeFilter === "all")}
+                {pairedGroups.length > 0 && seg("Pairs", buildMonsterPageHref(search, { crownType: "pairs" }), crownTypeFilter === "pairs")}
+                {seg("Large", buildMonsterPageHref(search, { crownType: "large" }), crownTypeFilter === "large", <Image src="/icons/largecrown.png" width={14} height={14} alt="" className="px" />)}
+                {seg("Small", buildMonsterPageHref(search, { crownType: "small" }), crownTypeFilter === "small", <Image src="/icons/smallcrown.png" width={14} height={14} alt="" className="px" />)}
               </div>
 
               {filteredSections.map((section) => (
-                <section key={section.key} className="overflow-hidden rounded-xl border border-white/5 bg-void/60">
-                  <div className="flex items-center gap-3 border-b border-white/5 bg-white/[0.03] px-4 py-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-void">
-                      <Image src={section.icon} width={20} height={20} alt="" className="pixel-art" />
-                    </div>
-                    <h3 className="font-display text-sm uppercase tracking-wide text-mist">{section.title}</h3>
-                    <span className="ml-auto rounded-full border border-ember/30 bg-ember/10 px-2.5 py-0.5 font-display text-xs text-ember-bright">
-                      {section.count}
-                    </span>
-                  </div>
-
-                  <div className="p-3 sm:p-4">
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                      {section.items || (
-                        <p className="col-span-full rounded-xl border border-dashed border-white/10 py-8 text-center font-body text-sm italic text-mist-dim">
-                          {section.empty}
-                        </p>
-                      )}
-                    </div>
-
-                    <Pagination
-                      page={section.pagination.page}
-                      totalPages={section.pagination.totalPages}
-                      search={search}
-                      pageKey={section.pagination.pageKey}
-                      activeTab="hosts"
-                    />
-                  </div>
-                </section>
+                <div key={section.key} className="hsec">
+                  <div className="hsh"><b>{section.title}</b><span>{section.count}</span></div>
+                  {section.items ? <div className="hostgrid">{section.items}</div> : <div className="m2empty"><b>{section.empty}</b></div>}
+                  <Pagination page={section.pagination.page} totalPages={section.pagination.totalPages} search={search} pageKey={section.pagination.pageKey} activeTab="hosts" />
+                </div>
               ))}
-            </div>
+            </>
           ) : (
-            <section>
-              <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-void px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <Image src="/icons/MHWilds-Wishlist_Pin_Icon.png" width={16} height={16} alt="" className="pixel-art" />
-                  <span className="font-body text-[10px] uppercase tracking-[0.25em] text-mist-dim">Track This Monster</span>
-                </div>
-                <WishlistToggle monsterId={monster.id} initialType={userWishlistType} />
-              </div>
-
-              <div className="mb-3 flex items-center gap-2">
-                <span className="font-body text-xs uppercase tracking-wider text-mist-dim">{wishlist.length} hunters seeking</span>
-              </div>
-
-              <div className="flex flex-col gap-2.5">
+            <>
+              <div className="list" style={{ marginTop: 14 }}>
                 {wishlist.length > 0 ? pagedSeeking.items.map((entry) => (
-                  <Link
-                    href={`/profile/${entry.user_id}`}
-                    key={entry.id || entry.user_id}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-white/5 bg-void px-4 py-3 transition-colors hover:border-ember/30 hover:bg-white/5"
-                  >
-                    <div className="flex min-w-0 items-center gap-3">
-                      <UserAvatar
-                        src={entry.avatar_url}
-                        alt={entry.username}
-                        size={40}
-                        className="h-10 w-10 shrink-0 rounded-full border border-white/10 object-cover"
-                      />
-                      <div className="min-w-0">
-                        <p className="truncate font-display text-sm text-ember-bright">{entry.username}</p>
-                        <p className="truncate font-body text-xs italic text-mist-dim">{entry.status_message || "Active Hunter"}</p>
-                      </div>
-                    </div>
-                    <div className="shrink-0 text-right">
-                      <p className="mb-1 font-body text-[10px] uppercase tracking-wider text-mist-dim">Needs</p>
-                      <div className="flex justify-end gap-1.5">
-                        {(entry.type === 'small' || entry.type === 'both') && <Image src="/icons/smallcrown.png" width={16} height={16} alt="S" className="pixel-art" />}
-                        {(entry.type === 'large' || entry.type === 'both') && <Image src="/icons/largecrown.png" width={16} height={16} alt="L" className="pixel-art" />}
-                      </div>
-                    </div>
+                  <Link className="r" href={`/profile/${entry.user_id}`} key={entry.id || entry.user_id}>
+                    <UserAvatar src={entry.avatar_url} alt={entry.username} size={44} className="av" />
+                    <div><div className="n">{entry.username}</div><div className="s">{entry.status_message || "Active hunter"}</div></div>
+                    <span className="x">
+                      {(entry.type === "small" || entry.type === "both") && <Image src="/icons/smallcrown.png" width={18} height={18} alt="Small" className="px" />}
+                      {(entry.type === "large" || entry.type === "both") && <Image src="/icons/largecrown.png" width={18} height={18} alt="Large" className="px" />}
+                    </span>
                   </Link>
-                )) : (
-                  <p className="rounded-xl border border-dashed border-white/10 py-8 text-center font-body text-sm italic text-mist-dim">
-                    No hunters are currently tracking this monster.
-                  </p>
-                )}
+                )) : <div className="m2empty"><b>No hunters are tracking this monster</b><span>Track it to be the first.</span></div>}
               </div>
-
-              <Pagination
-                page={pagedSeeking.page}
-                totalPages={pagedSeeking.totalPages}
-                search={search}
-                pageKey="seekingPage"
-                activeTab="seeking"
-              />
-            </section>
+              <Pagination page={pagedSeeking.page} totalPages={pagedSeeking.totalPages} search={search} pageKey="seekingPage" activeTab="seeking" />
+            </>
           )}
+        </div>
+
+        <div>
+          <div className="pp phys">
+            <div className="sec-h"><h2>Physiology</h2></div>
+            <div className="grp"><small>Weaknesses</small><TagList values={extraInfo?.weakness} tone="gold" fallback="Unknown" /></div>
+            <div className="grp"><small>Elements</small><TagList values={extraInfo?.elements} fallback="None" /></div>
+            <div className="grp"><small>Ailments</small><TagList values={extraInfo?.ailments} tone="red" fallback="None" /></div>
           </div>
-        </section>
-
-        <aside className="flex min-w-0 flex-col gap-3 lg:sticky lg:top-6">
-          <div className="overflow-hidden rounded-2xl border border-white/5 bg-void-panel">
-            <div className="border-b border-white/5 bg-white/5 px-5 py-4">
-              <div className="flex items-center gap-2 font-body text-[10px] uppercase tracking-[0.3em] text-mist-dim">
-                <Image src="/icons/MHWilds-Expedition_Record_Board_Icon.png" width={16} height={16} alt="" className="pixel-art" />
-                <span>Physiology</span>
-              </div>
-            </div>
-            <div className="p-5">
-              <div className="grid gap-3">
-                <div className="rounded-xl border border-white/5 bg-void px-3 py-3">
-                  <p className="mb-2 font-body text-[10px] uppercase tracking-[0.25em] text-mist-dim">Weaknesses</p>
-                  <TagList values={extraInfo?.weakness} tone="gold" fallback="Unknown" />
-                </div>
-                <div className="rounded-xl border border-white/5 bg-void px-3 py-3">
-                  <p className="mb-2 font-body text-[10px] uppercase tracking-[0.25em] text-mist-dim">Elements</p>
-                  <TagList values={extraInfo?.elements} tone="default" fallback="None" />
-                </div>
-                <div className="rounded-xl border border-white/5 bg-void px-3 py-3">
-                  <p className="mb-2 font-body text-[10px] uppercase tracking-[0.25em] text-mist-dim">Ailments</p>
-                  <TagList values={extraInfo?.ailments} tone="red" fallback="None" />
-                </div>
-              </div>
-            </div>
+          <div className="pp" style={{ marginTop: 16 }}>
+            <div className="sec-h"><h2>Breakdown</h2></div>
+            {[["Large", largeCrowns.length], ["Small", smallCrowns.length], ["Pairs", pairedGroups.length], ["Tempered", totalTemperedLogs]].map(([label, value]) => (
+              <div key={label} className="bd"><span>{label}</span><b>{value}</b></div>
+            ))}
           </div>
-
-          <div className="overflow-hidden rounded-2xl border border-white/5 bg-void-panel">
-            <div className="border-b border-white/5 bg-white/5 px-5 py-4">
-              <p className="font-body text-[10px] uppercase tracking-[0.3em] text-mist-dim">Breakdown</p>
-            </div>
-            <div className="grid gap-2 p-4">
-              {[
-                { label: 'Large', value: largeCrowns.length },
-                { label: 'Small', value: smallCrowns.length },
-                { label: 'Pairs', value: pairedGroups.length },
-                { label: 'Tempered', value: totalTemperedLogs },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center justify-between rounded-lg border border-white/5 bg-void px-3 py-2.5">
-                  <span className="font-body text-[10px] uppercase tracking-[0.25em] text-mist-dim">{item.label}</span>
-                  <strong className="font-display text-base text-ember-bright">{item.value}</strong>
-                </div>
-              ))}
-            </div>
-          </div>
-
-
-        </aside>
-      </div>
-    </main>
+        </div>
+      </section>
+    </div>
   );
 }

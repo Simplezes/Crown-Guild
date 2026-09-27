@@ -1,6 +1,7 @@
 import db from "@/lib/db";
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
+import { hasCrownSize } from "@/lib/db";
 import { logServerError } from "@/lib/logger";
 import { checkRateLimit } from "@/lib/ratelimit";
 
@@ -27,6 +28,7 @@ export async function PATCH(req, { params }) {
       investigation_monster_id,
       remaining_uses,
       mission_host_enabled,
+      size_cm,
     } = await req.json();
 
     const checkRes = await db.execute({
@@ -91,11 +93,16 @@ export async function PATCH(req, { params }) {
       return NextResponse.json({ success: true });
     }
 
+    const size = Number(size_cm);
+    const sizeGiven = size_cm !== undefined;
+    const sizeValue = size_cm === null || size_cm === "" ? null : Number.isFinite(size) && size > 0 && size < 10000 ? Math.round(size * 100) / 100 : null;
+    const withSize = sizeGiven && (await hasCrownSize());
+
     await db.execute({
       sql: `
         UPDATE crowns
         SET monster_id = ?, type = ?, tempered = ?, strength_rating = ?, quest = ?,
-            remaining_uses = NULL, investigation_id = ?, pair_id = ?
+            remaining_uses = NULL, investigation_id = ?, pair_id = ?${withSize ? ", size_cm = ?" : ""}
         WHERE id = ?
       `,
       args: [
@@ -106,6 +113,7 @@ export async function PATCH(req, { params }) {
         quest,
         resolvedInvestigationId,
         resolvedPairId,
+        ...(withSize ? [sizeValue] : []),
         id,
       ],
     });

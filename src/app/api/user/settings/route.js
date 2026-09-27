@@ -2,7 +2,31 @@ import { auth } from "@/auth";
 import db from "@/lib/db";
 import { NextResponse } from "next/server";
 import { logServerError } from "@/lib/logger";
+import { getUserSummary } from "@/lib/summary";
 import { checkRateLimit } from "@/lib/ratelimit";
+
+export async function GET() {
+  const session = await auth();
+  if (!session) return new NextResponse("Unauthorized", { status: 401 });
+  const userId = session.user.id;
+  const [res, summary] = await Promise.all([
+    db.execute({ sql: "SELECT id, username, lobby_id, quest_password, status_message, receive_dms FROM users WHERE id = ?", args: [userId] }),
+    getUserSummary(userId),
+  ]);
+  const u = res.rows[0];
+  if (!u) return new NextResponse("Not found", { status: 404 });
+  return NextResponse.json({
+    user: {
+      id: u.id,
+      username: u.username || session.user.name || "Hunter",
+      lobby_id: u.lobby_id || "",
+      quest_password: u.quest_password || "",
+      status_message: u.status_message || "",
+      receive_dms: u.receive_dms ?? 1,
+    },
+    rank: { title: summary?.title || "Fledgling" },
+  });
+}
 
 async function updateSettings(req) {
   const session = await auth();

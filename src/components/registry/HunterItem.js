@@ -2,126 +2,76 @@ import Link from "next/link";
 import Image from "next/image";
 import ContactButton from "../beacon/ContactButton";
 import UserAvatar from "@/components/ui/UserAvatar";
+import { Icon } from "@/components/shell/Icon";
 
-export default function HunterItem({ crown, linkedCrown = null, monsterName, monsterImageName, isHighlighted }) {
+const QUEST_ICON = { "Event Quests": "event", "Optional Quests": "optional", "Field Survey Quests": "survey", "Investigation Quests": "investigation" };
+const questName = (q) => (q || "Hunt").replace(/ Quests$/, " Quest").replace("Field Survey Quest", "Field Survey");
+const titleCase = (s) => s?.split(" ").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+
+function Row({ c, label, kind }) {
+  return (
+    <div className="hk-row">
+      <Image src={`/icons/${kind}crown.png`} alt="" width={18} height={18} className="px" />
+      <span>{label}</span>
+      <b>{c?.strength_rating ?? "-"}★</b>
+      {c?.size_cm && <em><Icon name="ruler" />{Number(c.size_cm)} cm</em>}
+    </div>
+  );
+}
+
+export default function HunterItem({ crown, linkedCrown = null, monsterName, isHighlighted, viewerId = null }) {
   const {
-    user_id,
-    avatar_url,
-    username,
-    status_message,
-    quest,
-    tempered,
-    strength_rating,
-    remaining_uses,
-    id: crownId,
-    monster_id,
-    inv_remaining_uses,
-    inv_monster_id,
-    inv_monster_name,
+    user_id, avatar_url, username, status_message, quest, tempered, remaining_uses, id: crownId, monster_id,
+    inv_remaining_uses, inv_monster_id, inv_monster_name, receive_dms,
   } = crown;
 
-  const effectiveUses = inv_remaining_uses !== undefined ? inv_remaining_uses : remaining_uses;
+  const uses = inv_remaining_uses !== undefined ? inv_remaining_uses : remaining_uses;
   const hasHost = inv_monster_id && String(inv_monster_id) !== String(monster_id);
-  const hostName = hasHost
-    ? inv_monster_name?.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
-    : null;
+  const hostName = hasHost ? titleCase(inv_monster_name) : null;
 
-  const smallC = linkedCrown ? (crown.type === 'small' ? crown : linkedCrown) : crown.type === 'small' ? crown : null;
-  const largeC = linkedCrown ? (crown.type === 'large' ? crown : linkedCrown) : crown.type === 'large' ? crown : null;
-  const crownTypeLabel = linkedCrown ? 'Crown Pair' : crown.type === 'small' ? 'Small Crown' : 'Large Crown';
-  const crownIcon = linkedCrown
-    ? '/icons/largecrown.png'
-    : crown.type === 'small' ? '/icons/smallcrown.png' : '/icons/largecrown.png';
-  const hasTempered = linkedCrown
-    ? Boolean(smallC?.tempered || largeC?.tempered)
-    : Boolean(tempered);
-  const showUses = quest === "Investigation Quests" && effectiveUses != null;
-  const noteText = status_message?.trim() || "No note set";
-  const questLabel = quest || "Hunt";
-  const ghostImageName = hasHost && inv_monster_name
-    ? `MHWilds-${inv_monster_name.replace(/\s+/g, '_')}_Icon.png`
-    : null;
+  const smallC = linkedCrown ? (crown.type === "small" ? crown : linkedCrown) : crown.type === "small" ? crown : null;
+  const largeC = linkedCrown ? (crown.type === "large" ? crown : linkedCrown) : crown.type === "large" ? crown : null;
+  const hasTempered = linkedCrown ? Boolean(smallC?.tempered || largeC?.tempered) : Boolean(tempered);
+  const showUses = quest === "Investigation Quests" && uses != null;
+  const typeLabel = linkedCrown ? "Crown pair" : crown.type === "small" ? "Small crown" : "Large crown";
+  const dmsOpen = Number(receive_dms ?? 1) !== 0;
+  const note = status_message?.trim();
+  const isOwn = viewerId != null && String(viewerId) === String(user_id);
+  const canDeploy = quest === "Investigation Quests" && uses > 0;
 
   return (
-    <div
-      id={`crown-${crownId}`}
-      className={`group relative flex flex-col overflow-hidden rounded-2xl border bg-void transition-all ${
-        isHighlighted ? 'border-ember shadow-[0_0_0_1px_rgba(201,162,74,0.4),0_0_28px_rgba(201,162,74,0.3)]' : 'border-white/5 hover:-translate-y-0.5 hover:border-ember/30 hover:shadow-lift'
-      }`}
-    >
-      {isHighlighted && (
-        <span className="absolute right-3 top-3 z-10 rounded bg-ember px-2 py-0.5 font-display text-[10px] uppercase tracking-wide text-void">
-          Featured
+    <div id={`crown-${crownId}`} className={`hk ${hasTempered ? "t" : ""} ${isHighlighted ? "feat" : ""}`}>
+      <div className="hk-top">
+        <span className={`hk-ty ${linkedCrown || crown.type === "large" ? "l" : ""}`}>
+          <Image src={crown.type === "small" && !linkedCrown ? "/icons/smallcrown.png" : "/icons/largecrown.png"} alt="" width={15} height={15} className="px" />
+          {typeLabel}
         </span>
-      )}
-
-      <div className="relative h-16 shrink-0 overflow-hidden border-b border-white/5 bg-gradient-to-r from-ember/15 via-white/[0.03] to-transparent">
-        {ghostImageName && (
-          <div className="pointer-events-none absolute -right-3 -top-3 h-24 w-24 opacity-[0.12]">
-            <Image src={`/monsters/${ghostImageName}`} alt="" fill sizes="96px" className="scale-125 object-contain grayscale pixel-art" />
-          </div>
-        )}
-        <div className="relative z-[1] flex items-center gap-1.5 px-3.5 pt-3">
-          <Image src={crownIcon} width={14} height={14} alt="" className="pixel-art" />
-          <span className="font-display text-[11px] uppercase tracking-wide text-ember-bright">{crownTypeLabel}</span>
-        </div>
+        {hasTempered && <span className="hk-tp"><Icon name="tempered" />Tempered</span>}
+        {isHighlighted && <span className="hk-ft">Featured</span>}
       </div>
 
-      <Link href={`/profile/${user_id}`} className="relative z-[1] -mt-6 flex min-w-0 flex-1 flex-col gap-3 px-3.5 pb-3.5">
-        <div className="flex items-end gap-3">
-          <UserAvatar
-            src={avatar_url}
-            alt={username}
-            size={52}
-            className={`h-[52px] w-[52px] shrink-0 rounded-xl border-2 bg-black object-cover transition-colors ${
-              hasTempered ? 'tempered-monster-icon border-tempered/70' : 'border-void group-hover:border-ember/50'
-            }`}
-          />
-          <div className="min-w-0 pb-0.5">
-            <p className="truncate font-display text-base tracking-wide text-ember-bright">{username}</p>
-            <p className="truncate font-body text-[11px] italic text-mist-dim">&ldquo;{noteText}&rdquo;</p>
-          </div>
+      <Link className="hk-id" href={`/profile/${user_id}`}>
+        <UserAvatar src={avatar_url} alt={username} size={48} className="hk-av" />
+        <div className="hk-nm">
+          <b>{username}</b>
+          <p className={note ? "" : "none"}>{note ? `“${note}”` : "No note set"}</p>
         </div>
-
-        <div className="flex flex-wrap items-center gap-1.5">
-          {linkedCrown ? (
-            <>
-              <span className="rounded border border-ember/30 bg-ember/10 px-1.5 py-0.5 font-body text-[9px] font-bold text-ember">
-                S {smallC?.strength_rating ?? '-'}★
-              </span>
-              <span className="rounded border border-ember/30 bg-ember/10 px-1.5 py-0.5 font-body text-[9px] font-bold text-ember">
-                L {largeC?.strength_rating ?? '-'}★
-              </span>
-            </>
-          ) : (
-            <span className="rounded border border-ember/30 bg-ember/10 px-1.5 py-0.5 font-body text-[9px] font-bold text-ember">
-              {strength_rating}★
-            </span>
-          )}
-          {hasTempered && (
-            <span className="rounded border border-tempered/50 bg-tempered/15 px-1.5 py-0.5 font-body text-[9px] font-bold uppercase tracking-wide text-tempered">
-              Tempered
-            </span>
-          )}
-          <span className="inline-flex items-center rounded border border-white/10 bg-white/5 px-1.5 py-0.5 font-body text-[9px] uppercase tracking-wide text-mist-dim">
-            {questLabel}
-          </span>
-          {showUses && (
-            <span className="inline-flex items-center rounded border border-white/10 bg-white/5 px-1.5 py-0.5 font-body text-[9px] uppercase tracking-wide text-mist-dim">
-              {effectiveUses} left
-            </span>
-          )}
-        </div>
-
-        {hasHost && (
-          <p className="font-body text-[9px] uppercase tracking-wide text-mist-faint">
-            Hosted on {hostName} {quest === "Field Survey Quests" ? "Field Survey" : "Investigation"}
-          </p>
-        )}
       </Link>
 
-      <div className="relative z-[1] border-t border-white/5 px-3.5 py-2.5 [&_button]:w-full [&_button]:justify-center">
-        {(effectiveUses > 0 || effectiveUses === null) ? (
+      <div className="hk-rows">
+        {smallC && <Row c={smallC} label="Small" kind="small" />}
+        {largeC && <Row c={largeC} label="Large" kind="large" />}
+      </div>
+
+      <div className="hk-q">
+        <span><Icon name={QUEST_ICON[quest] || "optional"} />{questName(quest)}{showUses ? ` · ${uses} left` : ""}</span>
+        {hasHost && <span className="hk-on">On {hostName} {quest === "Field Survey Quests" ? "Field Survey" : "Investigation"}</span>}
+      </div>
+
+      {isOwn && !canDeploy ? (
+        <div className="hk-c"><span className="hk-btn own">Your crown</span></div>
+      ) : (uses > 0 || uses === null || uses === undefined) ? (
+        <div className="hk-c">
           <ContactButton
             hostId={user_id}
             monsterId={monster_id}
@@ -129,12 +79,13 @@ export default function HunterItem({ crown, linkedCrown = null, monsterName, mon
             crownId={crownId}
             discordId={username}
             quest={quest}
-            canDeploy={quest === "Investigation Quests" && effectiveUses > 0}
+            canDeploy={canDeploy}
+            dmsOpen={dmsOpen}
           />
-        ) : (
-          <span className="block h-9" />
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="hk-c"><span className="hk-btn off">Out of uses</span></div>
+      )}
     </div>
   );
 }

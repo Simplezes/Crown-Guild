@@ -1,7 +1,9 @@
 import { getAllMonsters } from "@/lib/monsters";
 import { auth } from "@/auth";
 import db from "@/lib/db";
-import InvestigationBoard from "@/components/registry/InvestigationBoard";
+import MonstersBoard from "@/components/registry/MonstersBoard";
+
+export const metadata = { title: "Monsters | Crown Guild" };
 
 export default async function FieldGuide({ searchParams }) {
   const search = await searchParams;
@@ -45,8 +47,14 @@ export default async function FieldGuide({ searchParams }) {
 
     const wishEntry = userWishlist.find(w => w.monster_id === m.id);
 
+    const mine = {
+      s: userCrowns.filter((c) => c.monster_id === m.id && c.type === "small").length,
+      l: userCrowns.filter((c) => c.monster_id === m.id && c.type === "large").length,
+    };
+
     return {
       ...m,
+      mine,
       isCompleted,
       isWishlisted: !!wishEntry,
       wishlistType: wishEntry?.type || null,
@@ -55,9 +63,5 @@ export default async function FieldGuide({ searchParams }) {
     };
   });
 
-  return (
-    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
-      <InvestigationBoard monsters={monsters} />
-    </main>
-  );
+  return <MonstersBoard monsters={monsters} signedIn={!!session?.user?.id} />;
 }

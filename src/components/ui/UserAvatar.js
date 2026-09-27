@@ -15,13 +15,13 @@ function AvatarContent({
 
   if (!src || hasError) {
     return (
-      <div
-        className={`flex items-center justify-center overflow-hidden bg-white/5 ${className || ''} ${fallbackClassName}`}
-        style={{ width: size, height: size }}
+      <span
+        className={`${className || ''} ${fallbackClassName}`}
+        style={{ width: size, height: size, display: 'grid', placeItems: 'center', flex: 'none' }}
         aria-label={alt || 'User avatar'}
       >
-        <div className="h-full w-full animate-pulse bg-white/10" />
-      </div>
+        {(alt || '?').slice(0, 2).toUpperCase()}
+      </span>
     );
   }
 

@@ -1,4 +1,4 @@
-import db from "@/lib/db";
+import db, { hasCrownSize } from "@/lib/db";
 import { fetchDiscordUser } from "@/lib/discord";
 import { getMonsterCount } from "@/lib/monsters";
 
@@ -14,6 +14,7 @@ export async function getProfileData(userId) {
     let user = userRes.rows[0];
 
     const monsterCount = getMonsterCount() || 1;
+    const sizeCol = (await hasCrownSize()) ? "c.size_cm" : "NULL AS size_cm";
 
     const [
       crownsRes,
@@ -25,7 +26,7 @@ export async function getProfileData(userId) {
     ] = await Promise.all([
       db.execute({
         sql: `SELECT c.id, m.id as monster_id, m.name, m.emoji, m.image_name,
-                     c.type, c.tempered, c.strength_rating, c.quest, c.investigation_id, c.pair_id,
+                     c.type, c.tempered, c.strength_rating, c.quest, c.investigation_id, c.pair_id, ${sizeCol},
                      inv.remaining_uses,
                      inv.monster_id     AS inv_monster_id,
                      inv_m.name         AS inv_monster_name,
