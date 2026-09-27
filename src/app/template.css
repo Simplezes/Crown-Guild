@@ -1286,6 +1286,14 @@ svg.ms.lu.pin-f{display:none!important}
 .pf-idn{font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums}
 .pf-q{margin:12px 0 0;color:var(--mist-d);font-style:italic;max-width:60ch}
 .pf-act{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.pf-copy{display:flex;align-items:center;gap:5px}
+.pf-copy-more{position:relative;z-index:5;flex:none}
+.pf-copy-more summary{list-style:none;cursor:pointer}
+.pf-copy-more summary::-webkit-details-marker{display:none}
+.pf-copy-trigger{width:36px;height:36px;padding:0;justify-content:center}
+.pf-copy-menu{position:absolute;top:calc(100% + 6px);right:0;z-index:20;width:150px;padding:5px;background:#1a161c;border:1px solid var(--line2);border-radius:10px;box-shadow:0 16px 32px -14px rgba(0,0,0,.8)}
+.pf-copy-option{width:100%;height:36px;padding:0 10px;border:0;border-radius:7px;background:none;color:var(--mist-d);font:inherit;font-size:12px;text-align:left;cursor:pointer}
+.pf-copy-option:hover,.pf-copy-option:focus-visible{background:rgba(255,255,255,.05);color:var(--mist)}
 .pf-cols{display:grid;grid-template-columns:340px minmax(0,1fr);gap:16px;align-items:start}
 .pf-side{display:flex;flex-direction:column;gap:16px}
 .pf-rt{display:flex;gap:16px;align-items:center}

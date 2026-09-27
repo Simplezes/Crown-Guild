@@ -45,6 +45,11 @@ function monsterEmoji(crown) {
   return MONSTER_EMOJIS[guardian ? `G${key}` : key] || crown.emoji || baseName || name;
 }
 
+function monsterName(crown) {
+  const name = String(crown.name || crown.monster_name || "").trim();
+  return name.replace(/^Tempered\s+/i, "") || name;
+}
+
 function isTempered(crown) {
   return crown.tempered === true || crown.tempered === 1 || crown.tempered === "1";
 }
@@ -65,7 +70,26 @@ function uniqueMonsters(crowns) {
   });
 }
 
-export function formatCrownShare(crowns, profileUrl) {
+function appendMonsterList(lines, label, monsters) {
+  const prefix = `  - ${label}: `;
+  const continuation = " ".repeat(prefix.length);
+  let line = prefix;
+
+  for (const monster of monsters) {
+    const next = line === prefix ? monster : `, ${monster}`;
+    if (line.length + next.length > 64 && line !== prefix) {
+      lines.push(`${line},`);
+      line = `${continuation}${monster}`;
+    } else {
+      line += next;
+    }
+  }
+
+  lines.push(line);
+}
+
+export function formatCrownShare(crowns, profileUrl, useEmojis = true) {
+  const formatMonster = useEmojis ? monsterEmoji : monsterName;
   const small = [];
   const large = [];
   const pairs = new Map();
@@ -83,42 +107,60 @@ export function formatCrownShare(crowns, profileUrl) {
 
   const formatSize = (label, entries) => {
     if (!entries.length) return null;
-    const regular = uniqueMonsters(entries.filter((crown) => !isTempered(crown))).map(monsterEmoji);
+    const regular = uniqueMonsters(entries.filter((crown) => !isTempered(crown))).map(formatMonster);
     const tempered = new Map();
 
     for (const crown of entries.filter(isTempered)) {
       const strength = Number(crown.strength_rating) || 0;
       const rating = strength > 0 ? `${strength}\u2605` : "Tempered";
-      if (!tempered.has(rating)) tempered.set(rating, { seen: new Set(), emojis: [] });
+      if (!tempered.has(rating)) tempered.set(rating, { seen: new Set(), values: [] });
       const group = tempered.get(rating);
       const key = monsterIdentity(crown);
       if (group.seen.has(key)) continue;
       group.seen.add(key);
-      group.emojis.push(monsterEmoji(crown));
+      group.values.push(formatMonster(crown));
+    }
+
+    const ratingValue = (rating) => Number.parseInt(rating, 10) || Number.POSITIVE_INFINITY;
+    const orderedTempered = [...tempered].sort(([a], [b]) => ratingValue(a) - ratingValue(b));
+    if (!useEmojis) {
+      regular.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+      const section = [label === "S" ? "Small" : "Large"];
+      if (regular.length) appendMonsterList(section, "Regular", regular);
+      for (const [rating, group] of orderedTempered) {
+        group.values.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+        appendMonsterList(section, rating, group.values);
+      }
+      return section;
     }
 
     const parts = [...regular];
-    const ratingValue = (rating) => Number.parseInt(rating, 10) || Number.POSITIVE_INFINITY;
-    const orderedTempered = [...tempered].sort(([a], [b]) => ratingValue(a) - ratingValue(b));
-    for (const [rating, group] of orderedTempered) parts.push(`(${rating}: ${group.emojis.join(" ")})`);
-    return `${label}: ${parts.join(" ")}`;
+    for (const [rating, group] of orderedTempered) parts.push(`(${rating}: ${group.values.join(" ")})`);
+    return [`${label}: ${parts.join(" ")}`];
   };
 
-  const lines = ["Available:"];
+  const lines = [useEmojis ? "Available:" : "Available"];
   const smallLine = formatSize("S", small);
   const largeLine = formatSize("L", large);
-  if (smallLine) lines.push(smallLine);
-  if (largeLine) lines.push(largeLine);
+  if (smallLine) lines.push(...smallLine);
+  if (largeLine) {
+    if (!useEmojis && smallLine) lines.push("");
+    lines.push(...largeLine);
+  }
   if (!smallLine && !largeLine) lines.push("No crowns recorded yet.");
 
   const multiQuests = [...pairs.values()]
     .filter((pair) => pair.length >= 2)
     .map((pair) => pair.slice(0, 2).map((crown) => {
       const label = String(crown.type).toLowerCase() === "small" ? "S" : "L";
-      return `${label} ${monsterEmoji(crown)}`;
+      return `${label} ${formatMonster(crown)}`;
     }).join(" + "));
 
-  if (multiQuests.length) lines.push("Multi-Quest:", multiQuests.join(" / "));
+  if (multiQuests.length) {
+    if (!useEmojis && (smallLine || largeLine)) lines.push("");
+    lines.push("Multi-Quest:");
+    lines.push(...(useEmojis ? [multiQuests.join(" / ")] : multiQuests.map((quest) => `  - ${quest}`)));
+  }
   lines.push("", profileUrl);
   return lines.join("\n");
 }

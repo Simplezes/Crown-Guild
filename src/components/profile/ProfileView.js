@@ -192,10 +192,10 @@ export default function ProfileView({ user, crowns, stats, mp, rank, collection,
     toast.info("Link copied to your clipboard.");
   };
   const copy = (v) => { navigator.clipboard?.writeText(v).catch(() => {}); toast.info("Copied to your clipboard."); };
-  const copyCrowns = async () => {
+  const copyCrowns = async (useEmojis = true) => {
     const shareId = `${nonce()}-${Math.random().toString(36).slice(2, 8)}`;
     const profileUrl = `${window.location.origin}/profile/${encodeURIComponent(user.id)}?share=${shareId}`;
-    const copied = await copyText(formatCrownShare(crowns, profileUrl));
+    const copied = await copyText(formatCrownShare(crowns, profileUrl, useEmojis));
     if (copied) toast.success("All crowns copied to your clipboard.");
     else toast.error("Could not copy crowns. Check clipboard permissions and try again.");
   };
@@ -232,7 +232,15 @@ export default function ProfileView({ user, crowns, stats, mp, rank, collection,
           {user.status_message && <p className="pf-q">&ldquo;{user.status_message}&rdquo;</p>}
         </div>
         <div className="pf-act">
-          <button className="btn o sm" onClick={copyCrowns} title="Copy all crowns"><Icon name="copy" />Copy crowns</button>
+          <div className="pf-copy">
+            <button className="btn o sm" onClick={() => copyCrowns(true)} title="Copy all crowns with MH Wilds emotes"><Icon name="copy" />Copy crowns</button>
+            <details className="pf-copy-more" onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) e.currentTarget.open = false; }}>
+              <summary className="btn o sm pf-copy-trigger" aria-label="More copy formats" title="More copy formats"><Icon name="down" /></summary>
+              <div className="pf-copy-menu" role="group" aria-label="Copy format">
+                <button className="pf-copy-option" type="button" onClick={(e) => { copyCrowns(false); e.currentTarget.closest("details").open = false; }}>Plain text</button>
+              </div>
+            </details>
+          </div>
           {viewerId && !isOwner && <Link className="btn o sm" href={`/compare?a=${viewerId}&b=${user.id}`}><Icon name="compare" />Compare with you</Link>}
           {isOwner && <Link className="btn o sm" href={`/compare?a=${user.id}`}><Icon name="compare" />Compare with…</Link>}
           {isOwner && <button className="btn sm" onClick={() => showSettings()}><Icon name="edit" />Edit profile</button>}
