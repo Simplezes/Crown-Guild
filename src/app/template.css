@@ -1632,6 +1632,7 @@ svg.ms.lu.pin-f{display:none!important}
 .cnt2{align-self:flex-end;font-size:11px;color:var(--faint);font-variant-numeric:tabular-nums}
 .dz2{border-color:rgba(211,85,79,.28);background:rgba(211,85,79,.04)}
 .dz2 .strow b{color:var(--blood)}
+@media (max-width:900px){.dz2 .strow>div{flex:1;min-width:0}.dz2 .strow>.tbx{flex:0 0 76px;width:76px}}
 .dzc{display:flex;flex-direction:column;gap:10px;font-size:12.5px;color:var(--blood)}
 .dzc>div{display:flex;gap:8px;flex-wrap:wrap}
 .stft{display:flex;align-items:center;gap:10px;padding:14px 22px 18px;border-top:1px solid var(--line)}
