@@ -168,14 +168,20 @@ export default async function Home() {
         {userId && profile && summary ? (
           <GuildCard profile={profile} summary={summary} monsterCount={monsterCount} />
         ) : (
-          <div className="wd s12 gc4 gc-out">
-            <div className="g4-top">
-              <div className="g4e"><Emblem rank={1} /></div>
-              <div className="g4w">
-                <small>Your Guild Card</small>
-                <h3 className="rk">Sign in to start</h3>
-                <p className="g4s"><span>Log crowns, collect monsters and climb from Fledgling to Legend.</span></p>
-              </div>
+          <div className="wd s12 gc-out">
+            <div className="gco-badge"><Emblem rank={1} /></div>
+            <div className="gco-body">
+              <span className="eyebrow">Your Guild Card</span>
+              <h3>Sign in to start</h3>
+              <p className="gco-desc">Log crowns, collect monsters and climb from Fledgling to Legend.</p>
+            </div>
+            <div className="gco-ranks" aria-hidden="true">
+              {Array.from({ length: 8 }, (_, i) => (
+                <div key={i} className="gco-rank"><Emblem rank={i + 1} /></div>
+              ))}
+            </div>
+            <div className="gco-actions">
+              <a className="btn ln" href="https://discord.gg/mhwilds" target="_blank" rel="noopener noreferrer">Join Discord</a>
               <SignInButton />
             </div>
           </div>
