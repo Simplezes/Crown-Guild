@@ -1,4 +1,4 @@
-import db, { hasCrownSize } from "@/lib/db";
+import db, { hasCrownSize, ensureGuildArchiveTempered } from "@/lib/db";
 import { fetchDiscordUser } from "@/lib/discord";
 import { getMonsterCount, getMonsterTierMap } from "@/lib/monsters";
 import { masteryPointsFromRows } from "@/lib/guildArchive";
@@ -17,6 +17,7 @@ export async function getProfileData(userId) {
 
     const monsterCount = getMonsterCount() || 1;
     const sizeCol = (await hasCrownSize()) ? "c.size_cm" : "NULL AS size_cm";
+    await ensureGuildArchiveTempered();
 
     const [
       crownsRes,

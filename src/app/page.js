@@ -1,4 +1,4 @@
-import db from "@/lib/db";
+import db, { ensureGuildArchiveTempered } from "@/lib/db";
 import Link from "next/link";
 import Image from "next/image";
 import { auth } from "@/auth";
@@ -53,6 +53,7 @@ async function getHomeData() {
     const top = wantedRes.rows[0];
     const legendIds = renownRes.rows.map((r) => r.id);
     const marks = legendIds.map(() => "?").join(",");
+    await ensureGuildArchiveTempered();
     const [seekersRes, legendArch, tierMap] = await Promise.all([
       top
         ? db.execute({
