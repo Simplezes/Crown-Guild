@@ -12,12 +12,39 @@ import { useDrawer } from "@/components/monster/DrawerProvider";
 import Pager from "@/components/ui/Pager";
 import UserAvatar from "@/components/ui/UserAvatar";
 import { useSettings } from "./SettingsProvider";
+import { formatCrownShare } from "@/lib/crownShare";
 
 const QUEST_ICON = { "Event Quests": "event", "Optional Quests": "optional", "Field Survey Quests": "survey", "Investigation Quests": "investigation" };
 const questLabel = (q) => (q || "Optional Quests").replace(/ Quests$/, " Quest").replace("Field Survey Quest", "Field Survey");
 const FILTERS = ["All", "Small", "Large", "Tempered"];
 const PER_PAGE = 8;
 const nonce = () => Date.now().toString(36);
+
+async function copyText(text) {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {}
+
+  const field = document.createElement("textarea");
+  field.value = text;
+  field.setAttribute("readonly", "");
+  field.style.position = "fixed";
+  field.style.left = "-9999px";
+  document.body.appendChild(field);
+  field.focus();
+  field.select();
+  field.setSelectionRange(0, text.length);
+  try {
+    return document.execCommand("copy");
+  } catch {
+    return false;
+  } finally {
+    field.remove();
+  }
+}
 
 function groupCrowns(crowns) {
   const out = [], pairs = new Set(), invs = new Set();
@@ -165,6 +192,13 @@ export default function ProfileView({ user, crowns, stats, mp, rank, collection,
     toast.info("Link copied to your clipboard.");
   };
   const copy = (v) => { navigator.clipboard?.writeText(v).catch(() => {}); toast.info("Copied to your clipboard."); };
+  const copyCrowns = async () => {
+    const shareId = `${nonce()}-${Math.random().toString(36).slice(2, 8)}`;
+    const profileUrl = `${window.location.origin}/profile/${encodeURIComponent(user.id)}?share=${shareId}`;
+    const copied = await copyText(formatCrownShare(crowns, profileUrl));
+    if (copied) toast.success("All crowns copied to your clipboard.");
+    else toast.error("Could not copy crowns. Check clipboard permissions and try again.");
+  };
 
   const allPicked = list.length > 0 && list.every((g) => picked.has(keyOf(g)));
   const tabs = [["Crowns", crowns.length], ["Collected", Object.values(col).filter(Boolean).length], ["Wishlist", Object.values(wish).filter(Boolean).length]];
@@ -198,6 +232,7 @@ export default function ProfileView({ user, crowns, stats, mp, rank, collection,
           {user.status_message && <p className="pf-q">&ldquo;{user.status_message}&rdquo;</p>}
         </div>
         <div className="pf-act">
+          <button className="btn o sm" onClick={copyCrowns} title="Copy all crowns"><Icon name="copy" />Copy crowns</button>
           {viewerId && !isOwner && <Link className="btn o sm" href={`/compare?a=${viewerId}&b=${user.id}`}><Icon name="compare" />Compare with you</Link>}
           {isOwner && <Link className="btn o sm" href={`/compare?a=${user.id}`}><Icon name="compare" />Compare with…</Link>}
           {isOwner && <button className="btn sm" onClick={() => showSettings()}><Icon name="edit" />Edit profile</button>}
