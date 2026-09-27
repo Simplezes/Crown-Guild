@@ -17,7 +17,7 @@ import { formatCrownShare } from "@/lib/crownShare";
 const QUEST_ICON = { "Event Quests": "event", "Optional Quests": "optional", "Field Survey Quests": "survey", "Investigation Quests": "investigation" };
 const questLabel = (q) => (q || "Optional Quests").replace(/ Quests$/, " Quest").replace("Field Survey Quest", "Field Survey");
 const FILTERS = ["All", "Small", "Large", "Tempered"];
-const PER_PAGE = 8;
+const PER_PAGE = 9;
 const nonce = () => Date.now().toString(36);
 
 async function copyText(text) {
