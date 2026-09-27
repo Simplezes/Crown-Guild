@@ -15,7 +15,7 @@
 
 ---
 
-Log your Monster Hunter Wilds crown records, find hunters running investigation quests, and coordinate hunts in real time. Crown Guild stays in sync with the companion Discord bot every slash command is reflected on the dashboard instantly.
+Log your Monster Hunter Wilds crown records, find hunters running investigation quests, and coordinate hunts in real time.
 
 **Features**
 
@@ -63,48 +63,6 @@ For production on Vercel, add all env vars under **Project → Settings → Envi
 | `NEXT_PUBLIC_WEB_URL` | Public URL of this app used in share links |
 | `UPSTASH_REDIS_REST_URL` | Upstash Redis URL for rate limiting (optional in dev) |
 | `UPSTASH_REDIS_REST_TOKEN` | Upstash Redis token |
-
----
-
-## Real-time Events
-
-All events are pushed on `public-channel`. Both the web app and the Discord bot trigger them changes from either side appear immediately on every connected client.
-
-| Event | Trigger | Effect |
-|---|---|---|
-| `crown_update` | Crown added, edited, or deleted | Refreshes registry and profiles |
-| `mission_update` | Mission requested, confirmed, or completed | Updates the live board and mission panel |
-| `beacon_update` | Beacon raised or dismissed | Shows or hides the beacon popup |
-
----
-
-## API Routes
-
-**Auth**
-- `GET/POST /api/auth/[...nextauth]` Discord OAuth
-
-**Crowns**
-- `POST /api/crowns` Add a crown
-- `PUT /api/crowns/[id]` Update a crown
-- `DELETE /api/crowns/[id]` Delete a crown
-
-**Missions**
-- `POST /api/missions/beacon` Raise a beacon
-- `GET /api/missions/check` Check if a mission is active for the current session
-- `POST /api/missions/complete` Complete an active mission
-- `GET /api/missions/current` Fetch all active missions
-
-**Other**
-- `GET /api/monsters` List all monsters
-- `GET /api/user` Get current user profile
-
----
-
-## Related
-
-[Crown Guild Bot](https://github.com/Simplezes/Crown-Guild-Discord) the companion Discord bot that handles slash commands and triggers Pusher events to keep this dashboard in sync.
-
----
 
 ## License
 
