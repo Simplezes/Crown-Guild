@@ -21,7 +21,7 @@ function Slot({ crown, type }) {
   const strip = crown && crown.size
     ? <span className={`bz ${type === "large" ? "l" : ""} ${crown.tempered ? "t" : ""}`} title={`Length: ${Number(crown.size)} cm`}><Icon name="ruler" />{Number(crown.size)}</span>
     : crown && crown.sizeLabel
-    ? <span className={`bz ${type === "large" ? "l" : ""} ${crown.tempered ? "t" : ""}`} title={`Size: ${crown.sizeLabel}`}>{crown.sizeLabel}</span>
+    ? <span className={`bz lbl ${type === "large" ? "l" : ""} ${crown.tempered ? "t" : ""}`} title={`Size: ${crown.sizeLabel}`}>{crown.sizeLabel}</span>
     : null;
   if (!crown) {
     return (
