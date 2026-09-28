@@ -35,7 +35,7 @@ export default function LogHuntModal({ monsterId, initialGroup, onClose }) {
   const [pick, setPick] = useState(null);
   const [pickQ, setPickQ] = useState("");
 
-  const [quest, setQuest] = useState(() => initialGroup?.[0]?.quest || "Optional Quests");
+  const [quest, setQuest] = useState(() => initialGroup?.[0]?.quest || "Investigation Quests");
   const [uses, setUses] = useState(() => initialGroup?.[0]?.remaining_uses || initialGroup?.[0]?.inv_remaining_uses || 3);
   const [diff, setDiff] = useState(() => !!initialGroup?.[0]?.investigation_id && String(initialGroup[0].inv_monster_id) !== String(initialGroup[0].monster_id));
   const [primId, setPrimId] = useState(() => initialGroup?.[0]?.inv_monster_id || "");

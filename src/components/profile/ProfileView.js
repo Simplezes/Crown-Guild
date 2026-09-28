@@ -65,32 +65,33 @@ function groupCrowns(crowns) {
 }
 const keyOf = (g) => (g[0].pair_id ? `p${g[0].pair_id}` : g[0].investigation_id ? `i${g[0].investigation_id}` : `s${g[0].id}`);
 
-function HuntRecord({ group, isOwner, select, picked, onPick, onEdit, onDelete, onShare, onTile }) {
+function HuntRecord({ group, isOwner, select, picked, onPick, onEdit, onDelete, onShare, onUseCharge, onTile }) {
   const g0 = group[0];
   const tiles = tilesOf(group.map((c) => ({ name: c.name, image: c.image_name, type: c.type, tempered: !!c.tempered, strength: c.strength_rating, size: c.size_cm })));
   const prim = g0.inv_monster_id && String(g0.inv_monster_id) !== String(g0.monster_id) ? g0 : null;
-  const uses = g0.quest === "Investigation Quests" && g0.remaining_uses != null ? ` · ${g0.remaining_uses} left` : "";
+  const trackedInv = g0.quest === "Investigation Quests" && g0.remaining_uses != null;
+  const uses = trackedInv ? ` · ${g0.remaining_uses} left` : "";
   return (
     <div className={`aRec ${group.some((c) => c.tempered) ? "tp" : ""} ${picked ? "picked" : ""}`} style={{ "--n": tiles.length }} onClick={select ? onPick : undefined}>
       <div className="aHead">
         <div className="aH1">
           <span className="aQ"><Icon name={QUEST_ICON[g0.quest] || "optional"} />{questLabel(g0.quest)}{uses}</span>
-          {select && <span className={`pk ${picked ? "on" : ""}`}>{picked && <Icon name="check" />}</span>}
-          {!select && (
-            <div className="pc2x">
-              {isOwner && <button onClick={onEdit} title="Edit hunt record" aria-label="Edit hunt record"><Icon name="edit" /></button>}
-              <button onClick={onShare} title="Copy link" aria-label="Copy link"><Icon name="link" /></button>
-              {isOwner && <button className="dl" onClick={onDelete} title="Delete hunt record" aria-label="Delete hunt record"><Icon name="trash" /></button>}
-            </div>
-          )}
         </div>
         <div className="aH2">
-          <span className="aN">{group.length} crown{group.length === 1 ? "" : "s"}</span>
           {prim && (
             <span className="aPm" title={`This quest is for ${prim.inv_monster_name}. The crowns were found along the way.`}>
               {prim.inv_monster_image && <Image src={`/monsters/${prim.inv_monster_image}`} alt="" width={20} height={20} unoptimized className="px" />}
               {prim.inv_monster_name}
             </span>
+          )}
+          {select && <span className={`pk ${picked ? "on" : ""}`}>{picked && <Icon name="check" />}</span>}
+          {!select && (
+            <div className="pc2x">
+              {isOwner && trackedInv && <button className="chg" onClick={onUseCharge} title="Use a charge (reduces uses left)" aria-label="Use a charge, reducing uses left by 1"><b>&minus;1</b></button>}
+              {isOwner && <button onClick={onEdit} title="Edit hunt record" aria-label="Edit hunt record"><Icon name="edit" /></button>}
+              <button onClick={onShare} title="Copy link" aria-label="Copy link"><Icon name="link" /></button>
+              {isOwner && <button className="dl" onClick={onDelete} title="Delete hunt record" aria-label="Delete hunt record"><Icon name="trash" /></button>}
+            </div>
           )}
         </div>
       </div>
@@ -190,6 +191,21 @@ export default function ProfileView({ user, crowns, stats, mp, rank, collection,
     const url = `${window.location.origin}/monster/${encodeURIComponent(g[0].name)}?crownId=${g[0].id}&user=${user.id}&share=${nonce()}`;
     navigator.clipboard?.writeText(url).catch(() => {});
     toast.info("Link copied to your clipboard.");
+  };
+
+  const spendCharge = async (g) => {
+    const investigationId = g[0].investigation_id;
+    if (!investigationId) return;
+    try {
+      const res = await fetch(`/api/investigations/${investigationId}`, { method: "PATCH" });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (data.removed) toast.success("Investigation used up — record removed.");
+      else toast.info(`${data.remaining_uses} use${data.remaining_uses === 1 ? "" : "s"} left.`);
+      router.refresh();
+    } catch {
+      toast.error("Could not update the investigation.");
+    }
   };
   const copy = (v) => { navigator.clipboard?.writeText(v).catch(() => {}); toast.info("Copied to your clipboard."); };
   const copyCrowns = async (useEmojis = true) => {
@@ -300,7 +316,7 @@ export default function ProfileView({ user, crowns, stats, mp, rank, collection,
                     {shown.map((g) => (
                       <HuntRecord key={keyOf(g)} group={g} isOwner={isOwner} select={select} picked={picked.has(keyOf(g))}
                         onPick={() => setPicked((p) => { const n = new Set(p); if (n.has(keyOf(g))) n.delete(keyOf(g)); else n.add(keyOf(g)); return n; })}
-                        onEdit={() => openLog({ group: g })} onDelete={() => del([g])} onShare={() => share(g)} onTile={openDrawer} />
+                        onEdit={() => openLog({ group: g })} onDelete={() => del([g])} onShare={() => share(g)} onUseCharge={() => spendCharge(g)} onTile={openDrawer} />
                     ))}
                   </div>
                 ) : <div className="m2empty"><b>No crowns here</b><span>{isOwner ? "Log a crown to fill this list." : ""}</span></div>}

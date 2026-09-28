@@ -1360,6 +1360,7 @@ svg.ms.lu.pin-f{display:none!important}
 .pc2x button{width:30px;height:30px;border-radius:8px;background:none;border:0;color:var(--mist-d);display:grid;place-items:center;cursor:pointer;padding:0}
 .pc2x button:hover{background:rgba(255,255,255,.07);color:var(--ember-b)}
 .pc2x button.dl:hover{background:rgba(211,85,79,.14);color:var(--blood)}
+.pc2x button.chg:hover{background:rgba(201,162,74,.14);color:var(--ember-b)}
 .pc2x .ms{font-size:16px}
 .pk{position:absolute;left:-6px;top:-6px;width:22px;height:22px;border-radius:7px;border:1.5px solid var(--line2);background:#15111a;display:grid;place-items:center;color:#17110a}
 .pk.on{background:var(--ember);border-color:var(--ember)}.pk .ms{font-size:14px}
