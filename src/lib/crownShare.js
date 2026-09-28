@@ -88,7 +88,9 @@ function appendMonsterList(lines, label, monsters) {
   lines.push(line);
 }
 
-export function formatCrownShare(crowns, profileUrl, useEmojis = true) {
+export function formatCrownShare(crowns, profileUrl, mode = "emoji") {
+  const useEmojis = mode !== "plain";
+  const simple = mode === "emojiSimple";
   const formatMonster = useEmojis ? monsterEmoji : monsterName;
   const small = [];
   const large = [];
@@ -107,9 +109,14 @@ export function formatCrownShare(crowns, profileUrl, useEmojis = true) {
 
   const formatSize = (label, entries) => {
     if (!entries.length) return null;
+
+    if (simple) {
+      const all = uniqueMonsters(entries).map(formatMonster);
+      return all.length ? [`${label}: ${all.join(" ")}`] : [];
+    }
+
     const regular = uniqueMonsters(entries.filter((crown) => !isTempered(crown))).map(formatMonster);
     const tempered = new Map();
-
     for (const crown of entries.filter(isTempered)) {
       const strength = Number(crown.strength_rating) || 0;
       const rating = strength > 0 ? `${strength}\u2605` : "Tempered";
@@ -162,5 +169,23 @@ export function formatCrownShare(crowns, profileUrl, useEmojis = true) {
     lines.push(...(useEmojis ? [multiQuests.join(" / ")] : multiQuests.map((quest) => `  - ${quest}`)));
   }
   lines.push("", profileUrl);
+  return lines.join("\n");
+}
+
+export function formatWishlistShare(entries) {
+  const small = [];
+  const large = [];
+
+  for (const entry of entries) {
+    const type = String(entry.type || "").toLowerCase();
+    const emoji = monsterEmoji(entry);
+    if (type === "both" || type === "small") small.push(emoji);
+    if (type === "both" || type === "large") large.push(emoji);
+  }
+
+  const lines = ["Looking for:"];
+  if (large.length) lines.push(`L: ${large.join(" ")}`);
+  if (small.length) lines.push(`S: ${small.join(" ")}`);
+  if (!large.length && !small.length) lines.push("Nothing on the wishlist yet.");
   return lines.join("\n");
 }
