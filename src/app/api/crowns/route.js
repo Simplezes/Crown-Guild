@@ -1,9 +1,10 @@
-import db, { hasCrownSize } from "@/lib/db";
+import db, { hasCrownSize, hasCrownSizeLabel } from "@/lib/db";
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/ratelimit";
 import { logServerError } from "@/lib/logger";
 import { archiveCrown, getMasteryPoints, diffRankUp } from "@/lib/guildArchive";
+import { SIZE_LABELS } from "@/lib/sizeLabels";
 
 export async function POST(req) {
   const session = await auth();
@@ -27,10 +28,15 @@ export async function POST(req) {
       investigation_monster_id,
       remaining_uses,
       size_cm,
+      size_label,
     } = await req.json();
 
     if (!monster_id || !type || !quest || !strength_rating) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    if (size_label && !SIZE_LABELS.includes(size_label)) {
+      return NextResponse.json({ error: "Invalid size label" }, { status: 400 });
     }
 
     await db.execute({
@@ -71,13 +77,14 @@ export async function POST(req) {
     const size = Number(size_cm);
     const sizeOk = size_cm !== null && size_cm !== undefined && size_cm !== "" && Number.isFinite(size) && size > 0 && size < 10000;
     const withSize = sizeOk && (await hasCrownSize());
+    const withSizeLabel = !!size_label && (await hasCrownSizeLabel());
 
     const mpBefore = await getMasteryPoints(session.user.id);
 
     await db.execute({
       sql: `
-        INSERT INTO crowns(user_id, monster_id, type, tempered, strength_rating, quest, remaining_uses, investigation_id, pair_id${withSize ? ", size_cm" : ""})
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?${withSize ? ", ?" : ""})
+        INSERT INTO crowns(user_id, monster_id, type, tempered, strength_rating, quest, remaining_uses, investigation_id, pair_id${withSize ? ", size_cm" : ""}${withSizeLabel ? ", size_label" : ""})
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?${withSize ? ", ?" : ""}${withSizeLabel ? ", ?" : ""})
       `,
       args: [
         session.user.id,
@@ -90,6 +97,7 @@ export async function POST(req) {
         resolvedInvestigationId,
         pair_id || null,
         ...(withSize ? [Math.round(size * 100) / 100] : []),
+        ...(withSizeLabel ? [size_label] : []),
       ],
     });
 

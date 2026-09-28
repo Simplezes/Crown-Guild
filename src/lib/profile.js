@@ -1,4 +1,4 @@
-import db, { hasCrownSize, ensureGuildArchiveTempered } from "@/lib/db";
+import db, { hasCrownSize, hasCrownSizeLabel, ensureGuildArchiveTempered } from "@/lib/db";
 import { fetchDiscordUser } from "@/lib/discord";
 import { getMonsterCount, getMonsterTierMap } from "@/lib/monsters";
 import { masteryPointsFromRows } from "@/lib/guildArchive";
@@ -17,6 +17,7 @@ export async function getProfileData(userId) {
 
     const monsterCount = getMonsterCount() || 1;
     const sizeCol = (await hasCrownSize()) ? "c.size_cm" : "NULL AS size_cm";
+    const sizeLabelCol = (await hasCrownSizeLabel()) ? "c.size_label" : "NULL AS size_label";
     await ensureGuildArchiveTempered();
 
     const [
@@ -29,7 +30,7 @@ export async function getProfileData(userId) {
     ] = await Promise.all([
       db.execute({
         sql: `SELECT c.id, m.id as monster_id, m.name, m.emoji, m.image_name,
-                     c.type, c.tempered, c.strength_rating, c.quest, c.investigation_id, c.pair_id, ${sizeCol},
+                     c.type, c.tempered, c.strength_rating, c.quest, c.investigation_id, c.pair_id, ${sizeCol}, ${sizeLabelCol},
                      inv.remaining_uses,
                      inv.monster_id     AS inv_monster_id,
                      inv_m.name         AS inv_monster_name,

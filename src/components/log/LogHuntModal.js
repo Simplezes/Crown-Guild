@@ -7,6 +7,7 @@ import { useToast, useRankUp } from "@/app/UIProvider";
 import { Icon } from "@/components/shell/Icon";
 import { HuntTile, tilesOf } from "@/components/crowns/HuntTiles";
 import { getSpeciesTier, crownMp } from "@/lib/mastery";
+import { SIZE_LABELS } from "@/lib/sizeLabels";
 
 const QUESTS = [
   { label: "Event Quest", value: "Event Quests", icon: "event" },
@@ -17,7 +18,7 @@ const QUESTS = [
 
 let monstersCache = null;
 
-const blank = (monster_id = "") => ({ monster_id, type: "small", tempered: false, strength_rating: 1, size: "" });
+const blank = (monster_id = "") => ({ monster_id, type: "small", tempered: false, strength_rating: 1, size: "", sizeLabel: "", sizeMode: "cm" });
 const cleanSize = (v) => {
   const t = v.replace(",", ".").replace(/[^\d.]/g, "");
   const [a, ...b] = t.split(".");
@@ -41,7 +42,7 @@ export default function LogHuntModal({ monsterId, initialGroup, onClose }) {
   const [primId, setPrimId] = useState(() => initialGroup?.[0]?.inv_monster_id || "");
   const [entries, setEntries] = useState(() =>
     initialGroup?.length
-      ? initialGroup.map((c) => ({ id: c.id, monster_id: c.monster_id, type: c.type, tempered: !!c.tempered, strength_rating: c.strength_rating || 1, size: c.size_cm ? String(c.size_cm) : "" }))
+      ? initialGroup.map((c) => ({ id: c.id, monster_id: c.monster_id, type: c.type, tempered: !!c.tempered, strength_rating: c.strength_rating || 1, size: c.size_cm ? String(c.size_cm) : "", sizeLabel: c.size_label || "", sizeMode: c.size_label ? "label" : "cm" }))
       : [blank(monsterId || "")]
   );
 
@@ -92,7 +93,7 @@ export default function LogHuntModal({ monsterId, initialGroup, onClose }) {
         pair_id: pairId,
       };
       const requests = entries.map((e) => {
-        const payload = { ...base, monster_id: parseInt(e.monster_id), type: e.type, tempered: e.tempered, strength_rating: parseInt(e.strength_rating), size_cm: e.size ? parseFloat(e.size) : null };
+        const payload = { ...base, monster_id: parseInt(e.monster_id), type: e.type, tempered: e.tempered, strength_rating: parseInt(e.strength_rating), size_cm: e.sizeMode === "cm" && e.size ? parseFloat(e.size) : null, size_label: e.sizeMode === "label" && e.sizeLabel ? e.sizeLabel : null };
         return e.id
           ? fetch(`/api/crowns/${e.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
           : fetch("/api/crowns", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
@@ -122,7 +123,7 @@ export default function LogHuntModal({ monsterId, initialGroup, onClose }) {
     }
   };
 
-  const tiles = tilesOf(entries.map((e) => ({ name: mon(e.monster_id).name, image: mon(e.monster_id).image_name, type: e.type, tempered: e.tempered, strength: e.strength_rating, size: parseFloat(e.size) || 0 })));
+  const tiles = tilesOf(entries.map((e) => ({ name: mon(e.monster_id).name, image: mon(e.monster_id).image_name, type: e.type, tempered: e.tempered, strength: e.strength_rating, size: e.sizeMode === "cm" ? parseFloat(e.size) || 0 : 0, sizeLabel: e.sizeMode === "label" ? e.sizeLabel : "" })));
   const mp = entries.reduce((sum, e) => sum + crownMp(getSpeciesTier(mon(e.monster_id).type), e.type, e.tempered), 0);
   const q2 = pickQ.trim().toLowerCase();
   const pickList = monsters.filter((m) => m.name.toLowerCase().includes(q2));
@@ -246,11 +247,25 @@ export default function LogHuntModal({ monsterId, initialGroup, onClose }) {
                       </button>
                     </div>
                     <div className="h3f">
-                      <small>Length</small>
-                      <label className="h3len" title="Length in cm (optional)">
-                        <input inputMode="decimal" value={e.size} onChange={(ev) => setEntry(i, { size: cleanSize(ev.target.value) })} placeholder="Optional" autoComplete="off" aria-label={`Length of crown ${i + 1} in cm, optional`} />
-                        <span>cm</span>
-                      </label>
+                      <div className="pqh">
+                        <small>Length</small>
+                        <div className="pqs" role="group" aria-label={`Length format for crown ${i + 1}`}>
+                          <button aria-pressed={e.sizeMode !== "label"} onClick={() => setEntry(i, { sizeMode: "cm", sizeLabel: "" })}>cm</button>
+                          <button aria-pressed={e.sizeMode === "label"} onClick={() => setEntry(i, { sizeMode: "label", size: "" })}>Size</button>
+                        </div>
+                      </div>
+                      {e.sizeMode === "label" ? (
+                        <div className="szl" role="group" aria-label={`Size of crown ${i + 1}`}>
+                          {SIZE_LABELS.map((s) => (
+                            <button key={s} aria-pressed={e.sizeLabel === s} onClick={() => setEntry(i, { sizeLabel: s })}>{s}</button>
+                          ))}
+                        </div>
+                      ) : (
+                        <label className="h3len" title="Length in cm (optional)">
+                          <input inputMode="decimal" value={e.size} onChange={(ev) => setEntry(i, { size: cleanSize(ev.target.value) })} placeholder="Optional" autoComplete="off" aria-label={`Length of crown ${i + 1} in cm, optional`} />
+                          <span>cm</span>
+                        </label>
+                      )}
                     </div>
                   </div>
                 </div>

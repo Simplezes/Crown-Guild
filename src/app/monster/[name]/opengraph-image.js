@@ -12,7 +12,6 @@ export const size = {
 
 export const contentType = 'image/png';
 
-// Exact tokens from src/app/template.css :root
 const c = {
   void: '#08070a',
   panel: '#151217',
@@ -126,7 +125,11 @@ export default async function Image({ params, searchParams }) {
               <div style={{ display: 'flex', flexDirection: 'row', gap: '10px', flexShrink: 0 }}>
                 <StatTile label="Rating" value={`${crown.strength_rating}/10`} small />
                 <StatTile label="Size" value={crown.type === 'large' ? 'Large' : 'Small'} />
-                {crown.size_cm != null && <StatTile label="Length" value={`${Math.round(Number(crown.size_cm) * 10) / 10} cm`} small />}
+                {crown.size_cm != null ? (
+                  <StatTile label="Length" value={`${Math.round(Number(crown.size_cm) * 10) / 10} cm`} small />
+                ) : crown.size_label ? (
+                  <StatTile label="Length" value={crown.size_label} small />
+                ) : null}
                 {crown.remaining_uses !== null && <StatTile label="Uses Left" value={crown.remaining_uses} />}
               </div>
 

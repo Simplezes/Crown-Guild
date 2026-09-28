@@ -2,10 +2,6 @@ import db, { ensureGuildArchiveTempered } from "@/lib/db";
 import { getMonsterTierMap } from "@/lib/monsters";
 import { computeMasteryPoints, getRankProgress } from "@/lib/mastery";
 
-// archiveCrown: record that a user has (at least once) logged a crown of
-// this size for this monster. Upserts rather than INSERT OR IGNORE so a
-// later tempered hunt of the same monster/size upgrades the stored record -
-// tempered never gets un-set once earned.
 export async function archiveCrown(userId, monsterId, type, tempered) {
   await ensureGuildArchiveTempered();
   await db.execute({
@@ -42,7 +38,6 @@ export async function getRankForUser(userId) {
   return { mp, ...getRankProgress(mp) };
 }
 
-// diffRankUp: null if no rank was crossed, otherwise the new rank reached.
 export function diffRankUp(oldMp, newMp) {
   const before = getRankProgress(oldMp).currentRank.rank;
   const after = getRankProgress(newMp).currentRank.rank;

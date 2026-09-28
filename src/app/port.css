@@ -164,8 +164,9 @@ button.h5b{cursor:pointer}
   .lmodal .h3g .h3f:first-child,.lmodal .h3g .h3f:last-child{grid-column:auto}
   .lmodal .h3g .h3f{gap:4px}
   .lmodal .h3f small{font-size:9.5px;letter-spacing:.14em}
-  .lmodal .hrs button,.lmodal .stp,.lmodal .tmt,.lmodal .h3len{height:36px}
+  .lmodal .hrs button,.lmodal .szl button,.lmodal .stp,.lmodal .tmt,.lmodal .h3len{height:36px}
   .lmodal .hrs button{padding:0 6px;font-size:10px;gap:4px}
+  .lmodal .szl button{padding:0 4px;font-size:10px}
   .lmodal .h3ft{padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px))}
   .lmodal .hadd,.lmodal .h3add{min-height:52px}
 }

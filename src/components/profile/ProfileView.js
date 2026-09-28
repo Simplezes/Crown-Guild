@@ -67,7 +67,7 @@ const keyOf = (g) => (g[0].pair_id ? `p${g[0].pair_id}` : g[0].investigation_id 
 
 function HuntRecord({ group, isOwner, select, picked, onPick, onEdit, onDelete, onShare, onUseCharge, onTile }) {
   const g0 = group[0];
-  const tiles = tilesOf(group.map((c) => ({ name: c.name, image: c.image_name, type: c.type, tempered: !!c.tempered, strength: c.strength_rating, size: c.size_cm })));
+  const tiles = tilesOf(group.map((c) => ({ name: c.name, image: c.image_name, type: c.type, tempered: !!c.tempered, strength: c.strength_rating, size: c.size_cm, sizeLabel: c.size_label })));
   const prim = g0.inv_monster_id && String(g0.inv_monster_id) !== String(g0.monster_id) ? g0 : null;
   const trackedInv = g0.quest === "Investigation Quests" && g0.remaining_uses != null;
   const uses = trackedInv ? ` · ${g0.remaining_uses} left` : "";
@@ -200,7 +200,7 @@ export default function ProfileView({ user, crowns, stats, mp, rank, collection,
       const res = await fetch(`/api/investigations/${investigationId}`, { method: "PATCH" });
       if (!res.ok) throw new Error();
       const data = await res.json();
-      if (data.removed) toast.success("Investigation used up, record removed.");
+      if (data.removed) toast.success("Investigation used up — record removed.");
       else toast.info(`${data.remaining_uses} use${data.remaining_uses === 1 ? "" : "s"} left.`);
       router.refresh();
     } catch {

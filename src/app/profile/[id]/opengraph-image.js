@@ -11,7 +11,6 @@ export const size = {
 
 export const contentType = 'image/png';
 
-// Exact tokens from src/app/template.css :root
 const c = {
   void: '#08070a',
   panel: '#151217',

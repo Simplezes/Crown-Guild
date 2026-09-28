@@ -325,9 +325,6 @@ button.ava:hover,button.ava[aria-expanded=true]{border-color:rgba(201,162,74,.6)
   .seg{width:100%}.seg button{flex:1;justify-content:center;padding:8px 6px;letter-spacing:.1em}
   .mform{padding:20px 16px}.opts{grid-template-columns:1fr 1fr}.ents{grid-template-columns:1fr}
   .mback{padding:12px 8px}
-  .bnav{display:flex;position:sticky;bottom:0;z-index:7;background:rgba(15,13,17,.96);border-top:1px solid var(--line);height:62px;justify-content:space-around;align-items:center}
-  .bnav a{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mist-d)}
-  .bnav a img{width:22px;height:22px;opacity:.7}.bnav a.on{color:var(--ember-b)}.bnav a.on img{opacity:1}
   .foot{flex-direction:column;align-items:flex-start}
 }
 
@@ -513,7 +510,9 @@ button.ava:hover,button.ava[aria-expanded=true]{border-color:rgba(201,162,74,.6)
   .mback.pb{padding:16px 10px}
   .wrap{padding:8px 16px 96px}
   .mform{margin-bottom:80px}
-  .bnav{display:flex}
+  .bnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:7;background:rgba(15,13,17,.96);border-top:1px solid var(--line);height:62px;justify-content:space-around;align-items:center}
+  .bnav a{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mist-d)}
+  .bnav a img{width:22px;height:22px;opacity:.7}.bnav a.on{color:var(--ember-b)}.bnav a.on img{opacity:1}
   .toasts{bottom:78px}
 }
 
@@ -1360,6 +1359,7 @@ svg.ms.lu.pin-f{display:none!important}
 .pc2x button{width:30px;height:30px;border-radius:8px;background:none;border:0;color:var(--mist-d);display:grid;place-items:center;cursor:pointer;padding:0}
 .pc2x button:hover{background:rgba(255,255,255,.07);color:var(--ember-b)}
 .pc2x button.dl:hover{background:rgba(211,85,79,.14);color:var(--blood)}
+.pc2x button.chg b{font-size:11px;font-weight:700}
 .pc2x button.chg:hover{background:rgba(201,162,74,.14);color:var(--ember-b)}
 .pc2x .ms{font-size:16px}
 .pk{position:absolute;left:-6px;top:-6px;width:22px;height:22px;border-radius:7px;border:1.5px solid var(--line2);background:#15111a;display:grid;place-items:center;color:#17110a}
@@ -1712,6 +1712,9 @@ svg.ms.lu.pin-f{display:none!important}
 .hrs button img{width:15px;height:15px;image-rendering:pixelated;filter:grayscale(1);opacity:.5}
 .hrs button[aria-pressed=true]{background:rgba(201,162,74,.14);border-color:rgba(201,162,74,.6);color:var(--ember-b)}
 .hrs button[aria-pressed=true] img{filter:none;opacity:1}
+.szl{display:flex;gap:6px}
+.szl button{flex:1;height:34px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--line2);color:var(--mist-d);font:inherit;font-size:11px;font-weight:700;letter-spacing:.06em;cursor:pointer;transition:all .15s}
+.szl button[aria-pressed=true]{background:rgba(201,162,74,.14);border-color:rgba(201,162,74,.6);color:var(--ember-b)}
 .hrr{display:flex;align-items:center;gap:10px}
 .hst{display:flex;gap:1px;flex:1}
 .hst button{flex:1;height:26px;background:none;border:0;color:rgba(255,255,255,.16);font-size:15px;cursor:pointer;padding:0;line-height:1;transition:color .1s,transform .1s}
@@ -1778,6 +1781,7 @@ svg.ms.lu.pin-f{display:none!important}
 .h3g{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:12px;align-items:end}
 .h3f{display:flex;flex-direction:column;gap:6px;min-width:0}
 .h3f .hrs button{height:40px}
+.h3f .szl button{height:40px}
 .stp{display:flex;align-items:center;justify-content:space-between;height:40px;border:1px solid var(--line2);border-radius:10px;background:rgba(255,255,255,.03);overflow:hidden}
 .stp button{width:38px;height:100%;background:none;border:0;color:var(--mist-d);font:inherit;font-size:20px;cursor:pointer;line-height:1}
 .stp button:hover:not(:disabled){background:rgba(201,162,74,.14);color:var(--ember-b)}
@@ -1833,7 +1837,7 @@ svg.ms.lu.pin-f{display:none!important}
   .h3c{display:none}
   .h3g{grid-template-columns:1fr 1fr;gap:10px}
   .h3g .h3f:first-child{grid-column:1/-1}
-  .h3f .hrs button,.stp,.tmt{height:36px}
+  .h3f .hrs button,.h3f .szl button,.stp,.tmt{height:36px}
   .h3add{flex-direction:column;min-height:0;gap:4px;justify-content:center}
   .h3add span{margin:0}
   .h3l{overflow-y:auto}
@@ -1911,9 +1915,10 @@ svg.ms.lu.pin-f{display:none!important}
 }
 @media (min-width:901px) and (max-width:1080px){
   .bar2 .nav{display:none}
-  .bnav{display:flex;position:sticky;bottom:0;z-index:7;background:rgba(15,13,17,.96);border-top:1px solid var(--line);height:62px;justify-content:space-around;align-items:center;padding-bottom:8px}
+  .bnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:7;background:rgba(15,13,17,.96);border-top:1px solid var(--line);height:62px;justify-content:space-around;align-items:center;padding-bottom:8px}
   .bnav a{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mist-d)}
   .bnav a.on{color:var(--ember-b)}
+  .pad{padding-bottom:88px}
 }
 .cmp-page{gap:18px}
 .cmp-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}

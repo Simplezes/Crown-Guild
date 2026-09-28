@@ -20,6 +20,8 @@ function Slot({ crown, type }) {
   const letter = type === "small" ? "S" : "L";
   const strip = crown && crown.size
     ? <span className={`bz ${type === "large" ? "l" : ""} ${crown.tempered ? "t" : ""}`} title={`Length: ${Number(crown.size)} cm`}><Icon name="ruler" />{Number(crown.size)}</span>
+    : crown && crown.sizeLabel
+    ? <span className={`bz ${type === "large" ? "l" : ""} ${crown.tempered ? "t" : ""}`} title={`Size: ${crown.sizeLabel}`}>{crown.sizeLabel}</span>
     : null;
   if (!crown) {
     return (
@@ -36,7 +38,7 @@ function Slot({ crown, type }) {
     <div className="bslot">
       <div
         className={`br ${type === "large" ? "l" : ""} ${crown.tempered ? "t" : ""}`}
-        title={`${type === "small" ? "Small" : "Large"} crown, ${crown.strength} stars${crown.tempered ? ", tempered" : ""}${crown.size ? `, ${crown.size} cm` : ""}`}
+        title={`${type === "small" ? "Small" : "Large"} crown, ${crown.strength} stars${crown.tempered ? ", tempered" : ""}${crown.size ? `, ${crown.size} cm` : crown.sizeLabel ? `, size ${crown.sizeLabel}` : ""}`}
       >
         <span className="bl">{letter}</span>
         <span className="bs">{crown.strength}★</span>
@@ -48,7 +50,7 @@ function Slot({ crown, type }) {
 
 export function HuntTile({ tile, onClick, href }) {
   const tempered = (tile.s && tile.s.tempered) || (tile.l && tile.l.tempered);
-  const tall = !!((tile.s && tile.s.size) || (tile.l && tile.l.size));
+  const tall = !!((tile.s && (tile.s.size || tile.s.sizeLabel)) || (tile.l && (tile.l.size || tile.l.sizeLabel)));
   const body = (
     <>
       <div className="aArt">

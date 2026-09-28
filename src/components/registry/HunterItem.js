@@ -14,7 +14,7 @@ function Row({ c, label, kind }) {
       <Image src={`/icons/${kind}crown.png`} alt="" width={18} height={18} className="px" />
       <span>{label}</span>
       <b>{c?.strength_rating ?? "-"}★</b>
-      {c?.size_cm && <em><Icon name="ruler" />{Number(c.size_cm)} cm</em>}
+      {c?.size_cm ? <em><Icon name="ruler" />{Number(c.size_cm)} cm</em> : c?.size_label ? <em>{c.size_label}</em> : null}
     </div>
   );
 }

@@ -1,10 +1,11 @@
 import db from "@/lib/db";
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
-import { hasCrownSize } from "@/lib/db";
+import { hasCrownSize, hasCrownSizeLabel } from "@/lib/db";
 import { logServerError } from "@/lib/logger";
 import { checkRateLimit } from "@/lib/ratelimit";
 import { archiveCrown } from "@/lib/guildArchive";
+import { SIZE_LABELS } from "@/lib/sizeLabels";
 
 export async function PATCH(req, { params }) {
   const session = await auth();
@@ -30,7 +31,12 @@ export async function PATCH(req, { params }) {
       remaining_uses,
       mission_host_enabled,
       size_cm,
+      size_label,
     } = await req.json();
+
+    if (size_label && !SIZE_LABELS.includes(size_label)) {
+      return NextResponse.json({ error: "Invalid size label" }, { status: 400 });
+    }
 
     const checkRes = await db.execute({
       sql: "SELECT user_id, investigation_id as old_investigation_id, pair_id as old_pair_id FROM crowns WHERE id = ?",
@@ -99,11 +105,15 @@ export async function PATCH(req, { params }) {
     const sizeValue = size_cm === null || size_cm === "" ? null : Number.isFinite(size) && size > 0 && size < 10000 ? Math.round(size * 100) / 100 : null;
     const withSize = sizeGiven && (await hasCrownSize());
 
+    const labelGiven = size_label !== undefined;
+    const labelValue = size_label || null;
+    const withSizeLabel = labelGiven && (await hasCrownSizeLabel());
+
     await db.execute({
       sql: `
         UPDATE crowns
         SET monster_id = ?, type = ?, tempered = ?, strength_rating = ?, quest = ?,
-            remaining_uses = NULL, investigation_id = ?, pair_id = ?${withSize ? ", size_cm = ?" : ""}
+            remaining_uses = NULL, investigation_id = ?, pair_id = ?${withSize ? ", size_cm = ?" : ""}${withSizeLabel ? ", size_label = ?" : ""}
         WHERE id = ?
       `,
       args: [
@@ -115,6 +125,7 @@ export async function PATCH(req, { params }) {
         resolvedInvestigationId,
         resolvedPairId,
         ...(withSize ? [sizeValue] : []),
+        ...(withSizeLabel ? [labelValue] : []),
         id,
       ],
     });
