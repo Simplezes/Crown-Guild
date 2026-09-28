@@ -98,6 +98,8 @@ export async function DELETE() {
       { sql: "DELETE FROM investigations WHERE user_id = ?", args: [userId] },
       { sql: "DELETE FROM active_missions WHERE host_id = ? OR requester_id = ?", args: [userId, userId] },
       { sql: "DELETE FROM completed_missions WHERE host_id = ? OR requester_id = ?", args: [userId, userId] },
+      { sql: "DELETE FROM guild_archive WHERE user_id = ?", args: [userId] },
+      { sql: "DELETE FROM hunter_collection WHERE user_id = ?", args: [userId] },
       { sql: "DELETE FROM users WHERE id = ?", args: [userId] },
     ]);
 
