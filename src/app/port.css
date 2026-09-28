@@ -282,9 +282,10 @@ button.h5b{cursor:pointer}
 .bar2 .cmdk,.bar2 .tbtn,.bar2 .btn,.bar2 .uchip{border-radius:12px}
 .aRec .aHead{display:flex;flex-direction:column;align-items:stretch;flex-wrap:nowrap;gap:6px;height:auto;min-height:0;padding:10px 12px 10px 16px}
 .aRec .aH1,.aRec .aH2{display:flex;align-items:center;gap:8px;min-height:26px;min-width:0}
+.aRec .aH1{flex-wrap:wrap;row-gap:4px}
 .aRec .aH2{overflow:hidden}
-.aRec .aQ{flex:none}
-.aRec .aHead .pc2x{position:static;margin-left:auto;display:flex;gap:2px;order:0}
+.aRec .aQ{flex:none;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.aRec .aHead .pc2x{position:static;margin-left:auto;display:flex;flex:none;gap:2px;order:0}
 .aRec .aHead .pk{margin-left:auto}
 .aRec .aHead .aN{display:inline-flex!important;align-items:center;height:22px;padding:0 9px;border-radius:99px;background:rgba(255,255,255,.06);font-size:11px;letter-spacing:.04em;color:var(--mist-d);white-space:nowrap;flex:none}
 .aRec .aPm{position:static;left:auto;right:auto;bottom:auto;margin:0;flex:0 1 auto;min-width:0;max-width:100%;display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px 0 3px;border-radius:99px;background:rgba(201,162,74,.12);border:1px solid rgba(201,162,74,.28);font-size:11px;line-height:1;color:var(--ember-b);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
