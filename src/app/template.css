@@ -788,6 +788,7 @@ kbd{white-space:nowrap}
 .glance b i{font-style:normal;font-size:18px;color:var(--mist-d)}
 .glance span{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mist-d)}
 .h5r{display:grid;grid-template-columns:20px 40px minmax(0,1fr) 34px;gap:12px;align-items:center;padding:7px 4px;border-radius:12px;cursor:pointer;transition:background .15s}
+.h5r.notrk{grid-template-columns:20px 40px minmax(0,1fr)}
 .h5r:hover{background:rgba(255,255,255,.04)}
 .h5n{font-family:var(--disp);font-size:15px;color:var(--faint);text-align:center}
 .h5r:first-of-type .h5n{color:var(--ember-b)}
@@ -803,6 +804,8 @@ kbd{white-space:nowrap}
 .h5f{display:grid;grid-template-columns:30px minmax(0,1fr) 20px auto;gap:10px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--line);cursor:pointer}
 .h5f:last-child{border-bottom:0}
 .h5f:hover .mo{color:var(--ember-b)}
+.h5f.tp .mo{color:var(--tempered)}
+.h5f.tp:hover .mo{color:var(--tempered)}
 .h5x{font-size:13px;color:var(--mist-d);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .h5x b{color:var(--mist);font-weight:500}
 .h5x b.mo{transition:color .15s}

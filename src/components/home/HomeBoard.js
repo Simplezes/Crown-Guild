@@ -31,11 +31,11 @@ export default function HomeBoard({ demand, latest, legends, rarest, tracked = n
 
   const feedRows = (rows) =>
     rows.map((c) => (
-      <div key={c.id} className="h5f" role="button" tabIndex={0} onClick={open(c.monster)} onKeyDown={open(c.monster)}>
+      <div key={c.id} className={`h5f ${c.tempered ? "tp" : ""}`} role="button" tabIndex={0} onClick={open(c.monster)} onKeyDown={open(c.monster)}>
         <MonsterTile image={c.image} size={26} sm />
         <div className="h5x">
           <b className="mo">{c.monster}</b>
-          <span>{c.type === "small" ? "Small" : "Large"} crown &middot; {c.username}</span>
+          <span>{c.type === "small" ? "Small" : "Large"} crown{c.tempered ? " · Tempered" : ""} &middot; {c.username}</span>
         </div>
         <Crown type={c.type} />
       </div>
@@ -44,7 +44,7 @@ export default function HomeBoard({ demand, latest, legends, rarest, tracked = n
   let main = null;
   if (tab === "Demand") {
     main = demand.map((d, i) => (
-      <div key={d.id} className="h5r" role="button" tabIndex={0} onClick={open(d.name)} onKeyDown={open(d.name)}>
+      <div key={d.id} className={`h5r ${tracked ? "" : "notrk"}`} role="button" tabIndex={0} onClick={open(d.name)} onKeyDown={open(d.name)}>
         <span className="h5n">{i + 1}</span>
         <MonsterTile image={d.image} size={30} />
         <div className="h5m">

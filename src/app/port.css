@@ -26,6 +26,10 @@ button.h5b{cursor:pointer}
 .seg.lk a:hover{color:var(--mist)}
 .seg.lk a.on{background:var(--ember);color:#17110a}
 .seg.lk a img{width:14px;height:14px}
+@media (max-width:1080px){
+  .seg.lk{width:100%}
+  .seg.lk a{flex:1;justify-content:center}
+}
 .hsec{margin-top:22px}
 .hsh{display:flex;align-items:center;gap:10px;font-family:var(--disp);letter-spacing:.06em;text-transform:uppercase;color:var(--mist);font-size:14px}
 .hsh span{font-family:var(--body);font-size:11px;color:var(--ember-b);background:rgba(201,162,74,.12);border:1px solid rgba(201,162,74,.3);border-radius:99px;padding:1px 9px}
@@ -198,6 +202,7 @@ button.h5b{cursor:pointer}
 .hk-tp{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 10px 0 8px;border-radius:99px;background:rgba(180,95,240,.2);font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#d9b8ff}
 .hk-tp .ms{font-size:13px}
 .hk-ft{margin-left:auto;height:24px;display:inline-flex;align-items:center;padding:0 10px;border-radius:99px;background:var(--ember);color:#17110a;font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+@media (max-width:1080px){.hk-ft{margin-left:0}}
 .hk-id{display:flex;align-items:center;gap:12px;min-width:0;color:inherit;text-decoration:none}
 .hk-av{width:48px;height:48px;flex:none;border-radius:14px;object-fit:cover;background:var(--raised);border:1px solid var(--line2);display:grid;place-items:center;font-weight:600;color:var(--ember-b)}
 .hk.t .hk-av{border-color:rgba(180,95,240,.7)}

@@ -30,7 +30,7 @@ async function getHomeData() {
         GROUP BY m.id ORDER BY demand DESC LIMIT 6
       `),
       db.execute(`
-        SELECT c.id, c.type, m.name as monster_name, m.image_name, u.username, u.id as user_id
+        SELECT c.id, c.type, c.tempered, m.name as monster_name, m.image_name, u.username, u.id as user_id
         FROM crowns c
         JOIN monsters m ON c.monster_id = m.id
         JOIN users u ON c.user_id = u.id
@@ -91,7 +91,7 @@ async function getHomeData() {
         investigations: Number(investigationsRes.rows[0]?.count || 0),
       },
       demand: wantedRes.rows.map((m) => ({ id: m.id, name: m.name, image: m.image_name, demand: Number(m.demand) })),
-      latest: recentRes.rows.map((c) => ({ id: c.id, type: c.type, monster: c.monster_name, image: c.image_name, username: c.username, user_id: c.user_id })),
+      latest: recentRes.rows.map((c) => ({ id: c.id, type: c.type, tempered: !!c.tempered, monster: c.monster_name, image: c.image_name, username: c.username, user_id: c.user_id })),
       legends,
       rarest: rarestRes.rows.map((m) => ({ id: m.id, name: m.name, image: m.image_name, crowns: Number(m.crown_count) })),
       seekers: seekersRes.rows.map((u) => ({ name: u.username || "Hunter", avatar: u.avatar_url || null })),
