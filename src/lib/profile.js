@@ -125,10 +125,6 @@ export async function getProfileData(userId) {
     });
 
     const collection = Object.values(collectionMap);
-
-    // Mastery Points come only from crowns actually logged in the app
-    // (archived below) - the Collected checklist is a personal tracker,
-    // not an MP source, so it can't be used to fake rank.
     const tierMap = await getMonsterTierMap();
     const masteryPoints = masteryPointsFromRows(archiveRes.rows, tierMap);
 

@@ -79,7 +79,6 @@ export default async function Image({ params, searchParams }) {
   return new ImageResponse(
     (
       <div style={{ background: c.void, width: '100%', height: '100%', display: 'flex', flexDirection: 'row', fontFamily: 'sans-serif', overflow: 'hidden' }}>
-        {/* Left: mirrors .d2hero on the real monster drawer */}
         <div
           style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px',
@@ -101,7 +100,6 @@ export default async function Image({ params, searchParams }) {
           </div>
         </div>
 
-        {/* Right: content */}
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1, padding: '56px 60px', gap: '24px', justifyContent: 'center' }}>
           <span style={{ fontSize: 11, letterSpacing: '3px', color: c.mistD, textTransform: 'uppercase', display: 'flex', flexShrink: 0 }}>
             {crown ? 'Crown Record' : 'Monster Ledger'} · Crown Guild

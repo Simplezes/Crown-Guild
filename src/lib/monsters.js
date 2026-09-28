@@ -85,9 +85,6 @@ export function getMonsterCount() {
 }
 
 let tierMapPromise;
-// getMonsterTierMap: { [monster_id]: "standard"|"advanced"|"apex" }, built by
-// joining the real monsters table (numeric ids) against the species data
-// (matched by name) that mastery.js uses to weight MP.
 export function getMonsterTierMap() {
   tierMapPromise ??= (async () => {
     const res = await db.execute("SELECT id, name FROM monsters");

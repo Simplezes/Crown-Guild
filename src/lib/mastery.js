@@ -1,11 +1,3 @@
-// Mastery Points (MP) engine: how ranks are earned.
-//
-// Every crown you actually log is worth MP based on how threatening the
-// monster is, whether it's a small or large crown, and whether the hunt
-// was tempered. Getting both crown sizes for a monster adds a completion
-// bonus on top. This file has no server-only imports so it can be shared
-// between API routes and client components (for live MP previews).
-
 export const TIER_VALUES = {
   standard: { small: 20, large: 35, both: 25 },
   advanced: { small: 35, large: 60, both: 45 },
@@ -32,7 +24,6 @@ export function getSpeciesTier(species) {
   return TIER_BY_SPECIES[species] || "standard";
 }
 
-// crownMp: MP for a single crown size (small/large) on a monster of a given tier.
 export function crownMp(tier, type, tempered) {
   const values = TIER_VALUES[tier] || TIER_VALUES.standard;
   const base = type === "large" ? values.large : values.small;
@@ -43,9 +34,6 @@ export function bothCrownBonus(tier) {
   return (TIER_VALUES[tier] || TIER_VALUES.standard).both;
 }
 
-// computeMasteryPoints: rows = [{ monster_id, tier, type, tempered }], one row
-// per unique (monster_id, type) a hunter has ever archived. Repeat hunts of
-// the same monster/size don't add more MP - breadth and difficulty do.
 export function computeMasteryPoints(rows) {
   const byMonster = new Map();
   for (const r of rows) {
