@@ -200,7 +200,7 @@ export default function ProfileView({ user, crowns, stats, mp, rank, collection,
       const res = await fetch(`/api/investigations/${investigationId}`, { method: "PATCH" });
       if (!res.ok) throw new Error();
       const data = await res.json();
-      if (data.removed) toast.success("Investigation used up — record removed.");
+      if (data.removed) toast.success("Investigation used up, record removed.");
       else toast.info(`${data.remaining_uses} use${data.remaining_uses === 1 ? "" : "s"} left.`);
       router.refresh();
     } catch {

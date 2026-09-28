@@ -82,7 +82,6 @@ export default async function Image({ params }) {
           gap: '40px',
         }}
       >
-        {/* Hero row — mirrors .pf-hero on the real profile page */}
         <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '30px' }}>
           <div style={{ position: 'relative', width: '150px', height: '150px', flexShrink: 0, display: 'flex' }}>
             <img src={avatarUrl} width={150} height={150} style={{ objectFit: 'cover', borderRadius: '50%', border: `3px solid rgba(201,162,74,0.4)` }} />
@@ -105,7 +104,6 @@ export default async function Image({ params }) {
           </div>
         </div>
 
-        {/* Stat tiles — mirrors .pf-tiles */}
         <div style={{ display: 'flex', flexDirection: 'row', gap: '10px' }}>
           <StatTile label="Crowns" value={stats.total || 0} />
           <StatTile label="Large" value={stats.large || 0} icon={`${baseUrl}/icons/largecrown.png`} />
@@ -115,7 +113,6 @@ export default async function Image({ params }) {
           <StatTile label="Wishlist" value={wishlistCount} />
         </div>
 
-        {/* Mastery ladder — mirrors .ladder.mini + .rg lock/cur states */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
             <span style={{ fontSize: 11, letterSpacing: '3px', color: c.mistD, textTransform: 'uppercase', display: 'flex' }}>Mastery Ladder</span>
