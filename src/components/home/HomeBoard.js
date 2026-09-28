@@ -61,7 +61,7 @@ export default function HomeBoard({ demand, latest, legends, rarest, tracked = n
       <Link key={l.id} className={`h5l ${i === 0 ? "first" : ""}`} href={`/profile/${l.id}`}>
         <span className="h5n">{i + 1}</span>
         <span className="h5pf">
-          <UserAvatar src={l.avatar} alt={l.name} size={44} className="h5pv" />
+          <UserAvatar src={l.avatar} alt={l.name} size={32} className="h5pv" />
           <span className="h5rb" title={l.rankTitle}><Emblem rank={l.rank} /></span>
         </span>
         <b>{l.name}</b>

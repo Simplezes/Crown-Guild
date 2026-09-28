@@ -931,17 +931,12 @@ kbd{white-space:nowrap}
   .h5t span{white-space:nowrap;flex:none}
 }
 
-.h5pf{position:relative;width:40px;height:40px;flex:none}
-.h5pv{width:40px;height:40px;border-radius:50%;background:rgba(201,162,74,.12);border:1px solid rgba(201,162,74,.4);display:grid;place-items:center;font-size:12px;font-weight:600;color:var(--ember-b)}
-.h5rb{position:absolute;right:-6px;bottom:-6px;width:22px;height:22px;border-radius:50%;background:#15111a;border:2px solid #15111a;padding:1px;box-sizing:border-box}
+.h5pf{position:relative;width:32px;height:32px;flex:none}
+.h5pv{width:32px;height:32px;border-radius:50%;background:rgba(201,162,74,.12);border:1px solid rgba(201,162,74,.4);display:grid;place-items:center;font-size:11px;font-weight:600;color:var(--ember-b)}
+.h5rb{position:absolute;right:-5px;bottom:-5px;width:18px;height:18px;border-radius:50%;background:#15111a;border:2px solid #15111a;padding:1px;box-sizing:border-box}
 .h5rb svg{width:100%;height:100%}
-.h5l{grid-template-columns:22px 44px 150px minmax(0,1fr) auto;padding:8px 2px}
-@media (max-width:900px){.h5l{grid-template-columns:20px 44px minmax(0,1fr) auto}}
-
-.h5pf,.h5pv{width:44px;height:44px}
-.h5rb{width:28px;height:28px;right:-8px;bottom:-8px;padding:0;border-width:2px;background:#15111a}
-.h5l{grid-template-columns:22px 48px 150px minmax(0,1fr) auto}
-@media (max-width:900px){.h5l{grid-template-columns:20px 48px minmax(0,1fr) auto}}
+.h5l{grid-template-columns:22px 32px 150px minmax(0,1fr) auto;padding:8px 2px}
+@media (max-width:900px){.h5l{grid-template-columns:20px 32px minmax(0,1fr) auto}}
 
 .g4t{position:relative}
 .g4t i{position:absolute;right:-5px;bottom:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:99px;background:var(--ember);color:#17110a;font-style:normal;font-size:10px;font-weight:700;display:grid;place-items:center;border:2px solid #15111a;box-sizing:content-box;line-height:1}
@@ -1000,15 +995,12 @@ kbd{white-space:nowrap}
 
 @media (min-width:901px){
   .b3{height:312px;min-height:0;overflow:hidden}
-  .b3m .h5l{padding:4px 2px}
+  .b3m .h5l{padding:8px 2px}
   .b3m .h5f{padding:5px 8px}
 }
 
 @media (min-width:901px){
   .b3{height:284px}
-  .b3m .h5pf,.b3m .h5pv{width:38px;height:38px}
-  .b3m .h5rb{width:24px;height:24px;right:-7px;bottom:-7px}
-  .b3m .h5l{grid-template-columns:22px 44px 150px minmax(0,1fr) auto;padding:2px}
   .b3m .h5qa img{width:96px;height:96px}
   .b3m .h5r{padding:4px 8px 4px 4px}
 }
