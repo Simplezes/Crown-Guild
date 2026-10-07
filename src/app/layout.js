@@ -6,6 +6,7 @@ import { Providers } from "./providers";
 import TopBar from "@/components/shell/TopBar";
 import { auth } from "@/auth";
 import { getUserSummary } from "@/lib/summary";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
@@ -43,6 +44,7 @@ export default async function RootLayout({ children }) {
             <div className="main">{children}</div>
           </div>
         </Providers>
+        <SpeedInsights />
       </body>
     </html>
   );
