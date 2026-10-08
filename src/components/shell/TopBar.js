@@ -84,6 +84,9 @@ export default function TopBar({ user, summary }) {
         <button role="menuitem" onClick={() => { setMenu(false); openSettings(); }}><Icon name="settings" />Settings</button>
         <a href="https://discord.gg/mhwilds" target="_blank" rel="noopener noreferrer" role="menuitem"><Icon name="chat" />Join Discord</a>
         <div className="sep" />
+        <Link href="/terms" role="menuitem" onClick={() => setMenu(false)}>Terms of Service</Link>
+        <Link href="/privacy" role="menuitem" onClick={() => setMenu(false)}>Privacy Policy</Link>
+        <div className="sep" />
         <button className="out" role="menuitem" onClick={() => signOut()}>Sign out</button>
       </div>
   );
