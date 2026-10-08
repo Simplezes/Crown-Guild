@@ -1,4 +1,5 @@
 import { Inter, Outfit } from "next/font/google";
+import Link from "next/link";
 import "./globals.css";
 import "./template.css";
 import "./port.css";
@@ -40,7 +41,13 @@ export default async function RootLayout({ children }) {
           <div className="ghost-monster" aria-hidden="true" />
           <div className="app">
             <TopBar user={user} summary={summary} />
-            <div className="main">{children}</div>
+            <div className="main">
+              {children}
+              <footer className="site-legal" aria-label="Legal links">
+                <Link href="/terms">Terms of Service</Link>
+                <Link href="/privacy">Privacy Policy</Link>
+              </footer>
+            </div>
           </div>
         </Providers>
       </body>

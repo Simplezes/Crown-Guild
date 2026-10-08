@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
+import { usePathname } from "next/navigation";
 import { Icon } from "@/components/shell/Icon";
 import TrackPin from "@/components/registry/TrackPin";
 import UserAvatar from "@/components/ui/UserAvatar";
@@ -26,6 +26,7 @@ function Crown({ kind, label, n }) {
 
 function Drawer({ name, onClose }) {
   const { openLog } = useLog();
+  const pathname = usePathname() || "/";
   const [data, setData] = useState(() => cache.get(name) || null);
   const [failed, setFailed] = useState(false);
 
@@ -45,6 +46,7 @@ function Drawer({ name, onClose }) {
   }, [onClose]);
 
   const href = `/monster/${encodeURIComponent(name)}`;
+  const signInHref = `/signin?callbackUrl=${encodeURIComponent(pathname)}`;
   const d = data;
 
   return (
@@ -106,7 +108,7 @@ function Drawer({ name, onClose }) {
                 <TrackPin trigger="d2pin" up monsterId={d.id} name={name} initialType={d.wishlistType} />
               </>
             ) : d ? (
-              <button className="btn" onClick={() => signIn("discord")}>Sign in to log</button>
+              <Link className="btn" href={signInHref} onClick={onClose}>Sign in to log</Link>
             ) : null}
           </footer>
         </aside>

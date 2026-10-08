@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { signIn, signOut } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import { useLog } from "@/components/log/LogProvider";
 import { Icon, Emblem } from "./Icon";
 import { usePalette } from "./Palette";
@@ -40,6 +40,7 @@ export default function TopBar({ user, summary }) {
   const twrap = useRef(null);
   const mwrap = useRef(null);
   const profileHref = user ? `/profile/${user.id}` : null;
+  const signInHref = `/signin?callbackUrl=${encodeURIComponent(pathname)}`;
 
   useEffect(() => {
     const onDown = (e) => { if (!wrap.current?.contains(e.target) && !mwrap.current?.contains(e.target)) setMenu(false);
@@ -152,7 +153,7 @@ export default function TopBar({ user, summary }) {
             </div>
           </>
         ) : (
-          <button className="btn sm" onClick={() => signIn("discord")}>Sign in with Discord</button>
+          <Link className="btn sm" href={signInHref}>Sign in with Discord</Link>
         )}
       </div>
 
@@ -168,7 +169,7 @@ export default function TopBar({ user, summary }) {
               {accountMenu("mdd")}
             </div>
           ) : (
-            <button className="btn sm" onClick={() => signIn("discord")}>Sign in</button>
+            <Link className="btn sm" href={signInHref}>Sign in</Link>
           )}
         </div>
       </div>
@@ -183,7 +184,7 @@ export default function TopBar({ user, summary }) {
         {user ? (
           <Link className={pathname.startsWith("/profile") ? "on" : ""} href={profileHref}><Icon name="user" />Profile</Link>
         ) : (
-          <button onClick={() => signIn("discord")}><Icon name="user" />Sign in</button>
+          <Link href={signInHref}><Icon name="user" />Sign in</Link>
         )}
       </div>
 

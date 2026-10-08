@@ -364,6 +364,9 @@ button.ava:hover,button.ava[aria-expanded=true]{border-color:rgba(201,162,74,.6)
 .acct .chev{margin-left:auto;color:var(--faint)}
 .dd.up{top:auto;bottom:calc(100% + 8px);left:0;right:0;width:auto}
 .main{min-width:0;position:relative}
+.site-legal{display:flex;justify-content:flex-end;gap:18px;margin-top:auto;padding:16px 28px 24px;border-top:1px solid var(--line);color:var(--mist-d);font-size:12px}
+.site-legal a{color:inherit;text-decoration:underline;text-decoration-color:var(--line2);text-underline-offset:3px}
+.site-legal a:hover{color:var(--ember-b)}
 .bar2{position:sticky;top:0;z-index:6;height:64px;display:flex;align-items:center;gap:14px;padding:0 28px;background:rgba(15,13,17,.9);border-bottom:1px solid var(--line)}
 .pt{font-family:var(--disp);font-size:22px;letter-spacing:.06em;text-transform:uppercase;color:var(--mist)}
 .pt small{font-family:var(--body);font-size:12px;letter-spacing:.08em;color:var(--faint);margin-right:8px;text-transform:none}
@@ -373,6 +376,7 @@ button.ava:hover,button.ava[aria-expanded=true]{border-color:rgba(201,162,74,.6)
 .cmdk:hover{border-color:rgba(201,162,74,.5);color:var(--mist)}
 .mtitle{display:none}
 .pad{padding:28px;display:flex;flex-direction:column;gap:20px}
+@media(max-width:900px){.site-legal{justify-content:center;padding:14px 16px 88px}}
 .greet h2{font-family:var(--disp);font-weight:400;font-size:30px;letter-spacing:.03em;color:var(--mist)}
 .greet p{color:var(--mist-d);margin-top:4px}
 .bento{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
@@ -2002,8 +2006,8 @@ svg.ms.lu.pin-f{display:none!important}
 :root{--body:var(--font-inter),'Inter',system-ui,sans-serif}
 html,body{height:auto}
 body{background:#040305!important;padding:0!important;margin:0}
-.app{display:block;min-height:100vh}
-.main{position:static}
+.app{display:flex;flex-direction:column;min-height:100vh}
+.main{position:static;display:flex;flex:1;flex-direction:column}
 .bar2{position:sticky;top:0}
 @media (max-width:900px){
   .bnav{position:fixed;left:0;right:0;bottom:0}
