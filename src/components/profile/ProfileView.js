@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -14,12 +14,89 @@ import UserAvatar from "@/components/ui/UserAvatar";
 import { useSettings } from "./SettingsProvider";
 import { formatWishlistShare } from "@/lib/crownShare";
 import CopyCrownsButton from "@/components/crowns/CopyCrownsButton";
+import { SIZE_LABELS } from "@/lib/sizeLabels";
 
 const QUEST_ICON = { "Event Quests": "event", "Optional Quests": "optional", "Field Survey Quests": "survey", "Investigation Quests": "investigation" };
 const questLabel = (q) => (q || "Optional Quests").replace(/ Quests$/, " Quest").replace("Field Survey Quest", "Field Survey");
-const FILTERS = ["All", "Small", "Large", "Tempered"];
+const QUEST_TYPES = ["Any", "Optional Quests", "Field Survey Quests", "Investigation Quests", "Event Quests"];
+const STRENGTH_OPTIONS = ["Any", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 const PER_PAGE = 9;
 const nonce = () => Date.now().toString(36);
+const normalizeMonsterName = (value) => String(value || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+
+function editDistance(left, right) {
+  let previous = Array.from({ length: right.length + 1 }, (_, index) => index);
+  for (let i = 1; i <= left.length; i += 1) {
+    const current = [i];
+    for (let j = 1; j <= right.length; j += 1) {
+      current[j] = Math.min(current[j - 1] + 1, previous[j] + 1, previous[j - 1] + (left[i - 1] === right[j - 1] ? 0 : 1));
+    }
+    previous = current;
+  }
+  return previous[right.length];
+}
+
+function monsterMatchScore(query, name) {
+  const normalizedQuery = normalizeMonsterName(query);
+  const normalizedName = normalizeMonsterName(name);
+  if (!normalizedQuery || !normalizedName) return null;
+  if (normalizedName === normalizedQuery) return 0;
+  if (normalizedName.startsWith(normalizedQuery)) return 1;
+  const substringIndex = normalizedName.indexOf(normalizedQuery);
+  if (substringIndex >= 0) return 2 + substringIndex / 100;
+  if (normalizedQuery.length < 3 || normalizedQuery.length > normalizedName.length + 2) return null;
+
+  const tolerance = Math.min(2, Math.max(1, Math.floor(normalizedQuery.length / 4)));
+  let best = tolerance + 1;
+  for (let length = Math.max(1, normalizedQuery.length - tolerance); length <= Math.min(normalizedName.length, normalizedQuery.length + tolerance); length += 1) {
+    for (let start = 0; start <= normalizedName.length - length; start += 1) {
+      best = Math.min(best, editDistance(normalizedQuery, normalizedName.slice(start, start + length)));
+      if (best === 0) break;
+    }
+    if (best === 0) break;
+  }
+  return best <= tolerance ? 3 + best : null;
+}
+
+const matchesCrownFilter = (group, filterState, search, monsterTypeById) => {
+  const term = String(search || "").trim().toLowerCase();
+  if (term) {
+    const haystack = [
+      group[0]?.name,
+      group[0]?.monster_name,
+      group[0]?.inv_monster_name,
+      group[0]?.quest,
+      group[0]?.type,
+      group[0]?.size_label,
+      group[0]?.strength_rating,
+      group[0]?.remaining_uses,
+      ...group.map((c) => c.name),
+      ...group.map((c) => c.monster_name),
+      ...group.map((c) => c.inv_monster_name),
+      ...group.map((c) => c.type),
+      ...group.map((c) => c.size_label),
+      ...group.map((c) => c.quest),
+      ...group.map((c) => c.strength_rating),
+      ...group.map((c) => c.remaining_uses),
+    ].filter(Boolean).join(" ").toLowerCase();
+    if (!haystack.includes(term)) return false;
+  }
+
+  if (filterState.questType !== "Any" && (group[0]?.quest || "") !== filterState.questType) return false;
+  if (filterState.questType === "Investigation Quests" && filterState.usesLeft !== "Any") {
+    const uses = Number(group[0]?.remaining_uses ?? NaN);
+    if (!Number.isFinite(uses) || uses !== Number(filterState.usesLeft)) return false;
+  }
+  if (filterState.monsterId !== "Any" && !group.some((c) => String(c.monster_id) === String(filterState.monsterId))) return false;
+  if (filterState.monsterType !== "Any" && !group.some((c) => monsterTypeById[String(c.monster_id)] === filterState.monsterType)) return false;
+  if (filterState.monsterSize !== "Any" && !group.some((c) => String(c.type) === filterState.monsterSize)) return false;
+  if (filterState.strength !== "Any" && !group.some((c) => Number(c.strength_rating || 0) >= Number(filterState.strength))) return false;
+  if (filterState.tempered && !group.some((c) => !!c.tempered)) return false;
+  if (filterState.lengthMode === "cm" && filterState.lengthCm !== "" && !group.some((c) => Number(c.size_cm) === Number(filterState.lengthCm))) return false;
+  if (filterState.lengthMode === "size" && filterState.lengthSize !== "Any" && !group.some((c) => String(c.size_label || "").toUpperCase() === filterState.lengthSize)) return false;
+
+  return true;
+};
 
 async function copyText(text) {
   try {
@@ -71,20 +148,20 @@ function HuntRecord({ group, isOwner, select, picked, onPick, onEdit, onDelete, 
   const tiles = tilesOf(group.map((c) => ({ name: c.name, image: c.image_name, type: c.type, tempered: !!c.tempered, strength: c.strength_rating, size: c.size_cm, sizeLabel: c.size_label })));
   const prim = g0.inv_monster_id && String(g0.inv_monster_id) !== String(g0.monster_id) ? g0 : null;
   const trackedInv = g0.quest === "Investigation Quests" && g0.remaining_uses != null;
-  const uses = trackedInv ? ` · ${g0.remaining_uses} left` : "";
   return (
     <div className={`aRec ${group.some((c) => c.tempered) ? "tp" : ""} ${picked ? "picked" : ""}`} style={{ "--n": tiles.length }} onClick={select ? onPick : undefined}>
-      <div className="aHead">
+      <div className="aHead pf-hunt-header">
         <div className="aH1">
-          <span className="aQ"><Icon name={QUEST_ICON[g0.quest] || "optional"} />{questLabel(g0.quest)}{uses}</span>
+          <span className="aQ">
+            <Icon name={QUEST_ICON[g0.quest] || "optional"} />
+            <span className="aQ-label">
+              <span className="aQ-label-main">{questLabel(g0.quest).replace(/ Quest$/, "")}</span>
+              {trackedInv && <span className="aQ-uses-word"> · {g0.remaining_uses}</span>}
+            </span>
+            {prim?.inv_monster_image && <Image src={`/monsters/${prim.inv_monster_image}`} alt={`Investigation target: ${prim.inv_monster_name}`} title={`Investigation target: ${prim.inv_monster_name}`} width={22} height={22} unoptimized className="pf-investigation-target" />}
+          </span>
         </div>
         <div className="aH2">
-          {prim && (
-            <span className="aPm" title={`This quest is for ${prim.inv_monster_name}. The crowns were found along the way.`}>
-              {prim.inv_monster_image && <Image src={`/monsters/${prim.inv_monster_image}`} alt="" width={20} height={20} unoptimized className="px" />}
-              {prim.inv_monster_name}
-            </span>
-          )}
           {select && <span className={`pk ${picked ? "on" : ""}`}>{picked && <Icon name="check" />}</span>}
           {!select && (
             <div className="pc2x">
@@ -132,20 +209,144 @@ export default function ProfileView({ user, crowns, stats, mp, rank, collection,
   const { openDrawer } = useDrawer();
 
   const [tab, setTab] = useState("Crowns");
-  const [filter, setFilter] = useState("All");
+  const [filterQuery, setFilterQuery] = useState("");
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [filterMenuField, setFilterMenuField] = useState(null);
   const [page, setPage] = useState(1);
   const [select, setSelect] = useState(false);
   const [picked, setPicked] = useState(() => new Set());
   const { openSettings: showSettings } = useSettings();
+  const filterRef = useRef(null);
+  const [filterState, setFilterState] = useState({
+    questType: "Any",
+    usesLeft: "Any",
+    monsterId: "Any",
+    monsterType: "Any",
+    monsterSize: "Any",
+    strength: "Any",
+    tempered: false,
+    lengthMode: "cm",
+    lengthCm: "",
+    lengthSize: "Any",
+  });
 
   useEffect(() => {
     if (openSettings && isOwner) showSettings();
   }, [openSettings, isOwner, showSettings]);
+
+  useEffect(() => {
+    const onClick = (event) => {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setFilterOpen(false);
+        setFilterMenuField(null);
+        setSuggestionsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, []);
+
   const [col, setCol] = useState(() => Object.fromEntries(collection.map((c) => [c.monster_id, c.type])));
   const [wish, setWish] = useState(() => Object.fromEntries(wishlist.map((w) => [w.monster_id, w.type])));
 
+  const monsterOptions = useMemo(() => [
+    { value: "Any", label: "Any monster" },
+    ...allMonsters.map((m) => ({ value: String(m.id), label: m.name, image_name: m.image_name }))
+  ], [allMonsters]);
+  const monsterTypeOptions = useMemo(() => {
+    const types = [...new Set(allMonsters.map((m) => m.type || "Monster"))].sort((a, b) => a.localeCompare(b));
+    return ["Any", ...types];
+  }, [allMonsters]);
+  const monsterTypeById = useMemo(() => Object.fromEntries(allMonsters.map((m) => [String(m.id), m.type || "Monster"])), [allMonsters]);
+  const monsterSuggestions = useMemo(() => {
+    if (!filterQuery.trim()) return [];
+    return allMonsters
+      .map((monster) => ({ monster, score: monsterMatchScore(filterQuery, monster.name) }))
+      .filter(({ score }) => score !== null)
+      .sort((a, b) => a.score - b.score || a.monster.name.localeCompare(b.monster.name))
+      .slice(0, 5)
+      .map(({ monster }) => monster);
+  }, [allMonsters, filterQuery]);
+
+  const activeFilters = [];
+  if (filterState.questType !== "Any") activeFilters.push({ key: "questType", label: `Quest: ${filterState.questType}` });
+  if (filterState.questType === "Investigation Quests" && filterState.usesLeft !== "Any") activeFilters.push({ key: "usesLeft", label: `Uses left: ${filterState.usesLeft}` });
+  if (filterState.monsterId !== "Any") activeFilters.push({ key: "monsterId", label: `Monster: ${monsterOptions.find((option) => option.value === filterState.monsterId)?.label || "Selected"}` });
+  if (filterState.monsterType !== "Any") activeFilters.push({ key: "monsterType", label: `Type: ${filterState.monsterType}` });
+  if (filterState.monsterSize !== "Any") activeFilters.push({ key: "monsterSize", label: `Size: ${filterState.monsterSize === "small" ? "Small" : "Large"}` });
+  if (filterState.strength !== "Any") activeFilters.push({ key: "strength", label: `Strength: ${filterState.strength}+` });
+  if (filterState.tempered) activeFilters.push({ key: "tempered", label: "Tempered" });
+  if (filterState.lengthMode === "cm" && filterState.lengthCm !== "") activeFilters.push({ key: "length", label: `Length: ${filterState.lengthCm} cm` });
+  if (filterState.lengthMode === "size" && filterState.lengthSize !== "Any") activeFilters.push({ key: "length", label: `Length: ${filterState.lengthSize}` });
+
+  const filterTitles = {
+    questType: "Quest type",
+    usesLeft: "Uses left",
+    monsterId: "Monster",
+    monsterType: "Monster type",
+    monsterSize: "Monster size",
+    strength: "Monster strength",
+    length: "Length",
+  };
+  const filterCategories = [
+    { key: "questType", value: filterState.questType === "Any" ? "Any" : filterState.questType },
+    ...(filterState.questType === "Investigation Quests" ? [{ key: "usesLeft", value: filterState.usesLeft === "Any" ? "Any" : `${filterState.usesLeft} left` }] : []),
+    { key: "monsterId", value: filterState.monsterId === "Any" ? "Any" : monsterOptions.find((option) => option.value === filterState.monsterId)?.label || "Any" },
+    { key: "monsterType", value: filterState.monsterType },
+    { key: "monsterSize", value: filterState.monsterSize === "Any" ? "Any" : filterState.monsterSize === "small" ? "Small" : "Large" },
+    { key: "strength", value: filterState.strength === "Any" ? "Any" : `${filterState.strength}+` },
+    { key: "length", value: filterState.lengthMode === "cm" ? (filterState.lengthCm ? `${filterState.lengthCm} cm` : "Any") : (filterState.lengthSize === "Any" ? "Any" : filterState.lengthSize) },
+  ];
+  const filterMenuOptions = filterMenuField === "questType"
+    ? QUEST_TYPES.map((value) => ({ value, label: value === "Any" ? "Any quest type" : value }))
+    : filterMenuField === "usesLeft"
+      ? ["Any", "1", "2", "3"].map((value) => ({ value, label: value === "Any" ? "Any" : `${value} left` }))
+      : filterMenuField === "monsterId"
+        ? monsterOptions
+        : filterMenuField === "monsterType"
+          ? monsterTypeOptions.map((value) => ({ value, label: value === "Any" ? "Any monster type" : value }))
+          : filterMenuField === "monsterSize"
+            ? ["Any", "small", "large"].map((value) => ({ value, label: value === "Any" ? "Any size" : value === "small" ? "Small" : "Large" }))
+            : filterMenuField === "strength"
+              ? STRENGTH_OPTIONS.map((value) => ({ value, label: value === "Any" ? "Any strength" : `${value}★+` }))
+              : [];
+
+  const chooseFilterValue = (value) => {
+    setFilterState((current) => {
+      if (filterMenuField === "questType") return { ...current, questType: value, usesLeft: value === "Investigation Quests" ? current.usesLeft : "Any" };
+      if (filterMenuField === "usesLeft") return { ...current, usesLeft: value };
+      if (filterMenuField === "monsterId") return { ...current, monsterId: value };
+      if (filterMenuField === "monsterType") return { ...current, monsterType: value };
+      if (filterMenuField === "monsterSize") return { ...current, monsterSize: value };
+      if (filterMenuField === "strength") return { ...current, strength: value };
+      return current;
+    });
+    setFilterMenuField(null);
+  };
+
+  const clearFilter = (key) => {
+    const reset = {
+      questType: { questType: "Any", usesLeft: "Any" },
+      usesLeft: { usesLeft: "Any" },
+      monsterId: { monsterId: "Any" },
+      monsterType: { monsterType: "Any" },
+      monsterSize: { monsterSize: "Any" },
+      strength: { strength: "Any" },
+      tempered: { tempered: false },
+      length: { lengthMode: "cm", lengthCm: "", lengthSize: "Any" },
+    };
+    setFilterState((current) => ({ ...current, ...reset[key] }));
+  };
+
+  const clearAllFilters = () => {
+    setFilterState({ questType: "Any", usesLeft: "Any", monsterId: "Any", monsterType: "Any", monsterSize: "Any", strength: "Any", tempered: false, lengthMode: "cm", lengthCm: "", lengthSize: "Any" });
+    setFilterQuery("");
+    setPage(1);
+  };
+
   const groups = useMemo(() => groupCrowns(crowns), [crowns]);
-  const list = groups.filter((g) => filter === "All" || (filter === "Small" && g.some((c) => c.type === "small")) || (filter === "Large" && g.some((c) => c.type === "large")) || (filter === "Tempered" && g.some((c) => c.tempered)));
+  const list = groups.filter((g) => matchesCrownFilter(g, filterState, filterQuery, monsterTypeById));
   const pages = Math.max(1, Math.ceil(list.length / PER_PAGE));
   const cur = Math.min(page, pages);
   const shown = list.slice((cur - 1) * PER_PAGE, cur * PER_PAGE);
@@ -297,17 +498,121 @@ export default function ProfileView({ user, crowns, stats, mp, rank, collection,
             {tab === "Crowns" ? (
               <>
                 <div className="ptools">
-                  <div className="m2ch" role="group" aria-label="Filter crowns">{FILTERS.map((x) => <button key={x} aria-pressed={filter === x} onClick={() => { setFilter(x); setPage(1); }}>{x}</button>)}</div>
+                  <div className="pf-tools-main">
+                  <div className="pf-filter-wrap" ref={filterRef}>
+                    <div className="pf-filter" role="search">
+                      <button type="button" className="pf-filter-trigger" onClick={() => { setSuggestionsOpen(false); setFilterMenuField(null); setFilterOpen((open) => !open); }} aria-expanded={filterOpen} aria-label="Open filter options" title="Filter">
+                        <Icon name="filter" />
+                      </button>
+                      <div className="pf-filter-chips">
+                        {activeFilters.map((filter) => (
+                          <span className="pf-filter-chip" key={filter.key}>
+                            <span>{filter.label}</span>
+                            <button type="button" onClick={() => clearFilter(filter.key)} aria-label={`Remove ${filter.label} filter`} title={`Remove ${filter.label}`}><Icon name="close" /></button>
+                          </span>
+                        ))}
+                      </div>
+                      <input
+                        type="search"
+                        value={filterQuery}
+                        onChange={(e) => { setFilterQuery(e.target.value); setPage(1); setSuggestionsOpen(true); setFilterOpen(false); }}
+                        onFocus={() => { setSuggestionsOpen(true); setFilterOpen(false); setFilterMenuField(null); }}
+                        placeholder={activeFilters.length ? "" : "Search crowns..."}
+                        aria-label="Search crowns"
+                        autoComplete="off"
+                      />
+                    </div>
+                    {suggestionsOpen && monsterSuggestions.length > 0 && (
+                      <div className="pf-suggestions" role="listbox" aria-label="Monster suggestions">
+                        <div className="pf-suggestions-head">Is this what you&apos;re looking for?</div>
+                        {monsterSuggestions.map((monster) => (
+                          <button key={monster.id} type="button" className="pf-suggestion" role="option" aria-selected={false} onClick={() => {
+                            setFilterState((current) => ({ ...current, monsterId: String(monster.id) }));
+                            setFilterQuery("");
+                            setSuggestionsOpen(false);
+                            setPage(1);
+                          }}>
+                            {monster.image_name && <Image src={`/monsters/${monster.image_name}`} alt="" width={26} height={26} unoptimized />}
+                            <span>{monster.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {filterOpen && (
+                      <div className="pf-filter-menu" role="dialog" aria-label="Filter crowns">
+                        <div className="pf-filter-menu-head">
+                          {filterMenuField && <button type="button" className="pf-menu-back" onClick={() => setFilterMenuField(null)} aria-label="Back to filters"><Icon name="back" /></button>}
+                          <span>{filterMenuField ? filterTitles[filterMenuField] : "Add filter"}</span>
+                          {activeFilters.length > 0 && <button type="button" className="pf-filter-reset" onClick={clearAllFilters}>Clear all</button>}
+                        </div>
+
+                        {!filterMenuField ? (
+                          <div className="pf-filter-menu-options">
+                            {filterCategories.map(({ key, value }) => (
+                              <button type="button" className="pf-filter-menu-row" key={key} onClick={() => setFilterMenuField(key)}>
+                                <span>{filterTitles[key]}</span><small>{value}</small><Icon name="down" className="pf-row-chevron" />
+                              </button>
+                            ))}
+                            <button type="button" className="pf-filter-menu-row" aria-pressed={filterState.tempered} onClick={() => setFilterState((current) => ({ ...current, tempered: !current.tempered }))}>
+                              <span>Tempered</span><Icon name="check" className="pf-row-check" />
+                            </button>
+                          </div>
+                        ) : filterMenuField === "length" ? (
+                          <div className="pf-length-editor">
+                            <div className="pf-length-modes" role="group" aria-label="Length format">
+                              <button type="button" aria-pressed={filterState.lengthMode === "cm"} onClick={() => setFilterState((current) => ({ ...current, lengthMode: "cm", lengthCm: "", lengthSize: "Any" }))}>cm</button>
+                              <button type="button" aria-pressed={filterState.lengthMode === "size"} onClick={() => setFilterState((current) => ({ ...current, lengthMode: "size", lengthCm: "", lengthSize: "Any" }))}>Size</button>
+                            </div>
+                            {filterState.lengthMode === "cm" ? (
+                              <label className="pf-length-input">
+                                <input type="number" min="0" step="any" value={filterState.lengthCm} onChange={(e) => setFilterState((current) => ({ ...current, lengthCm: e.target.value }))} placeholder="Any length" aria-label="Length in centimeters" />
+                                <span>cm</span>
+                              </label>
+                            ) : (
+                              <div className="pf-filter-menu-options">
+                                {["Any", ...SIZE_LABELS].map((value) => (
+                                  <button type="button" className="pf-filter-menu-option" key={value} aria-pressed={filterState.lengthSize === value} onClick={() => setFilterState((current) => ({ ...current, lengthSize: value }))}>
+                                    <span>{value === "Any" ? "Any size" : value}</span>{filterState.lengthSize === value && <Icon name="check" />}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="pf-filter-menu-options">
+                            {filterMenuOptions.map(({ value, label, image_name }) => {
+                              const selected = filterMenuField === "questType" ? filterState.questType === value
+                                : filterMenuField === "usesLeft" ? filterState.usesLeft === value
+                                  : filterMenuField === "monsterId" ? filterState.monsterId === value
+                                    : filterMenuField === "monsterType" ? filterState.monsterType === value
+                                      : filterMenuField === "monsterSize" ? filterState.monsterSize === value
+                                        : filterState.strength === value;
+                              return (
+                                <button type="button" className="pf-filter-menu-option" key={value} aria-pressed={selected} onClick={() => chooseFilterValue(value)}>
+                                  <span>{label}</span>
+                                  {filterMenuField === "monsterId" && image_name ? <Image src={`/monsters/${image_name}`} alt="" width={22} height={22} unoptimized className="pf-monster-option-image" /> : selected && <Icon name="check" />}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                   <span className="ptc">{list.length} hunt record{list.length === 1 ? "" : "s"}</span>
-                  <span className="sp" />
-                  {isOwner && (select ? (
-                    <>
-                      <span className="selc">{picked.size} selected</span>
-                      <button className="tbx" onClick={() => setPicked(allPicked ? new Set() : new Set(list.map(keyOf)))}>{allPicked ? "Clear all" : "Select all"}</button>
-                      <button className="tbx danger" disabled={!picked.size} onClick={() => del(list.filter((g) => picked.has(keyOf(g))))}><Icon name="trash" />Delete</button>
-                      <button className="tbx" onClick={() => { setSelect(false); setPicked(new Set()); }}>Cancel</button>
-                    </>
-                  ) : <button className="tbx" onClick={() => setSelect(true)}><Icon name="check" />Select</button>)}
+                  </div>
+                  {isOwner && (
+                    <div className="pf-selection-actions" role="group" aria-label="Hunt record selection actions">
+                      {select ? (
+                        <>
+                          <span className="selc">{picked.size} selected</span>
+                          <button className="tbx" onClick={() => setPicked(allPicked ? new Set() : new Set(list.map(keyOf)))}>{allPicked ? "Clear all" : "Select all"}</button>
+                          <button className="tbx danger" disabled={!picked.size} onClick={() => del(list.filter((g) => picked.has(keyOf(g))))}><Icon name="trash" />Delete</button>
+                          <button className="tbx" onClick={() => { setSelect(false); setPicked(new Set()); }}>Cancel</button>
+                        </>
+                      ) : <button className="tbx" onClick={() => setSelect(true)}><Icon name="check" />Select</button>}
+                    </div>
+                  )}
                 </div>
                 {list.length ? (
                   <div className="ggrid">

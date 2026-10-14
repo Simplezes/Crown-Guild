@@ -8,6 +8,13 @@ const NAMES = {
 
 export function Icon({ name, className = "" }) {
   const id = NAMES[name] || name;
+  if (id === "filter") {
+    return (
+      <svg className={`ms lu ${className}`} viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 5h16l-6.5 7.5V19l-3 1v-7.5L4 5z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
   if (id === "pin") {
     return (
       <>

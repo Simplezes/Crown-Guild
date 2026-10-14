@@ -96,10 +96,11 @@ async function getHomeData() {
       legends,
       rarest: rarestRes.rows.map((m) => ({ id: m.id, name: m.name, image: m.image_name, crowns: Number(m.crown_count) })),
       seekers: seekersRes.rows.map((u) => ({ name: u.username || "Hunter", avatar: u.avatar_url || null })),
+      unavailable: false,
     };
   } catch (e) {
     console.error(e);
-    return { stats: { hunters: 0, crowns: 0, temperedRate: 0, investigations: 0 }, demand: [], latest: [], legends: [], rarest: [], seekers: [] };
+    return { stats: { hunters: 0, crowns: 0, temperedRate: 0, investigations: 0 }, demand: [], latest: [], legends: [], rarest: [], seekers: [], unavailable: true };
   }
 }
 
@@ -167,6 +168,13 @@ export default async function Home() {
         <h2>{userId ? `Welcome back${name ? `, ${name}` : ""}` : "Welcome to the guild"}</h2>
         <p>Here is what is happening across the guild.</p>
       </div>
+
+      {data.unavailable && (
+        <div className="wd s12" role="status">
+          <b>Guild data is temporarily unavailable.</b>
+          <p>Refresh the page to try again when the database connection is restored.</p>
+        </div>
+      )}
 
       <div className="bento">
         {userId && profile && summary ? (

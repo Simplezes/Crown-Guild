@@ -457,7 +457,7 @@ export default async function MonsterDetail({ params, searchParams }) {
 
           {activeTab === "hosts" ? (
             <>
-              <div className="seg lk" role="group" aria-label="Crown type" style={{ marginTop: 14 }}>
+              <div className="seg lk type-filter" role="group" aria-label="Crown type" style={{ marginTop: 14 }}>
                 {seg("All types", buildMonsterPageHref(search, { crownType: "all" }), crownTypeFilter === "all")}
                 {pairedGroups.length > 0 && seg("Pairs", buildMonsterPageHref(search, { crownType: "pairs" }), crownTypeFilter === "pairs")}
                 {seg("Large", buildMonsterPageHref(search, { crownType: "large" }), crownTypeFilter === "large", <Image src="/icons/largecrown.png" width={14} height={14} alt="" className="px" />)}

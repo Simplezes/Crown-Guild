@@ -98,7 +98,7 @@ export default async function Profile({ params, searchParams }) {
       rank={rankView(mp)}
       collection={data.collection.map((c) => ({ monster_id: c.monster_id, type: c.type }))}
       wishlist={data.wishlist.map((w) => ({ monster_id: w.monster_id, type: w.type }))}
-      allMonsters={allMonsters.map((m) => ({ id: m.id, name: m.name, image_name: m.image_name }))}
+      allMonsters={allMonsters.map((m) => ({ id: m.id, name: m.name, image_name: m.image_name, type: m.type || "Monster" }))}
       isOwner={isOwner}
       viewerId={session?.user?.id || null}
       openSettings={search?.settings === "true"}
