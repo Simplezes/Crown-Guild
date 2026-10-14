@@ -11,6 +11,7 @@ import HomeBoard from "@/components/home/HomeBoard";
 import SignInButton from "@/components/home/SignInButton";
 import UserAvatar from "@/components/ui/UserAvatar";
 import { WantedActions, ShelfThumb } from "@/components/home/HomeActions";
+import CopyCrownsButton from "@/components/crowns/CopyCrownsButton";
 
 export const dynamic = "force-dynamic";
 
@@ -133,7 +134,10 @@ function GuildCard({ profile, summary, monsterCount }) {
         <p className="g4-max">You have reached the highest rank.</p>
       )}
       <div className="g4-shelf">
-        <span className="g4c"><b>{collection.length}</b>/{monsterCount} collected</span>
+        <div className="g4-shelf-bar">
+          <span className="g4c"><b>{collection.length}</b>/{monsterCount} collected</span>
+          <CopyCrownsButton crowns={profile.crowns} userId={profile.user.id} />
+        </div>
         <div className="g4r">
           {shelf.map((c) => (
             <ShelfThumb key={c.monster_id} name={c.monster_name} image={c.image_name} type={c.type} />

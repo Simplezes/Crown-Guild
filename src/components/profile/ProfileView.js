@@ -12,7 +12,8 @@ import { useDrawer } from "@/components/monster/DrawerProvider";
 import Pager from "@/components/ui/Pager";
 import UserAvatar from "@/components/ui/UserAvatar";
 import { useSettings } from "./SettingsProvider";
-import { formatCrownShare, formatWishlistShare } from "@/lib/crownShare";
+import { formatWishlistShare } from "@/lib/crownShare";
+import CopyCrownsButton from "@/components/crowns/CopyCrownsButton";
 
 const QUEST_ICON = { "Event Quests": "event", "Optional Quests": "optional", "Field Survey Quests": "survey", "Investigation Quests": "investigation" };
 const questLabel = (q) => (q || "Optional Quests").replace(/ Quests$/, " Quest").replace("Field Survey Quest", "Field Survey");
@@ -208,13 +209,6 @@ export default function ProfileView({ user, crowns, stats, mp, rank, collection,
     }
   };
   const copy = (v) => { navigator.clipboard?.writeText(v).catch(() => {}); toast.info("Copied to your clipboard."); };
-  const copyCrowns = async (mode = "emoji") => {
-    const shareId = `${nonce()}-${Math.random().toString(36).slice(2, 8)}`;
-    const profileUrl = `${window.location.origin}/profile/${encodeURIComponent(user.id)}?share=${shareId}`;
-    const copied = await copyText(formatCrownShare(crowns, profileUrl, mode));
-    if (copied) toast.success("All crowns copied to your clipboard.");
-    else toast.error("Could not copy crowns. Check clipboard permissions and try again.");
-  };
 
   const copyWishlist = async () => {
     const entries = allMonsters.filter((m) => wish[m.id]).map((m) => ({ name: m.name, emoji: m.emoji, type: wish[m.id] }));
@@ -260,16 +254,7 @@ export default function ProfileView({ user, crowns, stats, mp, rank, collection,
           {user.status_message && <p className="pf-q">&ldquo;{user.status_message}&rdquo;</p>}
         </div>
         <div className="pf-act">
-          <div className="pf-copy">
-            <button className="btn o sm" onClick={() => copyCrowns("emoji")} title="Copy all crowns with MH Wilds emotes"><Icon name="copy" />Copy crowns</button>
-            <details className="pf-copy-more" onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) e.currentTarget.open = false; }}>
-              <summary className="btn o sm pf-copy-trigger" aria-label="More copy formats" title="More copy formats"><Icon name="down" /></summary>
-              <div className="pf-copy-menu" role="group" aria-label="Copy format">
-                <button className="pf-copy-option" type="button" onClick={(e) => { copyCrowns("emojiSimple"); e.currentTarget.closest("details").open = false; }}>Compact emojis</button>
-                <button className="pf-copy-option" type="button" onClick={(e) => { copyCrowns("plain"); e.currentTarget.closest("details").open = false; }}>Plain text</button>
-              </div>
-            </details>
-          </div>
+          <CopyCrownsButton crowns={crowns} userId={user.id} />
           {viewerId && !isOwner && <Link className="btn o sm" href={`/compare?a=${viewerId}&b=${user.id}`}><Icon name="compare" />Compare with you</Link>}
           {isOwner && <Link className="btn o sm" href={`/compare?a=${user.id}`}><Icon name="compare" />Compare with…</Link>}
           {isOwner && <button className="btn sm" onClick={() => showSettings()}><Icon name="edit" />Edit profile</button>}

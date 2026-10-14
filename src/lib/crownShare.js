@@ -34,6 +34,10 @@ const MONSTER_EMOJIS = {
   ZohShia: "<:ZohShia:1348003743425106034>",
 };
 
+const NORMALIZED_EMOJIS = Object.fromEntries(
+  Object.entries(MONSTER_EMOJIS).map(([k, v]) => [k.toLowerCase(), v])
+);
+
 function monsterEmoji(crown) {
   const name = String(crown.name || crown.monster_name || "").trim();
   const guardian = /^(?:Tempered\s+)?Guardian\s+/i.test(name);
@@ -41,8 +45,9 @@ function monsterEmoji(crown) {
     .replace(/^Tempered\s+Guardian\s+/i, "")
     .replace(/^Guardian\s+/i, "")
     .replace(/^Tempered\s+/i, "");
-  const key = baseName.replace(/[^a-z\d]/gi, "");
-  return MONSTER_EMOJIS[guardian ? `G${key}` : key] || crown.emoji || baseName || name;
+  const key = baseName.replace(/[^a-z\d]/gi, "").toLowerCase();
+  const lookupKey = guardian ? `g${key}` : key;
+  return NORMALIZED_EMOJIS[lookupKey] || crown.emoji || baseName || name;
 }
 
 function monsterName(crown) {
