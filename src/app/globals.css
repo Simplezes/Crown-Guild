@@ -188,6 +188,16 @@ button:hover {
   }
 }
 
+@keyframes sk-sweep {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
 .skeleton-shimmer {
   position: relative;
   display: block;
@@ -196,6 +206,19 @@ button:hover {
   border: 1px solid rgba(255, 255, 255, 0.05);
   box-shadow: none;
   animation: skeleton-pulse 1.2s ease-in-out infinite alternate;
+}
+
+.sk-b {
+  display: block;
+  border-radius: 8px;
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0.12) 40%,
+      rgba(255, 255, 255, 0.06) 100%);
+  background-size: 200% 100%;
+  animation: sk-sweep 1.8s ease-in-out infinite;
+  border: 0;
+  flex-shrink: 0;
 }
 
 .animate-mh-fade {
