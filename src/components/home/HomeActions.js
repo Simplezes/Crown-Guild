@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useDrawer } from "@/components/monster/DrawerProvider";
 import TrackPin from "@/components/registry/TrackPin";
 
@@ -8,7 +9,11 @@ export function WantedActions({ monster, signedIn, tracked }) {
   const { openDrawer } = useDrawer();
   return (
     <>
-      {signedIn && <TrackPin trigger="btn" monsterId={monster.id} name={monster.name} initialType={tracked || null} />}
+      {signedIn ? (
+        <TrackPin trigger="btn" noIcon monsterId={monster.id} name={monster.name} initialType={tracked || null} />
+      ) : (
+        <Link className="btn sm" href="/signin?callbackUrl=%2F">Sign in to track</Link>
+      )}
       <button className="btn o sm" onClick={() => openDrawer(monster.name)}>Details</button>
     </>
   );

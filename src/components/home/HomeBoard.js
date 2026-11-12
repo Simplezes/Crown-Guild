@@ -8,7 +8,12 @@ import { useDrawer } from "@/components/monster/DrawerProvider";
 import TrackPin from "@/components/registry/TrackPin";
 import UserAvatar from "@/components/ui/UserAvatar";
 
-const TABS = ["Demand", "Latest", "Legends", "Rarest"];
+const TABS = [
+  ["Demand", "MHWilds-Wishlist_Pin_Icon.png"],
+  ["Latest", "MHWilds-Hunt_Icon.png"],
+  ["Legends", "MHWilds-Expedition_Record_Board_Icon.png"],
+  ["Rarest", "MHWilds-Notes_4_Star_Icon.png"],
+];
 
 function MonsterTile({ image, size = 40, sm = false }) {
   return (
@@ -98,10 +103,12 @@ export default function HomeBoard({ demand, latest, legends, rarest, tracked = n
       : feedRows(latest);
 
   return (
-    <div className="wd s12 board">
+    <div className="wd s12 board hm-board">
       <div className="tabs3" role="tablist">
-        {TABS.map((t) => (
-          <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)}>{t}</button>
+        {TABS.map(([t, icon]) => (
+          <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)}>
+            <Image src={`/icons/${icon}`} alt="" width={18} height={18} className="px" />{t}
+          </button>
         ))}
         <Link className="all" href="/investigation">All monsters</Link>
       </div>
@@ -112,6 +119,7 @@ export default function HomeBoard({ demand, latest, legends, rarest, tracked = n
           {side}
         </aside>
       </div>
+      <Link className="hm-allm" href="/investigation">All monsters</Link>
     </div>
   );
 }

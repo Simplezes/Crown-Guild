@@ -22,7 +22,7 @@ export const metadata = {
 
 async function getHomeData() {
   try {
-    const [huntersRes, crownsRes, wantedRes, recentRes, renownRes, temperedRes, investigationsRes, rarestRes] = await Promise.all([
+    const [huntersRes, crownsRes, wantedRes, recentRes, renownRes, temperedRes, investigationsRes, rarestRes, rosterRes] = await Promise.all([
       db.execute("SELECT COUNT(*) as count FROM users"),
       db.execute("SELECT COUNT(*) as count FROM crowns"),
       db.execute(`
@@ -49,13 +49,14 @@ async function getHomeData() {
         FROM monsters m JOIN crowns c ON c.monster_id = m.id
         GROUP BY m.id ORDER BY crown_count ASC, m.name ASC LIMIT 3
       `),
+      db.execute("SELECT name, image_name FROM monsters ORDER BY name ASC"),
     ]);
 
     const top = wantedRes.rows[0];
     const legendIds = renownRes.rows.map((r) => r.id);
     const marks = legendIds.map(() => "?").join(",");
     await ensureGuildArchiveTempered();
-    const [seekersRes, legendArch, tierMap] = await Promise.all([
+    const [seekersRes, legendArch, tierMap, typesRes, claimedRes] = await Promise.all([
       top
         ? db.execute({
             sql: "SELECT u.username, u.avatar_url FROM wishlist w JOIN users u ON u.id = w.user_id WHERE w.monster_id = ? GROUP BY u.id LIMIT 4",
@@ -66,7 +67,15 @@ async function getHomeData() {
         ? db.execute({ sql: `SELECT user_id, monster_id, type, tempered FROM guild_archive WHERE user_id IN (${marks})`, args: legendIds })
         : { rows: [] },
       getMonsterTierMap(),
+      top ? db.execute({ sql: "SELECT type, COUNT(*) as c FROM wishlist WHERE monster_id = ? GROUP BY type", args: [top.id] }) : { rows: [] },
+      top ? db.execute({ sql: "SELECT COUNT(*) as c FROM crowns WHERE monster_id = ?", args: [top.id] }) : { rows: [] },
     ]);
+    const want = { small: 0, large: 0 };
+    for (const r of typesRes.rows) {
+      const c = Number(r.c);
+      if (r.type !== "large") want.small += c;
+      if (r.type !== "small") want.large += c;
+    }
 
     const crowns = Number(crownsRes.rows[0]?.count || 0);
     const tempered = Number(temperedRes.rows[0]?.count || 0);
@@ -95,21 +104,24 @@ async function getHomeData() {
       latest: recentRes.rows.map((c) => ({ id: c.id, type: c.type, tempered: !!c.tempered, monster: c.monster_name, image: c.image_name, username: c.username, user_id: c.user_id })),
       legends,
       rarest: rarestRes.rows.map((m) => ({ id: m.id, name: m.name, image: m.image_name, crowns: Number(m.crown_count) })),
+      roster: rosterRes.rows.filter((m) => m.image_name).map((m) => ({ name: m.name, image: m.image_name })),
+      spotlightMeta: { ...want, claimed: Number(claimedRes.rows[0]?.c || 0) },
       seekers: seekersRes.rows.map((u) => ({ name: u.username || "Hunter", avatar: u.avatar_url || null })),
       unavailable: false,
     };
   } catch (e) {
     console.error(e);
-    return { stats: { hunters: 0, crowns: 0, temperedRate: 0, investigations: 0 }, demand: [], latest: [], legends: [], rarest: [], seekers: [], unavailable: true };
+    return { stats: { hunters: 0, crowns: 0, temperedRate: 0, investigations: 0 }, demand: [], latest: [], legends: [], rarest: [], roster: [], spotlightMeta: { small: 0, large: 0, claimed: 0 }, seekers: [], unavailable: true };
   }
 }
 
-function GuildCard({ profile, summary, monsterCount }) {
+
+function GuildCard({ profile, summary, monsterCount, className }) {
   const { stats, collection } = profile;
   const nextRank = summary.rank < 8 ? summary.rank + 1 : null;
-  const shelf = collection.slice(0, 8);
+  const shelf = collection.slice(0, 7);
   return (
-    <div className="wd s12 gc3 gc4">
+    <section className={`wd hm-gc ${className}`}>
       <div className="g4-top">
         <div className="g4e"><Emblem rank={summary.rank} /></div>
         <div className="g4w">
@@ -150,7 +162,28 @@ function GuildCard({ profile, summary, monsterCount }) {
           )}
         </div>
       </div>
-    </div>
+    </section>
+  );
+}
+
+function SignedOutCard({ className }) {
+  return (
+    <section className={`wd hm-out ${className}`}>
+      <div>
+        <span className="eyebrow">Your Guild Card</span>
+        <h3>Sign in to start</h3>
+        <p>Log crowns, collect monsters and climb from Fledgling to Legend.</p>
+      </div>
+      <div className="hm-ranks" aria-hidden="true">
+        {Array.from({ length: 8 }, (_, i) => (
+          <div key={i} className={i === 0 ? "on" : ""}><Emblem rank={i + 1} /></div>
+        ))}
+      </div>
+      <div className="hm-outacts">
+        <SignInButton className="btn sm" />
+        <a className="hm-ln" href="https://discord.gg/mhwilds" target="_blank" rel="noopener noreferrer">Join Discord</a>
+      </div>
+    </section>
   );
 }
 
@@ -161,9 +194,13 @@ export default async function Home() {
   const monsterCount = getMonsterCount() || 1;
   const spotlight = data.demand[0];
   const name = session?.user?.name;
+  const cardCls = spotlight ? "s5" : "s12";
 
   return (
-    <div className="pad">
+    <div className="pad hm">
+      <div className="hm-ghost r" aria-hidden="true" />
+      <div className="hm-ghost l" aria-hidden="true" />
+
       <div className="greet">
         <h2>{userId ? `Welcome back${name ? `, ${name}` : ""}` : "Welcome to the guild"}</h2>
         <p>Here is what is happening across the guild.</p>
@@ -177,54 +214,68 @@ export default async function Home() {
       )}
 
       <div className="bento">
-        {userId && profile && summary ? (
-          <GuildCard profile={profile} summary={summary} monsterCount={monsterCount} />
-        ) : (
-          <div className="wd s12 gc-out">
-            <div className="gco-badge"><Emblem rank={1} /></div>
-            <div className="gco-body">
-              <span className="eyebrow">Your Guild Card</span>
-              <h3>Sign in to start</h3>
-              <p className="gco-desc">Log crowns, collect monsters and climb from Fledgling to Legend.</p>
-            </div>
-            <div className="gco-ranks" aria-hidden="true">
-              {Array.from({ length: 8 }, (_, i) => (
-                <div key={i} className="gco-rank"><Emblem rank={i + 1} /></div>
-              ))}
-            </div>
-            <div className="gco-actions">
-              <a className="btn ln" href="https://discord.gg/mhwilds" target="_blank" rel="noopener noreferrer">Join Discord</a>
-              <SignInButton />
-            </div>
-          </div>
-        )}
-
         {spotlight && (
-          <div className="s12 wanted3">
-            <div className="w3a"><Image src={`/monsters/${spotlight.image}`} alt="" width={92} height={92} unoptimized className="px" /></div>
-            <div className="w3t">
-              <span className="tag">Most wanted</span>
-              <h4>{spotlight.name}</h4>
-              <div className="w3h">
-                {data.seekers.map((s, i) => (
-                  <UserAvatar key={i} src={s.avatar} alt={s.name} size={26} className="h5a" />
-                ))}
+          <section className="wd s7 hm-wanted">
+            <div className="hm-tile"><Image src={`/monsters/${spotlight.image}`} alt="" width={104} height={104} unoptimized className="px" /></div>
+            <div className="hm-wt">
+              <span className="eyebrow"><Image src="/icons/MHWilds-Favorite_Icon.png" alt="" width={16} height={16} className="px" />Most wanted</span>
+              <h3>{spotlight.name}</h3>
+              <div className="hm-seek">
+                <div className="hm-av">
+                  {data.seekers.map((s, i) => (
+                    <UserAvatar key={i} src={s.avatar} alt={s.name} size={28} className="h5a" />
+                  ))}
+                </div>
                 <p><b>{spotlight.demand}</b> hunters seeking</p>
               </div>
+              <div className="hm-split">
+                {[["small", "Small crown"], ["large", "Large crown"]].map(([k, label]) => (
+                  <div key={k}>
+                    <span><Image src={`/icons/${k}crown.png`} alt="" width={16} height={16} className="px" />{label}</span>
+                    <div className="meter"><i style={{ width: `${Math.round((data.spotlightMeta[k] / Math.max(1, data.spotlightMeta.small, data.spotlightMeta.large)) * 100)}%` }} /></div>
+                    <b>{data.spotlightMeta[k]}</b>
+                  </div>
+                ))}
+                <p>{data.spotlightMeta.claimed} claimed guild-wide</p>
+              </div>
+              <div className="hm-acts">
+                <WantedActions monster={{ id: spotlight.id, name: spotlight.name }} signedIn={!!userId} tracked={profile?.wishlist.find((w) => String(w.monster_id) === String(spotlight.id))?.type} />
+              </div>
             </div>
-            <div className="w3s">
-              <div><b>{data.stats.hunters}</b><span>Hunters</span></div>
-              <div><b>{data.stats.crowns}</b><span>Crowns</span></div>
-              <div><b>{data.stats.temperedRate}<i>%</i></b><span>Tempered</span></div>
-              <div><b>{data.stats.investigations}</b><span>Investigations</span></div>
-            </div>
-            <div className="w3c">
-              <WantedActions monster={{ id: spotlight.id, name: spotlight.name }} signedIn={!!userId} tracked={profile?.wishlist.find((w) => String(w.monster_id) === String(spotlight.id))?.type} />
-            </div>
-          </div>
+          </section>
         )}
 
+        {userId && profile && summary ? (
+          <GuildCard profile={profile} summary={summary} monsterCount={monsterCount} className={cardCls} />
+        ) : (
+          <SignedOutCard className={cardCls} />
+        )}
+
+        <section className="wd s12 hm-stats" aria-label="Guild numbers">
+          <div><Image src="/icons/MHWilds-Quest_Members_Icon.png" alt="" width={30} height={30} className="px" /><span><b>{data.stats.hunters}</b>Hunters</span></div>
+          <div><Image src="/icons/largecrown.png" alt="" width={30} height={30} className="px" /><span><b>{data.stats.crowns}</b>Crowns</span></div>
+          <div><Image src="/icons/MHWilds-Favorite_Icon.png" alt="" width={30} height={30} className="px" /><span><b className="tp">{data.stats.temperedRate}%</b>Tempered</span></div>
+          <div><Image src="/icons/MHWilds-Field_Survey_Icon.png" alt="" width={30} height={30} className="px" /><span><b>{data.stats.investigations}</b>Investigations</span></div>
+        </section>
+
         <HomeBoard demand={data.demand.slice(0, 5)} latest={data.latest} legends={data.legends} rarest={data.rarest} tracked={profile ? Object.fromEntries(profile.wishlist.map((w) => [w.monster_id, w.type])) : null} />
+
+        {data.roster.length > 0 && (
+          <section className="wd s12 hm-roster">
+            <div className="hm-sech">
+              <h3><Image src="/icons/MHWilds-Quest_Menu_Icon.png" alt="" width={22} height={22} className="px" />The roster</h3>
+              <Link href="/investigation">Open investigations</Link>
+            </div>
+            <div className="hm-rost">
+              {data.roster.map((m) => (
+                <Link key={m.name} href={`/monster/${encodeURIComponent(m.name)}`}>
+                  <Image src={`/monsters/${m.image}`} alt="" width={32} height={32} unoptimized className="px" />
+                  <span>{m.name}</span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );

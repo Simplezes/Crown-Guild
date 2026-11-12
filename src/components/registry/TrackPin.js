@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/app/UIProvider";
 import { Icon } from "@/components/shell/Icon";
 
-export default function TrackPin({ monsterId, name, initialType, trigger = "pin", up = false, onChange }) {
+export default function TrackPin({ monsterId, name, initialType, trigger = "pin", up = false, noIcon = false, onChange }) {
   const router = useRouter();
   const toast = useToast();
   const wrap = useRef(null);
@@ -95,7 +95,7 @@ export default function TrackPin({ monsterId, name, initialType, trigger = "pin"
   return (
     <div className="tpin" ref={wrap} onClick={(e) => e.stopPropagation()}>
       <button ref={btn} className={cls} {...btnProps}>
-        {labelled ? (<><Icon name="pin" />{type ? "Tracking" : "Track target"}</>) : <Icon name="pin" />}
+        {labelled ? (<>{!noIcon && <Icon name="pin" />}{type ? "Tracking" : "Track target"}</>) : <Icon name="pin" />}
       </button>
       {open && pos && createPortal(
         <div className="tmenu" ref={menu} style={pos} role="menu" aria-label="Track crown sizes">

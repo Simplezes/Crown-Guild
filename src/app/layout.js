@@ -3,6 +3,7 @@ import Link from "next/link";
 import "./globals.css";
 import "./template.css";
 import "./port.css";
+import "./home.css";
 import { Providers } from "./providers";
 import TopBar from "@/components/shell/TopBar";
 import { auth } from "@/auth";
