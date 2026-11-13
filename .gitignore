@@ -5,3 +5,10 @@ node_modules/
 .env.local
 .env*.local
 .next/
+.audit/
+test-results/
+playwright-report/
+.tmp/
+tests/visual-baseline/
+coverage/
+*.tsbuildinfo

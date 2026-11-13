@@ -1,5 +1,5 @@
 {
-  "name": "web",
+  "name": "crown-guild",
   "version": "0.1.0",
   "private": true,
   "packageManager": "pnpm@10.33.0",
@@ -7,25 +7,50 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check:rules": "node scripts/check-rules.mjs",
+    "test": "vitest run",
+    "test:e2e": "playwright test --grep-invert visual",
+    "test:visual": "playwright test visual",
+    "audit:deps": "pnpm audit --audit-level=high",
+    "knip": "knip",
+    "check": "pnpm typecheck && pnpm lint && pnpm check:rules && pnpm test && pnpm audit:deps",
+    "analyze": "ANALYZE=true next build"
   },
   "dependencies": {
     "@libsql/client": "^0.17.3",
+    "@t3-oss/env-nextjs": "0.13.11",
+    "@tailwindcss/postcss": "4.3.5",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.37.0",
-    "discord-interactions": "^4.4.0",
-    "dotenv": "^17.4.2",
-    "next": "16.2.4",
-    "next-auth": "^5.0.0-beta.31",
+    "next": "16.4.6",
+    "next-auth": "5.0.0-beta.32",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "server-only": "0.0.1",
+    "tailwindcss": "4.3.5",
+    "zod": "4.6.7"
   },
   "devDependencies": {
-    "autoprefixer": "^10.5.0",
+    "@axe-core/playwright": "^4.14.0",
+    "@next/bundle-analyzer": "16.4.6",
+    "@playwright/test": "^1.65.0",
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "eslint": "^9",
-    "eslint-config-next": "16.2.4",
-    "postcss": "^8.5.14",
-    "sharp": "^0.34.5",
-    "tailwindcss": "^3.4.17"
+    "eslint-config-next": "16.4.6",
+    "eslint-plugin-jsx-a11y": "6.10.2",
+    "knip": "^6.44.2",
+    "prettier": "^3.9.10",
+    "prettier-plugin-tailwindcss": "0.8.1",
+    "typescript": "6.0.3",
+    "vitest": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=22.12"
   }
 }
