@@ -1,20 +1,84 @@
 import { Skeleton } from "@/shared/ui";
+import { HostCardSkeleton } from "./HostCardSkeleton";
 
-const stack = { display: "flex", flexDirection: "column", gap: 12 } as const;
+const lines = [100, 100, 100, 100, 62];
 
-function HostSkeleton() {
+function HeaderSkeleton() {
   return (
-    <div className="hk" aria-hidden="true">
-      <Skeleton width={96} height={22} radius={99} />
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <Skeleton width={48} height={48} radius={99} />
-        <div style={{ ...stack, flex: 1, gap: 8 }}>
-          <Skeleton width="50%" height={14} />
-          <Skeleton width="80%" height={10} />
+    <section className="p mh" aria-hidden="true">
+      <div>
+        <Skeleton width={130} height={11} />
+        <div className="top2">
+          <div className="big">
+            <Skeleton width={88} height={88} radius={20} />
+          </div>
+          <Skeleton width="min(320px, 55%)" height={48} />
+        </div>
+        <div className="quote" style={{ display: "flex", flexDirection: "column", gap: 11, paddingBottom: 11 }}>
+          {lines.map((width, index) => (
+            <Skeleton key={index} width={`${width}%`} height={12} />
+          ))}
         </div>
       </div>
-      <Skeleton width="100%" height={18} />
-      <Skeleton width="100%" height={38} radius={10} />
+      <div className="k4">
+        {Array.from({ length: 4 }, (_, index) => (
+          <div key={index} className="tile" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <Skeleton width={42} height={32} />
+            <Skeleton width={96} height={10} />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function SectionSkeleton({ cards }: { cards: number }) {
+  return (
+    <div className="hsec">
+      <div className="hsh">
+        <Skeleton width={120} height={14} />
+        <Skeleton width={30} height={20} radius={99} />
+      </div>
+      <div className="hostgrid">
+        {Array.from({ length: cards }, (_, index) => (
+          <HostCardSkeleton key={index} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SideSkeleton() {
+  return (
+    <div>
+      <div className="pp phys">
+        <div className="sec-h">
+          <Skeleton width={120} height={18} />
+        </div>
+        {[2, 1, 3].map((count, group) => (
+          <div key={group} className="grp">
+            <small>
+              <Skeleton width={84} height={10} />
+            </small>
+            <div className="pills2">
+              {Array.from({ length: count }, (_, index) => (
+                <Skeleton key={index} width={72} height={26} radius={8} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="pp" style={{ marginTop: 16 }}>
+        <div className="sec-h">
+          <Skeleton width={110} height={18} />
+        </div>
+        {Array.from({ length: 4 }, (_, index) => (
+          <div key={index} className="bd">
+            <Skeleton width={64} height={11} />
+            <Skeleton width={26} height={20} />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -22,45 +86,25 @@ function HostSkeleton() {
 export function MonsterSkeleton() {
   return (
     <div className="wrap" role="status" aria-label="Loading monster">
-      <Skeleton width={96} height={14} />
-      <section className="p mh" aria-hidden="true">
-        <div style={stack}>
-          <Skeleton width={120} height={12} />
-          <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-            <Skeleton width={88} height={88} radius={18} />
-            <Skeleton width={240} height={36} />
-          </div>
-          <Skeleton width="90%" height={14} />
-          <Skeleton width="70%" height={14} />
-          <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
-            <Skeleton width={130} height={40} radius={10} />
-            <Skeleton width={140} height={40} radius={10} />
-          </div>
-        </div>
-        <div className="k4">
-          {Array.from({ length: 4 }, (_, index) => (
-            <div key={index} className="tile" style={{ ...stack, gap: 8 }}>
-              <Skeleton width={40} height={28} />
-              <Skeleton width={90} height={10} />
-            </div>
-          ))}
-        </div>
-      </section>
+      <span className="back" aria-hidden="true">
+        <Skeleton width={92} height={12} />
+      </span>
+      <HeaderSkeleton />
       <section className="mbody" aria-hidden="true">
-        <div className="pp" style={stack}>
-          <Skeleton width={160} height={24} />
-          <div className="hostgrid">
-            {Array.from({ length: 3 }, (_, index) => (
-              <HostSkeleton key={index} />
-            ))}
+        <div className="pp">
+          <div className="sec-h" style={{ alignItems: "center", flexWrap: "wrap" }}>
+            <div>
+              <Skeleton width={110} height={10} />
+              <Skeleton width={170} height={20} className="mt6" />
+            </div>
+            <Skeleton width={150} height={40} radius={12} />
           </div>
+          <Skeleton width="85%" height={12} className="mt6" />
+          <Skeleton width={248} height={40} radius={12} className="mt14" />
+          <SectionSkeleton cards={4} />
+          <SectionSkeleton cards={2} />
         </div>
-        <div className="pp" style={stack}>
-          <Skeleton width={110} height={20} />
-          {Array.from({ length: 3 }, (_, index) => (
-            <Skeleton key={index} width="100%" height={28} />
-          ))}
-        </div>
+        <SideSkeleton />
       </section>
     </div>
   );
