@@ -1,5 +1,5 @@
 import "server-only";
-import { db, firstRow } from "@/server/db";
+import { db, ensureUserShareUrl, firstRow } from "@/server/db";
 import type { SettingsInput } from "@/server/schemas/user";
 import { getUserSummary } from "./summary";
 
@@ -10,6 +10,7 @@ export interface UserSettings {
   quest_password: string;
   status_message: string;
   receive_dms: number;
+  share_url: number;
 }
 
 interface SettingsRow {
@@ -19,15 +20,17 @@ interface SettingsRow {
   quest_password: string | null;
   status_message: string | null;
   receive_dms: number | null;
+  share_url: number | null;
 }
 
 export async function getSettings(
   userId: string,
   fallbackName: string | null,
 ): Promise<{ user: UserSettings; rank: { title: string } } | null> {
+  await ensureUserShareUrl();
   const [result, summary] = await Promise.all([
     db.execute({
-      sql: `SELECT id, username, lobby_id, quest_password, status_message, receive_dms
+      sql: `SELECT id, username, lobby_id, quest_password, status_message, receive_dms, share_url
             FROM users WHERE id = ?`,
       args: [userId],
     }),
@@ -43,9 +46,24 @@ export async function getSettings(
       quest_password: row.quest_password || "",
       status_message: row.status_message || "",
       receive_dms: row.receive_dms ?? 1,
+      share_url: row.share_url ?? 0,
     },
     rank: { title: summary?.title || "Fledgling" },
   };
+}
+
+export async function getShareUrl(userId: string | null): Promise<boolean> {
+  if (!userId) return false;
+  try {
+    await ensureUserShareUrl();
+    const result = await db.execute({
+      sql: "SELECT share_url FROM users WHERE id = ?",
+      args: [userId],
+    });
+    return Number(firstRow<{ share_url: number | null }>(result)?.share_url ?? 0) === 1;
+  } catch {
+    return false;
+  }
 }
 
 export async function updateSettings(userId: string, input: SettingsInput): Promise<void> {
@@ -67,6 +85,11 @@ export async function updateSettings(userId: string, input: SettingsInput): Prom
   if (input.receive_dms !== undefined) {
     assignments.push("receive_dms = ?");
     args.push(input.receive_dms ? 1 : 0);
+  }
+  if (input.share_url !== undefined) {
+    await ensureUserShareUrl();
+    assignments.push("share_url = ?");
+    args.push(input.share_url ? 1 : 0);
   }
   if (assignments.length === 0) return;
 

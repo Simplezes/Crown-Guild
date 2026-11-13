@@ -22,6 +22,7 @@ export function SettingsModal({ user, rank, onClose }: SettingsModalProps) {
     pass: user.quest_password,
     status: user.status_message,
     dms: !!Number(user.receive_dms),
+    shareUrl: !!Number(user.share_url),
   };
   const [saved, setSaved] = useState(initial);
   const [draft, setDraft] = useState(initial);
@@ -49,6 +50,7 @@ export function SettingsModal({ user, rank, onClose }: SettingsModalProps) {
           quest_password: draft.pass.trim(),
           status_message: draft.status.trim(),
           receive_dms: draft.dms,
+          share_url: draft.shareUrl,
         }),
       });
       if (!response.ok) {

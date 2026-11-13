@@ -25,6 +25,7 @@ export const settingsSchema = z.object({
     .union([z.boolean(), z.literal(0), z.literal(1)])
     .transform((value) => value === true || value === 1)
     .optional(),
+  share_url: z.boolean().optional(),
 });
 
 export const statusSchema = z.object({

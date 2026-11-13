@@ -5,6 +5,7 @@ export interface Draft {
   pass: string;
   status: string;
   dms: boolean;
+  shareUrl: boolean;
 }
 
 interface SettingsFieldsProps {
@@ -85,6 +86,21 @@ export function SettingsFields({ draft, onChange: set }: SettingsFieldsProps) {
             aria-checked={draft.dms}
             aria-label="Receive Discord DMs"
             onClick={() => set("dms", !draft.dms)}
+          />
+        </div>
+      </section>
+      <section className="stsec">
+        <div className="strow">
+          <div>
+            <b>Crown Guild link</b>
+            <small>Add your profile link when copying crowns. Shows an embed.</small>
+          </div>
+          <button
+            className="sw"
+            role="switch"
+            aria-checked={draft.shareUrl}
+            aria-label="Include Crown Guild link when copying crowns"
+            onClick={() => set("shareUrl", !draft.shareUrl)}
           />
         </div>
       </section>

@@ -32,5 +32,8 @@ const ensureCrownSizeLabel = () => ensureColumn("crowns", "size_label", "TEXT");
 export const ensureArchiveTempered = () =>
   ensureColumn("guild_archive", "tempered", "INTEGER NOT NULL DEFAULT 0");
 
+export const ensureUserShareUrl = () =>
+  ensureColumn("users", "share_url", "INTEGER NOT NULL DEFAULT 0");
+
 export const hasCrownSize = available(ensureCrownSize);
 export const hasCrownSizeLabel = available(ensureCrownSizeLabel);
