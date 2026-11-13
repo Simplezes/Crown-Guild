@@ -1,0 +1,19 @@
+@theme {
+  --color-void: #08070a;
+  --color-void-soft: #0f0d11;
+  --color-void-panel: #151217;
+  --color-void-raised: #1e1a20;
+  --color-ember: #c9a24a;
+  --color-ember-bright: #e8cc7d;
+  --color-ember-dim: #8a723a;
+  --color-blood: #9a3b3b;
+  --color-blood-bright: #d3554f;
+  --color-mist: #c9c2b8;
+  --color-mist-dim: #8a8378;
+  --color-mist-faint: #5c564e;
+  --color-tempered: #b45ff0;
+  --font-display: var(--font-marcellus), serif;
+  --font-body: var(--font-inter), sans-serif;
+  --shadow-rim: inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
+  --shadow-lift: 0 12px 32px -12px rgba(0, 0, 0, 0.6);
+}
