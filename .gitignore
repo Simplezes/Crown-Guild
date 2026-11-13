@@ -12,3 +12,4 @@ playwright-report/
 tests/visual-baseline/
 coverage/
 *.tsbuildinfo
+next-env.d.ts
