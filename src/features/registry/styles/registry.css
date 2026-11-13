@@ -192,3 +192,8 @@ button.m2t{width:100%}
 @media (max-width:900px){
 .tr .m .mdm{white-space:nowrap}
 }
+.m2b-q{flex:0 1 280px;min-width:180px}
+.m2ch-sk{flex:none}
+.m2ch-sk .sk-b{height:36px}
+@media (max-width:900px){.m2b-q{flex:1 1 100%}}
+@media (max-width:520px){.m2ch-sk .sk-b{height:44px}}
