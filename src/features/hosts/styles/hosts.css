@@ -1,0 +1,44 @@
+.flash{background:var(--ember);color:#17110a;border-radius:12px;padding:12px 18px;font-weight:600}
+.hk{display:flex;flex-direction:column;gap:12px;padding:14px;background:rgba(21,18,23,.85);border:1px solid var(--line);border-radius:20px;transition:border-color .15s,transform .15s}
+.hk:hover{border-color:rgba(201,162,74,.4)}
+.hk.t{border-color:rgba(180,95,240,.4);background:linear-gradient(180deg,rgba(180,95,240,.07),transparent 45%),rgba(21,18,23,.85)}
+.hk.feat{border-color:var(--ember);box-shadow:0 0 0 1px rgba(201,162,74,.4),0 0 28px rgba(201,162,74,.22)}
+.hk-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-height:24px}
+.hk-ty{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px 0 7px;border-radius:99px;background:rgba(255,255,255,.06);font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mist)}
+.hk-ty.l{background:rgba(201,162,74,.16);color:var(--ember-b)}
+.hk-ty img{width:15px;height:15px}
+.hk-tp{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 10px 0 8px;border-radius:99px;background:rgba(180,95,240,.2);font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#d9b8ff}
+.hk-tp .ms{font-size:13px}
+.hk-ft{margin-left:auto;height:24px;display:inline-flex;align-items:center;padding:0 10px;border-radius:99px;background:var(--ember);color:#17110a;font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+@media (max-width:1080px){
+.hk-ft{margin-left:0}}
+.hk-id{display:flex;align-items:center;gap:12px;min-width:0;color:inherit;text-decoration:none}
+.hk-av{width:48px;height:48px;flex:none;border-radius:14px;object-fit:cover;background:var(--raised);border:1px solid var(--line2);display:grid;place-items:center;font-weight:600;color:var(--ember-b)}
+.hk.t .hk-av{border-color:rgba(180,95,240,.7)}
+.hk-nm{min-width:0}
+.hk-nm b{display:block;font-weight:600;font-size:15px;color:var(--mist);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hk-id:hover .hk-nm b{color:var(--ember-b)}
+.hk-nm p{margin:2px 0 0;font-size:12px;font-style:italic;color:var(--mist-d);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hk-nm p.none{color:var(--faint)}
+.hk-rows{background:var(--void);border:1px solid var(--line);border-radius:12px;padding:2px 12px}
+.hk-row{display:grid;grid-template-columns:20px 1fr auto;align-items:center;gap:10px;height:38px;font-size:12.5px;color:var(--mist-d)}
+.hk-row+.hk-row{border-top:1px solid var(--line)}
+.hk-row span{letter-spacing:.06em;text-transform:uppercase;font-size:11px}
+.hk-row:has(em){grid-template-columns:20px 1fr auto auto}
+.hk-row b{font-family:var(--disp);font-weight:400;font-size:16px;color:var(--ember-b);min-width:36px;text-align:right}
+.hk-row em{font-style:normal;display:inline-flex;align-items:center;gap:5px;min-width:78px;justify-content:flex-end;color:var(--mist);font-variant-numeric:tabular-nums}
+.hk-row em.none{color:var(--faint);font-size:11px}
+.hk-row em .ms{font-size:13px;color:var(--mist-d)}
+.hk-q{display:flex;flex-direction:column;gap:3px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mist-d)}
+.hk-q span{display:flex;align-items:center;gap:7px}
+.hk-q .ms{font-size:14px}
+.hk-on{color:var(--faint)}
+.hk-c{margin-top:auto}
+.hk-btn{width:100%;height:40px;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:10px;background:none;border:1px solid var(--line2);color:var(--mist);font:inherit;font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .15s}
+.hk-btn .ms{font-size:16px}
+.hk-btn:hover:not(:disabled){border-color:rgba(201,162,74,.55);color:var(--ember-b);background:rgba(201,162,74,.08)}
+.hk-btn.dep{border-color:rgba(201,162,74,.5);background:rgba(201,162,74,.14);color:var(--ember-b)}
+.hk-btn.dep:hover:not(:disabled){background:var(--ember);color:#17110a}
+.hk-btn.off{border-style:dashed;color:var(--faint);cursor:not-allowed}
+.hk-btn:disabled{opacity:.7}
+.hk-btn.own{border-style:dashed;color:var(--mist-d);cursor:default}
