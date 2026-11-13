@@ -168,3 +168,7 @@ body:has(.hm) .app{overflow-x:clip}
 body:has(.hm)::before{background-image:radial-gradient(900px 520px at 90% -6%,rgba(201,162,74,.13),transparent 65%),linear-gradient(rgba(8,7,10,.78),rgba(8,7,10,.95)),url('../../../assets/bg.png')}
 .hm .meter{background:rgba(255,255,255,.07)}
 .hm .meter i{background:linear-gradient(90deg,var(--ember-d),var(--ember-b))}
+.hm-wsk{width:130px;height:130px}
+@media (max-width:900px){.hm-wsk{width:76px;height:76px}}
+.hm-rsk{display:flex;align-items:center;gap:12px;min-height:44px;border-bottom:1px solid rgba(255,255,255,.06)}
+@media (max-width:900px){.hm-rsk{gap:10px}}

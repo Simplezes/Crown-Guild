@@ -6,19 +6,20 @@ const row = { display: "flex", alignItems: "center", gap: 14 } as const;
 function WantedSkeleton() {
   return (
     <section className="wd s7 hm-wanted" aria-hidden="true">
-      <Skeleton width={104} height={104} radius={16} />
-      <div style={{ ...stack, flex: 1 }}>
-        <Skeleton width={90} height={12} />
-        <Skeleton width="60%" height={34} />
+      <Skeleton className="hm-wsk" radius={22} />
+      <div style={{ ...stack, flex: 1, gap: 14 }}>
+        <Skeleton width={100} height={12} />
+        <Skeleton width="min(320px, 70%)" height={52} />
         <div style={row}>
-          <Skeleton width={92} height={28} radius={99} />
+          <Skeleton width={96} height={30} radius={99} />
           <Skeleton width={120} height={14} />
         </div>
-        <Skeleton width="85%" height={8} radius={99} />
-        <Skeleton width="55%" height={8} radius={99} />
-        <div style={{ display: "flex", gap: 10, marginTop: 6 }}>
-          <Skeleton width={130} height={40} radius={10} />
-          <Skeleton width={96} height={40} radius={10} />
+        <Skeleton width="85%" height={14} />
+        <Skeleton width="85%" height={14} />
+        <Skeleton width={110} height={12} />
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <Skeleton width="min(160px, 100%)" height={44} radius={10} />
+          <Skeleton width="min(96px, 100%)" height={44} radius={10} />
         </div>
       </div>
     </section>
@@ -31,9 +32,9 @@ function CardSkeleton() {
       <Skeleton width={110} height={12} />
       <Skeleton width="60%" height={30} />
       <Skeleton width="85%" height={14} />
-      <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+      <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
         {Array.from({ length: 8 }, (_, index) => (
-          <Skeleton key={index} width={42} height={42} radius={99} />
+          <Skeleton key={index} width={38} height={38} radius={99} />
         ))}
       </div>
       <div style={{ ...row, marginTop: "auto" }}>
@@ -50,9 +51,9 @@ function StatsSkeleton() {
       {Array.from({ length: 4 }, (_, index) => (
         <div key={index}>
           <Skeleton width={30} height={30} radius={8} />
-          <span style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <Skeleton width={56} height={24} />
-            <Skeleton width={84} height={10} />
+          <span style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <Skeleton width={56} height={31} />
+            <Skeleton width={84} height={11} />
           </span>
         </div>
       ))}
@@ -100,14 +101,14 @@ function BoardSkeleton() {
 
 function RosterSkeleton() {
   return (
-    <section className="wd s12 hm-roster" style={{ minHeight: 341 }} aria-hidden="true">
+    <section className="wd s12 hm-roster" aria-hidden="true">
       <div className="hm-sech">
         <Skeleton width={140} height={20} />
         <Skeleton width={130} height={12} />
       </div>
       <div className="hm-rost">
-        {Array.from({ length: 25 }, (_, index) => (
-          <div key={index} style={row}>
+        {Array.from({ length: 28 }, (_, index) => (
+          <div key={index} className="hm-rsk">
             <Skeleton width={32} height={32} radius={8} />
             <Skeleton width="60%" height={12} />
           </div>
@@ -120,9 +121,13 @@ function RosterSkeleton() {
 export function HomeSkeleton() {
   return (
     <div className="pad hm" role="status" aria-label="Loading">
-      <div className="greet" style={stack}>
-        <Skeleton width={300} height={32} />
-        <Skeleton width={320} height={14} />
+      <div className="greet" aria-hidden="true">
+        <h2>
+          <Skeleton width="min(300px, 80%)" height={36} />
+        </h2>
+        <p>
+          <Skeleton width="min(320px, 90%)" height={20} />
+        </p>
       </div>
       <div className="bento">
         <WantedSkeleton />
