@@ -48,9 +48,12 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             <TopBar user={user} summary={summary} />
             <div className="main">
               {children}
-              <footer className="site-legal" aria-label="Legal links">
-                <Link href="/terms">Terms of Service</Link>
-                <Link href="/privacy">Privacy Policy</Link>
+              <footer className="site-legal">
+                <p>Fan-made. Not affiliated with or endorsed by Capcom. Monster Hunter is a Capcom trademark.</p>
+                <nav aria-label="Legal links">
+                  <Link href="/terms">Terms</Link>
+                  <Link href="/privacy">Privacy</Link>
+                </nav>
               </footer>
             </div>
           </div>
