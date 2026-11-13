@@ -10,6 +10,7 @@ const shareId = () => `${Date.now().toString(36)}-${Math.random().toString(36).s
 interface CopyCrownsButtonProps {
   crowns: ShareCrown[];
   userId: string;
+  includeUrl: boolean;
   className?: string;
   label?: string;
 }
@@ -17,6 +18,7 @@ interface CopyCrownsButtonProps {
 export function CopyCrownsButton({
   crowns,
   userId,
+  includeUrl,
   className = "",
   label = "Copy crowns",
 }: CopyCrownsButtonProps) {
@@ -28,7 +30,9 @@ export function CopyCrownsButton({
       toast.error("No crowns available to copy.");
       return;
     }
-    const url = `${window.location.origin}/profile/${encodeURIComponent(userId)}?share=${shareId()}`;
+    const url = includeUrl
+      ? `${window.location.origin}/profile/${encodeURIComponent(userId)}?share=${shareId()}`
+      : null;
     const copied = await copyText(formatCrownShare(crowns, url, mode));
     if (copied) toast.success("All crowns copied to your clipboard.");
     else toast.error("Could not copy crowns. Check clipboard permissions and try again.");

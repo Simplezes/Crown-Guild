@@ -40,6 +40,7 @@ export interface ProfileViewProps {
   allMonsters: MonsterOption[];
   isOwner: boolean;
   viewerId: string | null;
+  shareUrl: boolean;
   openSettings: boolean;
 }
 
@@ -89,6 +90,7 @@ export function ProfileView(props: ProfileViewProps) {
         crowns={crowns}
         isOwner={isOwner}
         viewerId={props.viewerId}
+        shareUrl={props.shareUrl}
         onEdit={showSettings}
       />
       <div className="pf-cols">

@@ -140,7 +140,7 @@ function multiQuestLines(crowns: ShareCrown[], ctx: FormatContext): string[] {
 
 export function formatCrownShare(
   crowns: ShareCrown[],
-  profileUrl: string,
+  profileUrl: string | null,
   mode: ShareMode = "emoji",
 ): string {
   const useEmojis = mode !== "plain";
@@ -169,7 +169,7 @@ export function formatCrownShare(
     lines.push("Multi-Quest:", ...multi);
   }
 
-  lines.push("", profileUrl);
+  if (profileUrl) lines.push("", profileUrl);
   return lines.join("\n");
 }
 

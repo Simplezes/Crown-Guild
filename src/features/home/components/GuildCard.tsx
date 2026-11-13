@@ -12,10 +12,11 @@ interface GuildCardProps {
   profile: ProfileData;
   summary: UserSummary;
   monsterCount: number;
+  shareUrl: boolean;
   className: string;
 }
 
-export function GuildCard({ profile, summary, monsterCount, className }: GuildCardProps) {
+export function GuildCard({ profile, summary, monsterCount, shareUrl, className }: GuildCardProps) {
   const { stats, collection } = profile;
   const nextRank = summary.rank < 8 ? summary.rank + 1 : null;
   const shelf = collection.slice(0, SHELF_SIZE);
@@ -71,7 +72,11 @@ export function GuildCard({ profile, summary, monsterCount, className }: GuildCa
           <span className="g4c">
             <b>{collection.length}</b>/{monsterCount} collected
           </span>
-          <CopyCrownsButton crowns={profile.crowns} userId={profile.user.id} />
+          <CopyCrownsButton
+            crowns={profile.crowns}
+            userId={profile.user.id}
+            includeUrl={shareUrl}
+          />
         </div>
         <div className="g4r">
           {shelf.map((entry) => (

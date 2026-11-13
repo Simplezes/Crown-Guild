@@ -6,6 +6,7 @@ import { buildProfileMetadata } from "@/features/profile/server";
 import { auth } from "@/server/auth";
 import { getAllMonstersEnriched } from "@/server/services/monsters";
 import { getProfileData } from "@/server/services/profile";
+import { getShareUrl } from "@/server/services/settings";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -43,6 +44,7 @@ export default async function Profile({
 
   const mp = Number(data.masteryPoints || 0);
   const viewerId = session?.user?.id ?? null;
+  const shareUrl = await getShareUrl(viewerId);
 
   return (
     <ProfileView
@@ -69,6 +71,7 @@ export default async function Profile({
       }))}
       isOwner={viewerId === id}
       viewerId={viewerId}
+      shareUrl={shareUrl}
       openSettings={search.settings === "true"}
     />
   );

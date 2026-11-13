@@ -9,10 +9,19 @@ interface ProfileHeroProps {
   crowns: ShareCrown[];
   isOwner: boolean;
   viewerId: string | null;
+  shareUrl: boolean;
   onEdit: () => void;
 }
 
-export function ProfileHero({ user, rank, crowns, isOwner, viewerId, onEdit }: ProfileHeroProps) {
+export function ProfileHero({
+  user,
+  rank,
+  crowns,
+  isOwner,
+  viewerId,
+  shareUrl,
+  onEdit,
+}: ProfileHeroProps) {
   return (
     <section className="pf-hero">
       <div className="pf-av">
@@ -31,7 +40,7 @@ export function ProfileHero({ user, rank, crowns, isOwner, viewerId, onEdit }: P
         {user.status_message && <p className="pf-q">&ldquo;{user.status_message}&rdquo;</p>}
       </div>
       <div className="pf-act">
-        <CopyCrownsButton crowns={crowns} userId={user.id} />
+        <CopyCrownsButton crowns={crowns} userId={user.id} includeUrl={shareUrl} />
         {viewerId && !isOwner && (
           <Link className="btn o sm" href={`/compare?a=${viewerId}&b=${user.id}`}>
             <Icon name="compare" />

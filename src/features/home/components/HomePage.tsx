@@ -2,6 +2,7 @@ import { auth } from "@/server/auth";
 import { getHomeData } from "@/server/services/home";
 import { getMonsterCount } from "@/server/services/monsters";
 import { getProfileData } from "@/server/services/profile";
+import { getShareUrl } from "@/server/services/settings";
 import { getUserSummary } from "@/server/services/summary";
 import { GuildCard } from "./GuildCard";
 import { HomeBoard } from "./HomeBoard";
@@ -12,9 +13,9 @@ import { WantedSpotlight } from "./WantedSpotlight";
 export async function HomePage() {
   const [session, data] = await Promise.all([auth(), getHomeData()]);
   const userId = session?.user?.id ?? null;
-  const [summary, profile] = userId
-    ? await Promise.all([getUserSummary(userId), getProfileData(userId)])
-    : [null, null];
+  const [summary, profile, shareUrl] = userId
+    ? await Promise.all([getUserSummary(userId), getProfileData(userId), getShareUrl(userId)])
+    : [null, null, false];
 
   const spotlight = data.demand[0];
   const cardClass = spotlight ? "s5" : "s12";
@@ -56,6 +57,7 @@ export async function HomePage() {
             profile={profile}
             summary={summary}
             monsterCount={getMonsterCount() || 1}
+            shareUrl={shareUrl}
             className={cardClass}
           />
         ) : (
