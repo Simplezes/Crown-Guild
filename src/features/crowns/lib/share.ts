@@ -169,7 +169,7 @@ export function formatCrownShare(
     lines.push("Multi-Quest:", ...multi);
   }
 
-  if (profileUrl) lines.push("", profileUrl);
+  lines.push("", profileUrl ? `-# Crown Guild · <${profileUrl}>` : "-# Crown Guild");
   return lines.join("\n");
 }
 
